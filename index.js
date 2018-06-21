@@ -23,7 +23,7 @@ const TryContinue = function Continue() {
             }
         })
     }
-    if (GAME.m_State.m_LevelUpScreen)
+    if (GAME.m_State.m_LevelUpScreen) {
         continued = false;
         GAME.m_State.m_LevelUpScreen.children.forEach(function(child) {
             if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
@@ -44,13 +44,13 @@ const InGame = function InGame() {
 }
 
 const InZoneSelect = function InZoneSelect() {
-    return GAME.m_State instanceof CBattleSelectionState; 
+    return GAME.m_State instanceof CBattleSelectionState;
 }
 
 const WORST_SCORE = -1 / 0;
 const START_POS = pixi.renderer.width;
 
-let lastZoneIndex;
+// context.lastZoneIndex;
 let isJoining = false;
 
 const EnemySpeed = function EnemySpeed(enemy) {
@@ -76,6 +76,9 @@ class Attack {
 // Basic clicking attack, attack closest
 class ClickAttack extends Attack {
     shouldAttack(delta) {
+        // Can't do basic attack when station is down
+        if (GAME.m_State.m_PlayerHealth <= 0)
+            return false;
         this.nextAttackDelta -= delta;
         return this.nextAttackDelta <= 0;;
     }
@@ -168,21 +171,17 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-    if(GAME.m_State.m_bRunning === false) {
-        GAME.ChangeState( new CBattleSelectionState( gGame.m_State.m_PlanetData.id ));
-    }
-
-    if(InZoneSelect() && lastZoneIndex > 0 && !isJoining) {
+    if (InZoneSelect() && context.lastZoneIndex !== undefined && !isJoining) {
         isJoining = true;
         SERVER.JoinZone(
             lastZoneIndex,
-            function ( results ) {
-                gGame.ChangeState( new CBattleState( GAME.m_State.m_PlanetData, lastZoneIndex ) );
+            function (results) {
+                GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, context.lastZoneIndex));
             },
             GameLoadError
-            );
-        
-        return;  
+        );
+
+        return;
     }
 
     if (!InGame()) {
@@ -193,7 +192,7 @@ context.BOT_FUNCTION = function ticker(delta) {
     }
 
     isJoining = false;
-    lastZoneIndex = GAME.m_State.m_unZoneIndex;    
+    context.lastZoneIndex = GAME.m_State.m_unZoneIndex;
 
     let state = EnemyManager();
 
