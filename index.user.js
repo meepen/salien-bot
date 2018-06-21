@@ -99,7 +99,7 @@ const GetBestZone = function GetBestZone() {
 }
 
 // Let's challenge ourselves to be human here!
-const CLICKS_PER_SECOND = 10;
+const CLICKS_PER_SECOND = 15;
 
 const InGame = function InGame() {
     return GAME.m_State.m_bRunning;
