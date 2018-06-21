@@ -12,6 +12,30 @@ const EnemyManager = function EnemyManager() {
 const AttackManager = function AttackManager() {
     return GAME.m_State.m_AttackManager;
 }
+
+const TryContinue = function Continue() {
+    let continued = false;
+    if (GAME.m_State.m_VictoryScreen) {
+        GAME.m_State.m_VictoryScreen.children.forEach(function(child) {
+            if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
+                continued = true;
+                child.click();
+            }
+        })
+    }
+    if (GAME.m_State.m_LevelUpScreen)
+        continued = false;
+        GAME.m_State.m_LevelUpScreen.children.forEach(function(child) {
+            if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
+                continued = true;
+                child.click();
+            }
+        })
+    }
+    return continued;
+}
+
+
 // Let's challenge ourselves to be human here!
 const CLICKS_PER_SECOND = 10;
 
@@ -161,7 +185,10 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;  
     }
 
-    if (!InGame() || GAME.m_State.m_PlayerHealth == 0) {
+    if (!InGame()) {
+        if (TryContinue()) {
+            console.log("continued!");
+        }
         return;
     }
 
