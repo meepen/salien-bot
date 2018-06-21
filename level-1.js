@@ -33,10 +33,10 @@ class ClickAttack extends Attack {
     process(enemies) {
         let target, target_score = WORST_SCORE;
 
-        enemies.forEach(function FindBest(enemy) {
+        enemies.forEach((enemy) => {
             if (!enemy.m_Sprite.visible)
                 return;
-            let now_score = ScoreEnemyForClicking(enemy);
+            let now_score = this.score(enemy);
             if (now_score > target_score) {
                 target = enemy, target_score = now_score;
             }
