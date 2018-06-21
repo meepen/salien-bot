@@ -2,6 +2,7 @@
 const pixi = gApp;
 const GAME = gGame;
 const SERVER = gServer;
+const PLAYER = gPlayerInfo;
 const SetMouse = function SetMouse(x, y) {
     pixi.renderer.plugins.interaction.mouse.global.x = x;
     pixi.renderer.plugins.interaction.mouse.global.y = y;
@@ -31,6 +32,10 @@ const TryContinue = function Continue() {
             }
         })
     }
+    if(GAME.m_State instanceof CBootState) { //First screen
+        GAME.ChangeState( new CBattleSelectionState( PLAYER.active_planet ) );
+        continued = true;
+    }
     return continued;
 }
 const CanAttack = function CanAttack(attackname) {
@@ -39,6 +44,31 @@ const CanAttack = function CanAttack(attackname) {
     let canAttack = Manager.BAttack();
     Manager.m_rtAttackLastUsed = lastUsed;
     return canAttack;
+}
+const GetBestZone = function GetBestZone() {
+    let bestZoneIdx = -1;
+    let maxProgress = 0;
+
+    for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) { 
+        let zone = GAME.m_State.m_Grid.m_Tiles[idx].Info;
+        if(!zone.captured) {
+            if(zone.boss) {
+                return idx;
+            }
+
+            if(zone.progress > maxProgress) {
+                maxProgress = zone.progress;
+                bestZoneIdx = idx;
+            }
+
+        }
+    }
+
+    if(bestZoneIdx > -1) {
+        console.log(`zone ${bestZoneIdx} progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress}`);
+    }
+
+    return bestZoneIdx;
 }
 
 // Let's challenge ourselves to be human here!
@@ -225,26 +255,23 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-    if (InZoneSelect() && context.lastZoneIndex !== undefined && !isJoining) {
-        isJoining = true;
+    if (InZoneSelect() && !isJoining) {
+        let bestZoneIdx = GetBestZone();
+        if(bestZoneIdx > -1) {
+            isJoining = true;
+            console.log("join to zone", bestZoneIdx);
+             SERVER.JoinZone(
+                bestZoneIdx,
+                function (results) {
+                    GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, bestZoneIdx));
+                },
+                GameLoadError
+            );    
 
-        if (GAME.m_State.m_PlanetData.zones[context.lastZoneIndex].captured)
-		{
-            context.lastZoneIndex = undefined;
-			return;
+            return;    
         }
-
-        SERVER.JoinZone(
-            lastZoneIndex,
-            function (results) {
-                GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, context.lastZoneIndex));
-            },
-            GameLoadError
-        );
-
-        return;
     }
-33
+
     if (!InGame()) {
         if (TryContinue()) {
             console.log("continued!");
@@ -253,7 +280,6 @@ context.BOT_FUNCTION = function ticker(delta) {
     }
 
     isJoining = false;
-    context.lastZoneIndex = GAME.m_State.m_unZoneIndex;
 
     let state = EnemyManager();
 
@@ -262,6 +288,11 @@ context.BOT_FUNCTION = function ticker(delta) {
     for (let attack of attacks)
         if (attack.shouldAttack(delta, enemies))
             attack.process(enemies);
+
+    let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
+    if(buttonsOnErrorMessage.length > 0) {
+        buttonsOnErrorMessage[0].click();
+    }
 
 }
 
