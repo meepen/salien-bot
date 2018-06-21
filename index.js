@@ -161,7 +161,7 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;  
     }
 
-    if (!InGame()) {
+    if (!InGame() || GAME.m_State.m_PlayerHealth == 0) {
         return;
     }
 
