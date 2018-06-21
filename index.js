@@ -13,7 +13,6 @@ const EnemyManager = function EnemyManager() {
 const AttackManager = function AttackManager() {
     return GAME.m_State.m_AttackManager;
 }
-
 const TryContinue = function Continue() {
     let continued = false;
     if (GAME.m_State.m_VictoryScreen) {
@@ -39,6 +38,7 @@ const TryContinue = function Continue() {
     }
     return continued;
 }
+<<<<<<< HEAD
 
 const GetBestZone = function GetBestZone() {
     let bestZoneIdx = -1;
@@ -64,6 +64,14 @@ const GetBestZone = function GetBestZone() {
     }
 
     return bestZoneIdx;
+=======
+const CanAttack = function CanAttack(attackname) {
+    let Manager = AttackManager().m_mapCooldowns.get(attackname);
+    let lastUsed = Manager.m_rtAttackLastUsed;
+    let canAttack = Manager.BAttack();
+    Manager.m_rtAttackLastUsed = lastUsed;
+    return canAttack;
+>>>>>>> upstream/master
 }
 
 // Let's challenge ourselves to be human here!
@@ -94,7 +102,7 @@ class Attack {
     constructor() {
         this.nextAttackDelta = 0;
     }
-    shouldAttack(delta) {
+    shouldAttack(delta, enemies) {
         throw new Error("shouldAttack not implemented");
     }
     process(enemies) {
@@ -151,11 +159,7 @@ class SpecialAttack extends Attack {
         return AttackManager().m_AttackData[this.getCurrent()];
     }
     shouldAttack(delta) {
-        let Manager = AttackManager().m_mapCooldowns.get(this.getCurrent());
-        let lastUsed = Manager.m_rtAttackLastUsed;
-        let canAttack = Manager.BAttack();
-        Manager.m_rtAttackLastUsed = lastUsed;
-        return canAttack
+        return CanAttack(this.getCurrent());
     }
     score(enemy) {
         if (enemy.m_bDead)
@@ -183,9 +187,46 @@ class SpecialAttack extends Attack {
     }
 }
 
+class BombAttack extends SpecialAttack {
+    getCurrent() {
+        return "explosion";
+    }
+}
+class BlackholeAttack extends SpecialAttack {
+    getCurrent() {
+        return "blackhole";
+    }
+}
+
+class FreezeAttack extends Attack {
+    getCurrent() {
+        return "flashfreeze";
+    }
+    shouldAttack(delta, enemies) {
+        let shouldAttack = false;
+        if (CanAttack(this.getCurrent())) {
+            enemies.forEach((enemy) => {
+                if (EnemyDistance(enemy) <= 0.05) {
+                    shouldAttack = true;
+                }
+            });
+        }
+        return shouldAttack;
+    }
+    getData() {
+        return AttackManager().m_AttackData[this.getCurrent()];
+    }
+    process() {
+        AttackManager().m_mapKeyCodeToAttacks.get(this.getData().keycode)()
+    }
+}
+
 let attacks = [
     new ClickAttack(),
-    new SpecialAttack()
+    new SpecialAttack(),
+    new FreezeAttack(),
+    new BombAttack(),
+    new BlackholeAttack()
 ]
 
 if (context.BOT_FUNCTION) {
@@ -200,6 +241,7 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
+<<<<<<< HEAD
     if (InZoneSelect() && !isJoining) {
         let bestZoneIdx = GetBestZone();
         if(bestZoneIdx > -1) {
@@ -215,8 +257,28 @@ context.BOT_FUNCTION = function ticker(delta) {
 
             return;    
         }
-    }
+=======
+    if (InZoneSelect() && context.lastZoneIndex !== undefined && !isJoining) {
+        isJoining = true;
 
+        if (GAME.m_State.m_PlanetData.zones[context.lastZoneIndex].captured)
+		{
+            context.lastZoneIndex = undefined;
+			return;
+        }
+
+        SERVER.JoinZone(
+            lastZoneIndex,
+            function (results) {
+                GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, context.lastZoneIndex));
+            },
+            GameLoadError
+        );
+
+        return;
+>>>>>>> upstream/master
+    }
+33
     if (!InGame()) {
         if (TryContinue()) {
             console.log("continued!");
@@ -230,6 +292,7 @@ context.BOT_FUNCTION = function ticker(delta) {
 
     let enemies = state.m_rgEnemies;
 
+<<<<<<< HEAD
     if(GAME.m_State.m_PlayerHealth > 0) {
         for (let attack of attacks)
             if (attack.shouldAttack(delta))
@@ -240,6 +303,11 @@ context.BOT_FUNCTION = function ticker(delta) {
     if(buttonsOnErrorMessage.length > 0) {
         buttonsOnErrorMessage[0].click();
     }
+=======
+    for (let attack of attacks)
+        if (attack.shouldAttack(delta, enemies))
+            attack.process(enemies);
+>>>>>>> upstream/master
 
 }
 
