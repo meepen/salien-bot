@@ -77,22 +77,30 @@ const GetBestZone = function GetBestZone() {
             if (zone.boss) {
                 return idx;
             }
+            
+            if(isLevelling) {
+                if(zone.difficulty > highestDifficulty) {
+                    highestDifficulty = zone.difficulty;
+                    maxProgress = zone.progress;
+                    bestZoneIdx = idx;
+                } else if(zone.difficulty < highestDifficulty) continue;
 
-            if (isLevelling && zone.difficulty > highestDifficulty) {
-                highestDifficulty = zone.difficulty
-                maxProgress = zone.progress;
-                bestZoneIdx = idx;
-            }
-            else if (isLevelling ? zone.progress < maxProgress : zone.progress > maxProgress) {
-                maxProgress = zone.progress;
-                bestZoneIdx = idx;
+                if(zone.progress < maxProgress) {
+                    maxProgress = zone.progress;
+                    bestZoneIdx = idx;
+                }
+            } else {
+                if(zone.progress > maxProgress) {
+                    maxProgress = zone.progress;
+                    bestZoneIdx = idx;
+                }
             }
 
         }
     }
 
     if(bestZoneIdx !== undefined) {
-        console.log(`zone ${bestZoneIdx} progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress} difficulty: ${highestDifficulty}`);
+        console.log(`zone ${bestZoneIdx} progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress} difficulty: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.difficulty}`);
     }
 
     return bestZoneIdx;
