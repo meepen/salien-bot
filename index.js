@@ -155,6 +155,12 @@ class SpecialAttack extends Attack {
     }
 }
 
+class BombAttack extends SpecialAttack {
+    getCurrent() {
+        return "explosion";
+    }
+}
+
 class FreezeAttack extends Attack {
     getCurrent() {
         return "flashfreeze";
@@ -181,7 +187,8 @@ class FreezeAttack extends Attack {
 let attacks = [
     new ClickAttack(),
     new SpecialAttack(),
-    new FreezeAttack()
+    new FreezeAttack(),
+    new BombAttack()
 ]
 
 if (context.BOT_FUNCTION) {
