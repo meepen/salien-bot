@@ -1,6 +1,7 @@
 (function(context) {
 const pixi = gApp;
 const GAME = gGame;
+const SERVER = gServer;
 const SetMouse = function SetMouse(x, y) {
     pixi.renderer.plugins.interaction.mouse.global.x = x;
     pixi.renderer.plugins.interaction.mouse.global.y = y;
@@ -42,9 +43,15 @@ const InGame = function InGame() {
     return GAME.m_State.m_bRunning;
 }
 
+const InZoneSelect = function InZoneSelect() {
+    return GAME.m_State instanceof CBattleSelectionState; 
+}
+
 const WORST_SCORE = -1 / 0;
 const START_POS = pixi.renderer.width;
 
+let lastZoneIndex;
+let isJoining = false;
 
 const EnemySpeed = function EnemySpeed(enemy) {
     return enemy.m_Sprite.vx;
@@ -157,12 +164,36 @@ if (context.BOT_FUNCTION) {
 context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
 
+    if(GAME.m_IsStateLoading) {
+        return;
+    }
+
+    if(GAME.m_State.m_bRunning === false) {
+        GAME.ChangeState( new CBattleSelectionState( gGame.m_State.m_PlanetData.id ));
+    }
+
+    if(InZoneSelect() && lastZoneIndex > 0 && !isJoining) {
+        isJoining = true;
+        SERVER.JoinZone(
+            lastZoneIndex,
+            function ( results ) {
+                gGame.ChangeState( new CBattleState( GAME.m_State.m_PlanetData, lastZoneIndex ) );
+            },
+            GameLoadError
+            );
+        
+        return;  
+    }
+
     if (!InGame()) {
         if (TryContinue()) {
             console.log("continued!");
         }
         return;
     }
+
+    isJoining = false;
+    lastZoneIndex = GAME.m_State.m_unZoneIndex;    
 
     let state = EnemyManager();
 
