@@ -15,6 +15,8 @@ function ScoreEnemy(enemy) {
     return 0;
 }
 
+var prevTarget = null;
+
 var timerId = setInterval(function game_think() {
     let state = GAME.m_State.m_EnemyManager;
 
@@ -41,10 +43,18 @@ var timerId = setInterval(function game_think() {
 
     if (target) {
         target.m_Sprite.click();
-        console.log(`Current target: ${now.toString()}" (${target_score})`);
     } 
-    else {
-        console.log("No target");
+
+
+    if(prevTarget !== target) {
+        if (target) {  
+            console.log(`New target: ${target.toString()}" (${target_score})`);
+            console.log(target);            
+        }
+        else {
+            console.log("No target");
+        }
+        prevTarget = target;
     }
 
 }, 1000 / CLICKS_PER_SECOND);
