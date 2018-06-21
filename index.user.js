@@ -297,7 +297,7 @@ context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
 
     let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
-    if(buttonsOnErrorMessage.length > 0) {
+    if(buttonsOnErrorMessage[0] != null) {
         buttonsOnErrorMessage[0].click();
         return;
     }
