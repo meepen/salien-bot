@@ -1,7 +1,13 @@
-const GAME = gGame;
-const CLICKS_PER_SECOND = 10;
+if (typeof timerId !== 'undefined') {
+    console.log('Stop timer');
+    clearInterval(timerId);
+}
+else {
+    const GAME = gGame;
+    const CLICKS_PER_SECOND = 10;
+    const WORST_SCORE = -1 / 0;
+}
 
-const WORST_SCORE = -1 / 0;
 
 function ScoreEnemy(enemy) {
     if (enemy.m_bDead)
@@ -9,7 +15,7 @@ function ScoreEnemy(enemy) {
     return 0;
 }
 
-setInterval(function game_think() {
+var timerId = setInterval(function game_think() {
     let state = GAME.m_State.m_EnemyManager;
 
     if (!state) {
