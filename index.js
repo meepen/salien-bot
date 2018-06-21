@@ -3,6 +3,13 @@ const pixi = gApp;
 const GAME = gGame;
 const SERVER = gServer;
 const PLAYER = gPlayerInfo;
+const Option = function Option(name, def) {
+    if (window.localStorage[name] === undefined) {
+        context.localStorage[name] = def;
+    }
+    return context.localStorage[name];
+}
+Option("forceLevellingMode", false);
 const SetMouse = function SetMouse(x, y) {
     pixi.renderer.plugins.interaction.mouse.global.x = x;
     pixi.renderer.plugins.interaction.mouse.global.y = y;
@@ -46,17 +53,23 @@ const CanAttack = function CanAttack(attackname) {
     return canAttack;
 }
 const GetBestZone = function GetBestZone() {
-    let bestZoneIdx = -1;
+    let bestZoneIdx;
     let maxProgress = 0;
+    let highestDifficulty = -1;
 
     for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) { 
         let zone = GAME.m_State.m_Grid.m_Tiles[idx].Info;
-        if(!zone.captured) {
-            if(zone.boss) {
+        if (!zone.captured) {
+            if (zone.boss) {
                 return idx;
             }
 
-            if(zone.progress > maxProgress) {
+            if ((context.gPlayerInfo.level < 9 || Option("forceLevellingMode")) && zone.difficulty > highestDifficulty) {
+                highestDifficulty = zone.difficulty
+                maxProgress = zone.progress;
+                bestZoneIdx = idx;
+            }
+            else if (zone.progress > maxProgress) {
                 maxProgress = zone.progress;
                 bestZoneIdx = idx;
             }
@@ -64,8 +77,8 @@ const GetBestZone = function GetBestZone() {
         }
     }
 
-    if(bestZoneIdx > -1) {
-        console.log(`zone ${bestZoneIdx} progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress}`);
+    if(bestZoneIdx !== undefined) {
+        console.log(`zone ${bestZoneIdx} progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress} difficulty: ${highestDifficulty}`);
     }
 
     return bestZoneIdx;
