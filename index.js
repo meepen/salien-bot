@@ -2,6 +2,7 @@
 const pixi = gApp;
 const GAME = gGame;
 const SERVER = gServer;
+const PLAYER = gPlayerInfo;
 const SetMouse = function SetMouse(x, y) {
     pixi.renderer.plugins.interaction.mouse.global.x = x;
     pixi.renderer.plugins.interaction.mouse.global.y = y;
@@ -31,6 +32,10 @@ const TryContinue = function Continue() {
                 child.click();
             }
         })
+    }
+    if(GAME.m_State instanceof CBootState) { //First screen
+        GAME.ChangeState( new CBattleSelectionState( PLAYER.active_planet ) );
+        continued = true;
     }
     return continued;
 }
@@ -202,6 +207,11 @@ context.BOT_FUNCTION = function ticker(delta) {
         for (let attack of attacks)
             if (attack.shouldAttack(delta))
                 attack.process(enemies);
+    }
+
+    let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
+    if(buttonsOnErrorMessage.length > 0) {
+        buttonsOnErrorMessage[0].click();
     }
 
 }
