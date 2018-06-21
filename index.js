@@ -34,14 +34,8 @@ class Attack {
 // Basic clicking attack, attack closest
 class ClickAttack extends Attack {
     shouldAttack(delta) {
-        console.log(delta)
         this.nextAttackDelta -= delta;
-        let result = false;
-        if (this.nextAttackDelta <= 0) {
-            result = true;
-            this.nextAttackDelta = 1 / CLICKS_PER_SECOND;
-        }
-        return result;
+        return this.nextAttackDelta <= 0;;
     }
     score(enemy) {
         if (enemy.m_bDead)
@@ -65,6 +59,7 @@ class ClickAttack extends Attack {
     }
     attack(enemy) {
         enemy.m_Sprite.click();
+        this.nextAttackDelta = 1 / CLICKS_PER_SECOND;
     }
 }
 
@@ -78,7 +73,7 @@ if (context.BOT_FUNCTION) {
 }
 
 context.BOT_FUNCTION = function ticker(delta) {
-    delta /= 1000; // milliseconds -> seconds
+    delta /= 100;
     let state = GAME.m_State.m_EnemyManager;
 
     if (!InGame()) {
