@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      0
+// @version      1
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame/play/
-// @downloadURL  https://raw.githubusercontent.com/meepen/salien-bot/master/salien-bot.user.js
-// @updateURL    https://raw.githubusercontent.com/meepen/salien-bot/master/salien-bot.user.js
+// @downloadURL  https://github.com/meepen/salien-bot/raw/master/index.user.js
+// @updateURL    https://github.com/meepen/salien-bot/raw/master/index.user.js
 // @grant        none
 // ==/UserScript==
 
@@ -66,8 +66,10 @@ const CanAttack = function CanAttack(attackname) {
 }
 const GetBestZone = function GetBestZone() {
     let bestZoneIdx;
-    let maxProgress = 0;
     let highestDifficulty = -1;
+
+    let isLevelling = context.gPlayerInfo.level < 9 || Option("forceLevellingMode");
+    let maxProgress = isLevelling ? 10000 : 0;
 
     for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) {
         let zone = GAME.m_State.m_Grid.m_Tiles[idx].Info;
@@ -76,12 +78,12 @@ const GetBestZone = function GetBestZone() {
                 return idx;
             }
 
-            if ((context.gPlayerInfo.level < 9 || Option("forceLevellingMode")) && zone.difficulty > highestDifficulty) {
+            if (isLevelling && zone.difficulty > highestDifficulty) {
                 highestDifficulty = zone.difficulty
                 maxProgress = zone.progress;
                 bestZoneIdx = idx;
             }
-            else if (zone.progress > maxProgress) {
+            else if (isLevelling ? zone.progress < maxProgress : zone.progress > maxProgress) {
                 maxProgress = zone.progress;
                 bestZoneIdx = idx;
             }
