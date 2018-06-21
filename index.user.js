@@ -326,4 +326,18 @@ context.BOT_FUNCTION = function ticker(delta) {
 
 pixi.ticker.add(context.BOT_FUNCTION);
 
+setInterval(function(){
+    if (!gGame || !gGame.m_State || !gGame.m_State.m_EnemyManager) return;
+
+    if (!gGame.m_State.m_EnemyManager.m_EnemyData) return;
+
+    gGame.m_State.m_EnemyManager.m_EnemyData.slime.base_health = gGame.m_State.m_EnemyManager.m_EnemyData.volvoian.base_health = gGame.m_State.m_EnemyManager.m_EnemyData.neomorph.base_health = 1;
+    gGame.m_State.m_EnemyManager.m_EnemyData.slime.base_damage = gGame.m_State.m_EnemyManager.m_EnemyData.volvoian.base_damage = gGame.m_State.m_EnemyManager.m_EnemyData.neomorph.base_damage = 0
+
+    if (!gGame.m_State.m_EnemyManager.m_rgEnemies) return;
+
+    gGame.m_State.m_EnemyManager.m_rgEnemies
+      .forEach(function(e) {e.m_Sprite.click()})
+}, 100);
+    
 })(window);
