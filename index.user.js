@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      1
+// @version      2
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame/play/
@@ -278,6 +278,12 @@ if (context.BOT_FUNCTION) {
 context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
 
+    let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
+    if(buttonsOnErrorMessage.length > 0) {
+        buttonsOnErrorMessage[0].click();
+        return;
+    }
+
     if(GAME.m_IsStateLoading || !context.gPlayerInfo) {
         return;
     }
@@ -315,12 +321,6 @@ context.BOT_FUNCTION = function ticker(delta) {
     for (let attack of attacks)
         if (attack.shouldAttack(delta, enemies))
             attack.process(enemies);
-
-    let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
-    if(buttonsOnErrorMessage.length > 0) {
-        buttonsOnErrorMessage[0].click();
-    }
-
 }
 
 
