@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      2
+// @version      6
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
+// @match        https://steamcommunity.com/saliengame/play
 // @match        https://steamcommunity.com/saliengame/play/
 // @downloadURL  https://github.com/meepen/salien-bot/raw/master/index.user.js
 // @updateURL    https://github.com/meepen/salien-bot/raw/master/index.user.js
@@ -101,22 +102,30 @@ const GetBestZone = function GetBestZone() {
             if (zone.boss) {
                 return idx;
             }
+            
+            if(isLevelling) {
+                if(zone.difficulty > highestDifficulty) {
+                    highestDifficulty = zone.difficulty;
+                    maxProgress = zone.progress;
+                    bestZoneIdx = idx;
+                } else if(zone.difficulty < highestDifficulty) continue;
 
-            if (isLevelling && zone.difficulty > highestDifficulty) {
-                highestDifficulty = zone.difficulty
-                maxProgress = zone.progress;
-                bestZoneIdx = idx;
-            }
-            else if (isLevelling ? zone.progress < maxProgress : zone.progress > maxProgress) {
-                maxProgress = zone.progress;
-                bestZoneIdx = idx;
+                if(zone.progress < maxProgress) {
+                    maxProgress = zone.progress;
+                    bestZoneIdx = idx;
+                }
+            } else {
+                if(zone.progress > maxProgress) {
+                    maxProgress = zone.progress;
+                    bestZoneIdx = idx;
+                }
             }
 
         }
     }
 
     if(bestZoneIdx !== undefined) {
-        console.log(`zone ${bestZoneIdx} progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress} difficulty: ${highestDifficulty}`);
+        console.log(`zone ${bestZoneIdx} (${bestZoneIdx % k_NumMapTilesW}, ${(bestZoneIdx / k_NumMapTilesW) | 0}) progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress} difficulty: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.difficulty}`);
     }
 
     return bestZoneIdx;
