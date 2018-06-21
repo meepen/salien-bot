@@ -1,3 +1,5 @@
+(function(context) {
+const pixi = gApp;
 const GAME = gGame;
 const CLICKS_PER_SECOND = 10;
 
@@ -6,7 +8,7 @@ const InGame = function InGame() {
 }
 
 const WORST_SCORE = -1 / 0;
-const START_POS = gApp.renderer.width;
+const START_POS = pixi.renderer.width;
 
 
 const EnemySpeed = function EnemySpeed(enemy) {
@@ -18,13 +20,29 @@ const EnemyDistance = function EnemyDistance(enemy) {
 
 
 class Attack {
+    constructor() {
+        this.nextAttackDelta = 0;
+    }
+    shouldAttack(delta) {
+        throw new Error("shouldAttack not implemented");
+    }
     process(enemies) {
-        throw new Error("not implemented");
+        throw new Error("process not implemented");
     }
 }
 
 // Basic clicking attack, attack closest
 class ClickAttack extends Attack {
+    shouldAttack(delta) {
+        console.log(delta)
+        this.nextAttackDelta -= delta;
+        let result = false;
+        if (this.nextAttackDelta <= 0) {
+            result = true;
+            this.nextAttackDelta = 1 / CLICKS_PER_SECOND;
+        }
+        return result;
+    }
     score(enemy) {
         if (enemy.m_bDead)
             return WORST_SCORE;
@@ -54,7 +72,13 @@ let attacks = [
     new ClickAttack(),
 ]
 
-setInterval(function game_think() {
+if (context.BOT_FUNCTION) {
+    pixi.ticker.remove(context.BOT_FUNCTION);
+    context.BOT_FUNCTION = undefined;
+}
+
+context.BOT_FUNCTION = function ticker(delta) {
+    delta /= 1000; // milliseconds -> seconds
     let state = GAME.m_State.m_EnemyManager;
 
     if (!InGame()) {
@@ -64,5 +88,12 @@ setInterval(function game_think() {
     let enemies = state.m_rgEnemies;
 
     for (let attack of attacks)
-        attack.process(enemies);
-}, 1000 / CLICKS_PER_SECOND);
+        if (attack.shouldAttack(delta))
+            attack.process(enemies);
+
+}
+
+
+pixi.ticker.add(context.BOT_FUNCTION);
+
+})(window);
