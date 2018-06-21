@@ -28,7 +28,7 @@ class ClickAttack extends Attack {
     score(enemy) {
         if (enemy.m_bDead)
             return WORST_SCORE;
-        return EnemyDistance(enemy);
+        return 1 - EnemyDistance(enemy);
     }
     process(enemies) {
         let target, target_score = WORST_SCORE;
