@@ -11,6 +11,21 @@ const EnemyManager = function EnemyManager() {
 const AttackManager = function AttackManager() {
     return GAME.m_State.m_AttackManager;
 }
+
+const TryContinue = function Continue() {
+    if (!gGame.m_State.m_VictoryScreen)
+        return false;
+    let continued = false;
+    gGame.m_State.m_VictoryScreen.children.forEach(function(child) {
+        if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
+            continued = true;
+            child.click();
+        }
+    })
+    return continued;
+}
+
+
 // Let's challenge ourselves to be human here!
 const CLICKS_PER_SECOND = 10;
 
@@ -134,6 +149,9 @@ context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
 
     if (!InGame()) {
+        if (TryContinue()) {
+            console.log("continued!");
+        }
         return;
     }
 
