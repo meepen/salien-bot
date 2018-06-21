@@ -40,6 +40,31 @@ const TryContinue = function Continue() {
     return continued;
 }
 
+const GetBestZone = function GetBestZone() {
+    let bestZoneIdx = -1;
+    let maxProgress = 0;
+
+    for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) { 
+        let zone = GAME.m_State.m_Grid.m_Tiles[idx].Info;
+        if(!zone.captured) {
+            if(zone.boss) {
+                return idx;
+            }
+
+            if(zone.progress > maxProgress) {
+                maxProgress = zone.progress;
+                bestZoneIdx = idx;
+            }
+
+        }
+    }
+
+    if(bestZoneIdx > -1) {
+        console.log(`zone ${bestZoneIdx} progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress}`);
+    }
+
+    return bestZoneIdx;
+}
 
 // Let's challenge ourselves to be human here!
 const CLICKS_PER_SECOND = 10;
@@ -55,7 +80,6 @@ const InZoneSelect = function InZoneSelect() {
 const WORST_SCORE = -1 / 0;
 const START_POS = pixi.renderer.width;
 
-// context.lastZoneIndex;
 let isJoining = false;
 
 const EnemySpeed = function EnemySpeed(enemy) {
@@ -176,17 +200,21 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-    if (InZoneSelect() && context.lastZoneIndex !== undefined && !isJoining) {
-        isJoining = true;
-        SERVER.JoinZone(
-            lastZoneIndex,
-            function (results) {
-                GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, context.lastZoneIndex));
-            },
-            GameLoadError
-        );
+    if (InZoneSelect() && !isJoining) {
+        let bestZoneIdx = GetBestZone();
+        if(bestZoneIdx > -1) {
+            isJoining = true;
+            console.log("join to zone", bestZoneIdx);
+             SERVER.JoinZone(
+                bestZoneIdx,
+                function (results) {
+                    GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, bestZoneIdx));
+                },
+                GameLoadError
+            );    
 
-        return;
+            return;    
+        }
     }
 
     if (!InGame()) {
@@ -197,7 +225,6 @@ context.BOT_FUNCTION = function ticker(delta) {
     }
 
     isJoining = false;
-    context.lastZoneIndex = GAME.m_State.m_unZoneIndex;
 
     let state = EnemyManager();
 
