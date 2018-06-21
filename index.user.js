@@ -1,8 +1,27 @@
+// ==UserScript==
+// @name         Saliens bot
+// @namespace    http://tampermonkey.net/
+// @version      0
+// @description  Beat all the saliens levels
+// @author       https://github.com/meepen/salien-bot
+// @match        https://steamcommunity.com/saliengame/play/
+// @downloadURL  https://raw.githubusercontent.com/meepen/salien-bot/master/salien-bot.user.js
+// @updateURL    https://raw.githubusercontent.com/meepen/salien-bot/master/salien-bot.user.js
+// @grant        none
+// ==/UserScript==
+
 (function(context) {
+"use strict";
 const pixi = gApp;
 const GAME = gGame;
 const SERVER = gServer;
-const PLAYER = gPlayerInfo;
+const Option = function Option(name, def) {
+    if (window.localStorage[name] === undefined) {
+        context.localStorage[name] = def;
+    }
+    return context.localStorage[name];
+}
+Option("forceLevellingMode", false);
 const SetMouse = function SetMouse(x, y) {
     pixi.renderer.plugins.interaction.mouse.global.x = x;
     pixi.renderer.plugins.interaction.mouse.global.y = y;
@@ -33,7 +52,7 @@ const TryContinue = function Continue() {
         })
     }
     if(GAME.m_State instanceof CBootState) { //First screen
-        GAME.ChangeState( new CBattleSelectionState( PLAYER.active_planet ) );
+        GAME.ChangeState( new CBattleSelectionState( context.gPlayerInfo.active_planet ) );
         continued = true;
     }
     return continued;
@@ -46,17 +65,23 @@ const CanAttack = function CanAttack(attackname) {
     return canAttack;
 }
 const GetBestZone = function GetBestZone() {
-    let bestZoneIdx = -1;
+    let bestZoneIdx;
     let maxProgress = 0;
+    let highestDifficulty = -1;
 
-    for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) { 
+    for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) {
         let zone = GAME.m_State.m_Grid.m_Tiles[idx].Info;
-        if(!zone.captured) {
-            if(zone.boss) {
+        if (!zone.captured) {
+            if (zone.boss) {
                 return idx;
             }
 
-            if(zone.progress > maxProgress) {
+            if ((context.gPlayerInfo.level < 9 || Option("forceLevellingMode")) && zone.difficulty > highestDifficulty) {
+                highestDifficulty = zone.difficulty
+                maxProgress = zone.progress;
+                bestZoneIdx = idx;
+            }
+            else if (zone.progress > maxProgress) {
                 maxProgress = zone.progress;
                 bestZoneIdx = idx;
             }
@@ -64,8 +89,8 @@ const GetBestZone = function GetBestZone() {
         }
     }
 
-    if(bestZoneIdx > -1) {
-        console.log(`zone ${bestZoneIdx} progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress}`);
+    if(bestZoneIdx !== undefined) {
+        console.log(`zone ${bestZoneIdx} progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress} difficulty: ${highestDifficulty}`);
     }
 
     return bestZoneIdx;
@@ -93,6 +118,13 @@ const EnemySpeed = function EnemySpeed(enemy) {
 }
 const EnemyDistance = function EnemyDistance(enemy) {
     return (enemy.m_Sprite.x - k_nDamagePointx) / (START_POS - k_nDamagePointx);
+}
+
+const EnemyCenter = function EnemyCenter(enemy) {
+    return [
+        enemy.m_Sprite.x + enemy.m_Sprite.width / 2,
+        enemy.m_Sprite.y + enemy.m_Sprite.height / 2
+    ];
 }
 
 
@@ -174,7 +206,7 @@ class ProjectileAttack extends Attack {
         });
 
         if (target)
-            this.attack(target.m_Sprite.x, target.m_Sprite.y);
+            this.attack.apply(this, EnemyCenter(target));
     }
     attack(x, y) {
         SetMouse(x, y)
@@ -244,12 +276,7 @@ if (context.BOT_FUNCTION) {
 context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
 
-    let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
-    if(buttonsOnErrorMessage.length > 0) {
-        buttonsOnErrorMessage[0].click();
-    }
-
-    if(GAME.m_IsStateLoading) {
+    if(GAME.m_IsStateLoading || !context.gPlayerInfo) {
         return;
     }
 
@@ -258,15 +285,15 @@ context.BOT_FUNCTION = function ticker(delta) {
         if(bestZoneIdx > -1) {
             isJoining = true;
             console.log("join to zone", bestZoneIdx);
-             SERVER.JoinZone(
+                SERVER.JoinZone(
                 bestZoneIdx,
                 function (results) {
                     GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, bestZoneIdx));
                 },
                 GameLoadError
-            );    
+            );
 
-            return;    
+            return;
         }
     }
 
@@ -286,6 +313,11 @@ context.BOT_FUNCTION = function ticker(delta) {
     for (let attack of attacks)
         if (attack.shouldAttack(delta, enemies))
             attack.process(enemies);
+
+    let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
+    if(buttonsOnErrorMessage.length > 0) {
+        buttonsOnErrorMessage[0].click();
+    }
 
 }
 
