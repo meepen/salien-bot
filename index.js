@@ -244,6 +244,11 @@ if (context.BOT_FUNCTION) {
 context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
 
+    let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
+    if(buttonsOnErrorMessage.length > 0) {
+        buttonsOnErrorMessage[0].click();
+    }
+
     if(GAME.m_IsStateLoading) {
         return;
     }
@@ -281,11 +286,6 @@ context.BOT_FUNCTION = function ticker(delta) {
     for (let attack of attacks)
         if (attack.shouldAttack(delta, enemies))
             attack.process(enemies);
-
-    let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
-    if(buttonsOnErrorMessage.length > 0) {
-        buttonsOnErrorMessage[0].click();
-    }
 
 }
 
