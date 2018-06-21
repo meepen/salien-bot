@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      6
+// @version      7
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame/play
@@ -10,6 +10,15 @@
 // @updateURL    https://github.com/meepen/salien-bot/raw/master/index.user.js
 // @grant        none
 // ==/UserScript==
+
+
+// when the error is fixed we should remove the following
+CSalien.prototype.UpdateCustomizations = function()
+{
+    this.SetBodyType(BODY_TYPES[gSalienData.body_type]);
+    this.LoadAttachments();
+}
+
 
 (function(context) {
 "use strict";
