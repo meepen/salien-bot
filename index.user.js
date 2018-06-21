@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      0
+// @version      6
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
+// @match        https://steamcommunity.com/saliengame/play
 // @match        https://steamcommunity.com/saliengame/play/
-// @downloadURL  https://raw.githubusercontent.com/meepen/salien-bot/master/salien-bot.user.js
-// @updateURL    https://raw.githubusercontent.com/meepen/salien-bot/master/salien-bot.user.js
+// @downloadURL  https://github.com/meepen/salien-bot/raw/master/index.user.js
+// @updateURL    https://github.com/meepen/salien-bot/raw/master/index.user.js
 // @grant        none
 // ==/UserScript==
 
@@ -90,8 +91,10 @@ const CanAttack = function CanAttack(attackname) {
 }
 const GetBestZone = function GetBestZone() {
     let bestZoneIdx;
-    let maxProgress = 0;
     let highestDifficulty = -1;
+
+    let isLevelling = context.gPlayerInfo.level < 9 || Option("forceLevellingMode");
+    let maxProgress = isLevelling ? 10000 : 0;
 
     for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) {
         let zone = GAME.m_State.m_Grid.m_Tiles[idx].Info;
@@ -99,22 +102,30 @@ const GetBestZone = function GetBestZone() {
             if (zone.boss) {
                 return idx;
             }
+            
+            if(isLevelling) {
+                if(zone.difficulty > highestDifficulty) {
+                    highestDifficulty = zone.difficulty;
+                    maxProgress = zone.progress;
+                    bestZoneIdx = idx;
+                } else if(zone.difficulty < highestDifficulty) continue;
 
-            if ((context.gPlayerInfo.level < 9 || Option("forceLevellingMode")) && zone.difficulty > highestDifficulty) {
-                highestDifficulty = zone.difficulty
-                maxProgress = zone.progress;
-                bestZoneIdx = idx;
-            }
-            else if (zone.progress > maxProgress) {
-                maxProgress = zone.progress;
-                bestZoneIdx = idx;
+                if(zone.progress < maxProgress) {
+                    maxProgress = zone.progress;
+                    bestZoneIdx = idx;
+                }
+            } else {
+                if(zone.progress > maxProgress) {
+                    maxProgress = zone.progress;
+                    bestZoneIdx = idx;
+                }
             }
 
         }
     }
 
     if(bestZoneIdx !== undefined) {
-        console.log(`zone ${bestZoneIdx} progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress} difficulty: ${highestDifficulty}`);
+        console.log(`zone ${bestZoneIdx} (${bestZoneIdx % k_NumMapTilesW}, ${(bestZoneIdx / k_NumMapTilesW) | 0}) progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress} difficulty: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.difficulty}`);
     }
 
     return bestZoneIdx;
@@ -141,7 +152,7 @@ const GetBestPlanet = function GetBestPlanet() {
 }
 
 // Let's challenge ourselves to be human here!
-const CLICKS_PER_SECOND = 10;
+const CLICKS_PER_SECOND = 15;
 
 const InGame = function InGame() {
     return GAME.m_State.m_bRunning;
@@ -364,7 +375,6 @@ context.BOT_FUNCTION = function ticker(delta) {
     for (let attack of attacks)
         if (attack.shouldAttack(delta, enemies))
             attack.process(enemies);
-
 }
 
 
