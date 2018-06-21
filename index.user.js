@@ -322,7 +322,9 @@ context.BOT_FUNCTION = function ticker(delta) {
 
     let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
     if(buttonsOnErrorMessage.length > 0) {
-        buttonsOnErrorMessage[0].click();
+        setTimeout(function tick() {
+            buttonsOnErrorMessage[0].click();
+        }, 2000);        
     }
 
     if(GAME.m_IsStateLoading || !context.gPlayerInfo) {
