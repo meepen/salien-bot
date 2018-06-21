@@ -76,6 +76,15 @@ class Attack {
     process(enemies) {
         throw new Error("process not implemented");
     }
+    getAttackName() {
+        throw new Error("no current attack name");
+    }
+    canAttack() {
+        return CanAttack(this.getAttackName());
+    }
+    getAttackData() {
+        return AttackManager().m_AttackData[this.getAttackName()];
+    }
 }
 
 // Basic clicking attack, attack closest
@@ -113,21 +122,9 @@ class ClickAttack extends Attack {
     }
 }
 
-// the '1' button (SlimeAttack PsychicAttack BeastAttack - depends on body type of your salien)
-class SpecialAttack extends Attack {
-    getCurrent() {
-        if (gSalien.m_BodyType == "slime")
-            return "slimeattack";
-        else if (gSalien.m_BodyType == "beast")
-            return "beastattack";
-        else
-            return "psychicattack";
-    }
-    getData() {
-        return AttackManager().m_AttackData[this.getCurrent()];
-    }
+class ProjectileAttack extends Attack {
     shouldAttack(delta) {
-        return CanAttack(this.getCurrent());
+        return CanAttack(this.getAttackName());
     }
     score(enemy) {
         if (enemy.m_bDead)
@@ -151,17 +148,29 @@ class SpecialAttack extends Attack {
     }
     attack(x, y) {
         SetMouse(x, y)
-        AttackManager().m_mapKeyCodeToAttacks.get(this.getData().keycode)()
+        AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)()
     }
 }
 
-class BombAttack extends SpecialAttack {
-    getCurrent() {
+// the '1' button (SlimeAttack PsychicAttack BeastAttack - depends on body type of your salien)
+class SpecialAttack extends ProjectileAttack {
+    getAttackName() {
+        if (gSalien.m_BodyType == "slime")
+            return "slimeattack";
+        else if (gSalien.m_BodyType == "beast")
+            return "beastattack";
+        else
+            return "psychicattack";
+    }
+}
+
+class BombAttack extends ProjectileAttack {
+    getAttackName() {
         return "explosion";
     }
 }
-class BlackholeAttack extends SpecialAttack {
-    getCurrent() {
+class BlackholeAttack extends ProjectileAttack {
+    getAttackName() {
         return "blackhole";
     }
 }
