@@ -1,8 +1,18 @@
+// ==UserScript==
+// @name         Saliens bot
+// @namespace    http://tampermonkey.net/
+// @version      0
+// @description  Beat all the saliens levels
+// @author       https://github.com/meepen/salien-bot
+// @match        https://steamcommunity.com/saliengame/play/
+// @grant        none
+// ==/UserScript==
+
 (function(context) {
+"use strict";
 const pixi = gApp;
 const GAME = gGame;
 const SERVER = gServer;
-const PLAYER = gPlayerInfo;
 const Option = function Option(name, def) {
     if (window.localStorage[name] === undefined) {
         context.localStorage[name] = def;
@@ -40,7 +50,7 @@ const TryContinue = function Continue() {
         })
     }
     if(GAME.m_State instanceof CBootState) { //First screen
-        GAME.ChangeState( new CBattleSelectionState( PLAYER.active_planet ) );
+        GAME.ChangeState( new CBattleSelectionState( context.gPlayerInfo.active_planet ) );
         continued = true;
     }
     return continued;
@@ -57,7 +67,7 @@ const GetBestZone = function GetBestZone() {
     let maxProgress = 0;
     let highestDifficulty = -1;
 
-    for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) { 
+    for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) {
         let zone = GAME.m_State.m_Grid.m_Tiles[idx].Info;
         if (!zone.captured) {
             if (zone.boss) {
@@ -264,7 +274,7 @@ if (context.BOT_FUNCTION) {
 context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
 
-    if(GAME.m_IsStateLoading) {
+    if(GAME.m_IsStateLoading || !context.gPlayerInfo) {
         return;
     }
 
@@ -273,15 +283,15 @@ context.BOT_FUNCTION = function ticker(delta) {
         if(bestZoneIdx > -1) {
             isJoining = true;
             console.log("join to zone", bestZoneIdx);
-             SERVER.JoinZone(
+                SERVER.JoinZone(
                 bestZoneIdx,
                 function (results) {
                     GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, bestZoneIdx));
                 },
                 GameLoadError
-            );    
+            );
 
-            return;    
+            return;
         }
     }
 
