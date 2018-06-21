@@ -11,6 +11,15 @@
 // @grant        none
 // ==/UserScript==
 
+
+// when the error is fixed we should remove the following
+CSalien.prototype.UpdateCustomizations = function()
+{
+    this.SetBodyType(BODY_TYPES[gSalienData.body_type]);
+    this.LoadAttachments();
+}
+
+
 (function(context) {
 "use strict";
 const pixi = gApp;
