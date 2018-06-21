@@ -38,8 +38,13 @@ const TryContinue = function Continue() {
     }
     return continued;
 }
-<<<<<<< HEAD
-
+const CanAttack = function CanAttack(attackname) {
+    let Manager = AttackManager().m_mapCooldowns.get(attackname);
+    let lastUsed = Manager.m_rtAttackLastUsed;
+    let canAttack = Manager.BAttack();
+    Manager.m_rtAttackLastUsed = lastUsed;
+    return canAttack;
+}
 const GetBestZone = function GetBestZone() {
     let bestZoneIdx = -1;
     let maxProgress = 0;
@@ -64,14 +69,6 @@ const GetBestZone = function GetBestZone() {
     }
 
     return bestZoneIdx;
-=======
-const CanAttack = function CanAttack(attackname) {
-    let Manager = AttackManager().m_mapCooldowns.get(attackname);
-    let lastUsed = Manager.m_rtAttackLastUsed;
-    let canAttack = Manager.BAttack();
-    Manager.m_rtAttackLastUsed = lastUsed;
-    return canAttack;
->>>>>>> upstream/master
 }
 
 // Let's challenge ourselves to be human here!
@@ -88,6 +85,7 @@ const InZoneSelect = function InZoneSelect() {
 const WORST_SCORE = -1 / 0;
 const START_POS = pixi.renderer.width;
 
+// context.lastZoneIndex;
 let isJoining = false;
 
 const EnemySpeed = function EnemySpeed(enemy) {
@@ -241,7 +239,6 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-<<<<<<< HEAD
     if (InZoneSelect() && !isJoining) {
         let bestZoneIdx = GetBestZone();
         if(bestZoneIdx > -1) {
@@ -257,28 +254,8 @@ context.BOT_FUNCTION = function ticker(delta) {
 
             return;    
         }
-=======
-    if (InZoneSelect() && context.lastZoneIndex !== undefined && !isJoining) {
-        isJoining = true;
-
-        if (GAME.m_State.m_PlanetData.zones[context.lastZoneIndex].captured)
-		{
-            context.lastZoneIndex = undefined;
-			return;
-        }
-
-        SERVER.JoinZone(
-            lastZoneIndex,
-            function (results) {
-                GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, context.lastZoneIndex));
-            },
-            GameLoadError
-        );
-
-        return;
->>>>>>> upstream/master
     }
-33
+
     if (!InGame()) {
         if (TryContinue()) {
             console.log("continued!");
@@ -292,22 +269,14 @@ context.BOT_FUNCTION = function ticker(delta) {
 
     let enemies = state.m_rgEnemies;
 
-<<<<<<< HEAD
-    if(GAME.m_State.m_PlayerHealth > 0) {
-        for (let attack of attacks)
-            if (attack.shouldAttack(delta))
-                attack.process(enemies);
-    }
+    for (let attack of attacks)
+        if (attack.shouldAttack(delta, enemies))
+            attack.process(enemies);
 
     let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
     if(buttonsOnErrorMessage.length > 0) {
         buttonsOnErrorMessage[0].click();
     }
-=======
-    for (let attack of attacks)
-        if (attack.shouldAttack(delta, enemies))
-            attack.process(enemies);
->>>>>>> upstream/master
 
 }
 
