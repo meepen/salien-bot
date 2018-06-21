@@ -13,15 +13,24 @@ const AttackManager = function AttackManager() {
 }
 
 const TryContinue = function Continue() {
-    if (!gGame.m_State.m_VictoryScreen)
-        return false;
     let continued = false;
-    gGame.m_State.m_VictoryScreen.children.forEach(function(child) {
-        if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
-            continued = true;
-            child.click();
-        }
-    })
+    if (GAME.m_State.m_VictoryScreen) {
+        GAME.m_State.m_VictoryScreen.children.forEach(function(child) {
+            if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
+                continued = true;
+                child.click();
+            }
+        })
+    }
+    if (GAME.m_State.m_LevelUpScreen)
+        continued = false;
+        GAME.m_State.m_LevelUpScreen.children.forEach(function(child) {
+            if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
+                continued = true;
+                child.click();
+            }
+        })
+    }
     return continued;
 }
 
