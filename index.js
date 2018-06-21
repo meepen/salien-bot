@@ -198,9 +198,11 @@ context.BOT_FUNCTION = function ticker(delta) {
 
     let enemies = state.m_rgEnemies;
 
-    for (let attack of attacks)
-        if (attack.shouldAttack(delta))
-            attack.process(enemies);
+    if(GAME.m_State.m_PlayerHealth > 0) {
+        for (let attack of attacks)
+            if (attack.shouldAttack(delta))
+                attack.process(enemies);
+    }
 
 }
 
