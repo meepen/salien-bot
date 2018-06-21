@@ -198,6 +198,13 @@ context.BOT_FUNCTION = function ticker(delta) {
 
     if (InZoneSelect() && context.lastZoneIndex !== undefined && !isJoining) {
         isJoining = true;
+
+        if (GAME.m_State.m_PlanetData.zones[context.lastZoneIndex].captured)
+		{
+            context.lastZoneIndex = undefined;
+			return;
+        }
+
         SERVER.JoinZone(
             lastZoneIndex,
             function (results) {
@@ -208,7 +215,7 @@ context.BOT_FUNCTION = function ticker(delta) {
 
         return;
     }
-
+33
     if (!InGame()) {
         if (TryContinue()) {
             console.log("continued!");
