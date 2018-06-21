@@ -44,7 +44,7 @@ const InGame = function InGame() {
 }
 
 const InZoneSelect = function InZoneSelect() {
-    return GAME.m_State instanceof CBattleSelectionState; 
+    return GAME.m_State instanceof CBattleSelectionState;
 }
 
 const WORST_SCORE = -1 / 0;
@@ -76,6 +76,9 @@ class Attack {
 // Basic clicking attack, attack closest
 class ClickAttack extends Attack {
     shouldAttack(delta) {
+        // Can't do basic attack when station is down
+        if (GAME.m_State.m_PlayerHealth <= 0)
+            return false;
         this.nextAttackDelta -= delta;
         return this.nextAttackDelta <= 0;;
     }
@@ -168,27 +171,26 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-    if (InZoneSelect()) {
-        if (context.lastZoneIndex !== undefined && !isJoining) {
-            isJoining = true;
-            SERVER.JoinZone(
-                lastZoneIndex,
-                function ( results ) {
-                    gGame.ChangeState( new CBattleState( GAME.m_State.m_PlanetData, context.lastZoneIndex ) );
-                },
-                GameLoadError
-                );
-            
-            return;  
-        }
+    if (InZoneSelect() && context.lastZoneIndex !== undefined && !isJoining) {
+        isJoining = true;
+        SERVER.JoinZone(
+            lastZoneIndex,
+            function (results) {
+                GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, context.lastZoneIndex));
+            },
+            GameLoadError
+        );
+
+        return;
     }
+
     if (!InGame()) {
         if (TryContinue()) {
             console.log("continued!");
         }
         return;
     }
-    
+
     isJoining = false;
     context.lastZoneIndex = GAME.m_State.m_unZoneIndex;
 
