@@ -5,6 +5,8 @@
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame/play/
+// @downloadURL  https://raw.githubusercontent.com/meepen/salien-bot/master/salien-bot.user.js
+// @updateURL    https://raw.githubusercontent.com/meepen/salien-bot/master/salien-bot.user.js
 // @grant        none
 // ==/UserScript==
 
