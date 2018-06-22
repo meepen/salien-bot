@@ -114,6 +114,7 @@ const GetBestZone = function GetBestZone() {
         let zone = GAME.m_State.m_Grid.m_Tiles[idx].Info;
         if (!zone.captured) {
             if (zone.boss) {
+                console.log(`zone ${idx} (${bestZoneIdx % k_NumMapTilesW}, ${(bestZoneIdx / k_NumMapTilesW) | 0}) with boss`);
                 return idx;
             }
             
@@ -139,7 +140,7 @@ const GetBestZone = function GetBestZone() {
     }
 
     if(bestZoneIdx !== undefined) {
-        console.log(`zone ${bestZoneIdx} (${bestZoneIdx % k_NumMapTilesW}, ${(bestZoneIdx / k_NumMapTilesW) | 0}) progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress} difficulty: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.difficulty}`);
+        console.log(`${GAME.m_State.m_PlanetData.state.name} zone ${bestZoneIdx} (${bestZoneIdx % k_NumMapTilesW}, ${(bestZoneIdx / k_NumMapTilesW) | 0}) progress: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.progress} difficulty: ${GAME.m_State.m_Grid.m_Tiles[bestZoneIdx].Info.difficulty}`);
     }
 
     return bestZoneIdx;
@@ -360,6 +361,7 @@ context.BOT_FUNCTION = function ticker(delta) {
         let bestZoneIdx = GetBestZone();
         if(bestZoneIdx > -1) {
             isJoining = true;
+            console.log(GAME.m_State.m_SalienInfoBox.m_LevelText.text, GAME.m_State.m_SalienInfoBox.m_XPValueText.text);
             console.log("join to zone", bestZoneIdx);
                 SERVER.JoinZone(
                 bestZoneIdx,
