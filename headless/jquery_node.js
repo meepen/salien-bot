@@ -19,6 +19,9 @@ $J.ajax({
 */
 
 class AjaxResponse {
+    constructor() {
+        this._fails = 0;
+    }
     success(fn) {
         this.succ = fn;
         return this;
@@ -61,8 +64,13 @@ let internal_ajax = function internal_ajax(data, ajax_object) {
         form: form
     }, function response(err, resp, body) {
         if (err || resp.statusCode == 500 || resp.statusCode == 503) {
-            console.log(`failed url ${url}, retrying`);
-            internal_ajax(data, ajax_object);
+            console.log(`failed url ${url}, retrying ${++ajax_object._fails} err code ${resp.statusCode}`);
+            console.log(err);
+            console.log(body);
+            if (ajax_object._fails > 1)
+                ajax_object.nosucc();
+            else
+                internal_ajax(data, ajax_object);
             return;
         }
         
