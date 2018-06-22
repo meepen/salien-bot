@@ -53,8 +53,17 @@ const EnemyManager = function EnemyManager() {
 const AttackManager = function AttackManager() {
     return GAME.m_State.m_AttackManager;
 }
-
+const ReloadPage = function ReloadPage() {
+    if(Date.now() - lastReloadAttempt < 5 * 60 * 1000) {
+        return;
+    }
+    reloadingPage = true;
+    window.location.reload();
+    console.log("try to reload page");
+}
 let isJoining = false;
+let failCount = 0;
+
 const TryContinue = function TryContinue() {
     let continued = false;
     if (GAME.m_State.m_VictoryScreen) {
@@ -97,8 +106,9 @@ const TryContinue = function TryContinue() {
                     console.log(results);
                 },
                 () => {
-                    console.log("fail");
+                    console.log(`fail ${failCount}/${MAX_FAIL_COUNT}`);
                     isJoining = false;
+                    failCount++;
                 }
             );
         }
@@ -180,6 +190,8 @@ const GetBestPlanet = function GetBestPlanet() {
 
 // Let's challenge ourselves to be human here!
 const CLICKS_PER_SECOND = 15;
+const STATE_TIMEOUT_MINUTES = 5;
+const MAX_FAIL_COUNT = 50;
 
 const InGame = function InGame() {
     return GAME.m_State.m_bRunning;
@@ -356,8 +368,20 @@ if (context.BOT_FUNCTION) {
 }
 
 let reloadingPage = false;
+let watchdogTimer  = setInterval(function() {
+    if(Date.now() - watchdogLastGameChange > STATE_TIMEOUT_MINUTES * 60 * 1000) {
+        ReloadPage();
+    }
+}, 10000);
+let watchdogLastGameChange = Date.now();
+let lastReloadAttempt = Date.now();
+
 
 context.BOT_FUNCTION = function ticker(delta) {
+    if(reloadingPage) {
+        return;
+    }
+
     delta /= 100;
 
     let difficulties = PIXI.loader.resources['level_config'];
@@ -376,6 +400,10 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
+    if(failCount > MAX_FAIL_COUNT) {
+        ReloadPage();
+    }
+
     if(GAME.m_IsStateLoading || !context.gPlayerInfo) {
         return;
     }
@@ -383,10 +411,11 @@ context.BOT_FUNCTION = function ticker(delta) {
     if (!InGame()) {
         if (TryContinue()) {
             console.log("continued!");
+            watchdogLastGameChange = Date.now();
         }
         return;
     }
-
+    failCount = 0;
 
 
     let state = EnemyManager();
