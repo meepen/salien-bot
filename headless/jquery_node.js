@@ -41,10 +41,7 @@ class AjaxResponseObject {
 const jar = request.jar();
 
 
-j.ajax = function ajax(data) {
-    jar.setCookie(request.cookie(`access_token=${j.token}`), data.url)
-    let ajax_object = new AjaxResponse();
-
+let internal_ajax = function internal_ajax(data, ajax_object) {
     let url = data.url;
     let form;
     if (data.method == "POST")
@@ -63,9 +60,9 @@ j.ajax = function ajax(data) {
         jar: jar,
         form: form
     }, function response(err, resp, body) {
-        if (err) {
-            if (ajax_object.nosucc)
-                ajax_object.nosucc();
+        if (err || resp.statusCode == 500 || resp.statusCode == 503) {
+            console.log(`failed url ${url}, retrying`);
+            internal_ajax(data, ajax_object);
             return;
         }
         
@@ -76,6 +73,13 @@ j.ajax = function ajax(data) {
         if (ajax_object.succ)
             ajax_object.succ(value, null, new AjaxResponseObject(resp));
     })
+}
+
+j.ajax = function ajax(data) {
+    jar.setCookie(request.cookie(`access_token=${j.token}`), data.url)
+    let ajax_object = new AjaxResponse();
+
+    internal_ajax(data, ajax_object);
 
     return ajax_object;
 }

@@ -216,7 +216,5 @@ CServerInterface.prototype.LeaveGameInstance = function( instanceid, callback )
 		{
 			error();
 		}
-	}).fail( function( err ) {
-		console.log(err);
 	});
 };

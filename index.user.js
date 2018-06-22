@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      15
+// @version      18
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame
@@ -13,7 +13,7 @@
 // @grant        none
 // ==/UserScript==
 
-const MAX_LEVEL = 9;
+const MAX_LEVEL = 13;
 
 if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") == "Greasemonkey") {
     alert("It's not possible to support Greasemonkey, please try Tampermonkey or ViolentMonkey.");
@@ -23,7 +23,7 @@ if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") 
 "use strict";
 
 // reload automatically instead of clicking ok
-GameLoadError = function() {
+context.error = context.GameLoadError = function() {
 	window.location.reload();
 }
 
@@ -68,10 +68,16 @@ let failCount = 0;
 
 const TryContinue = function TryContinue() {
     let continued = false;
+    if (isJoining) 
+        return continued;
     if (GAME.m_State.m_VictoryScreen) {
         GAME.m_State.m_VictoryScreen.children.forEach(function(child) {
             if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
                 continued = true;
+                isJoining = true;
+                setTimeout(() => {
+                    isJoining = false
+                }, 1000);
                 child.click();
             }
         })
@@ -81,12 +87,16 @@ const TryContinue = function TryContinue() {
         GAME.m_State.m_LevelUpScreen.children.forEach(function(child) {
             if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
                 continued = true;
+                isJoining = true;
                 child.click();
+                setTimeout(() => {
+                    isJoining = false
+                }, 1000);
             }
         })
     }
     if (GAME.m_State instanceof CBootState) { // First screen
-        gGame.m_State.button.click();
+        GAME.m_State.button.click();
     }
     if (GAME.m_State instanceof CPlanetSelectionState && !isJoining) { // Planet Selectiong
         GAME.m_State.m_rgPlanetSprites[0].click();
