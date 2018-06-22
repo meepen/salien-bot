@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      19
+// @version      20
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame
@@ -85,7 +85,9 @@ const TryContinue = function TryContinue() {
             }
         })
     }
-    if (GAME.m_State instanceof CBootState) { // First screen
+    if (gServer.m_WebAPI && GAME.m_State instanceof CBootState) { // First screen
+        isJoining = true;
+        setTimeout(() => isJoining = false, 1000);
         GAME.m_State.button.click();
     }
     if (GAME.m_State instanceof CPlanetSelectionState && !isJoining) { // Planet Selectiong
@@ -100,17 +102,8 @@ const TryContinue = function TryContinue() {
             console.log(GAME.m_State.m_SalienInfoBox.m_LevelText.text, GAME.m_State.m_SalienInfoBox.m_XPValueText.text);
             console.log("join to zone", bestZoneIdx);
             isJoining = true;
-            SERVER.JoinZone(
-                bestZoneIdx,
-                (results) => {
-                    GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, bestZoneIdx));
-                    isJoining = false;
-                    console.log(results);
-                },
-                () => {
-                    setTimeout(() => isJoining = false, 1000);
-                }
-            );
+            GAME.m_State.m_Grid.click(bestZoneIdx % k_NumMapTilesW, (bestZoneIdx / k_NumMapTilesW) | 0);
+            setTimeout(() => isJoining = false, 1000);
         }
         else {
             isJoining = true;
@@ -394,7 +387,7 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-    if(GAME.m_IsStateLoading || !context.gPlayerInfo) {
+    if (GAME.m_IsStateLoading) {
         return;
     }
 
