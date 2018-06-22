@@ -70,7 +70,7 @@ j.ajax = function ajax(data) {
         }
         
         let value = body;
-        if (data.dataType == "json")
+        //if (data.dataType == "json")
             value = JSON.parse(value);
         
         if (ajax_object.succ)
