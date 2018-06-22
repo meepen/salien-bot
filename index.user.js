@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      14
+// @version      15
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame
@@ -26,10 +26,11 @@ CSalien.prototype.UpdateCustomizations = function()
     this.SetBodyType(BODY_TYPES[gSalienData.body_type]);
     this.LoadAttachments();
 }
-const pixi = gApp;
-const GAME = gGame;
-const SERVER = gServer;
-const PLAYER = gPlayerInfo;
+const APP = context.gApp;
+const GAME = context.gGame;
+const SERVER = context.gServer;
+const PIXI = context.PIXI;
+
 const Option = function Option(name, def) {
     if (window.localStorage[name] === undefined) {
         context.localStorage[name] = def;
@@ -38,8 +39,8 @@ const Option = function Option(name, def) {
 }
 Option("forceLevellingMode", false);
 const SetMouse = function SetMouse(x, y) {
-    pixi.renderer.plugins.interaction.mouse.global.x = x;
-    pixi.renderer.plugins.interaction.mouse.global.y = y;
+    APP.renderer.plugins.interaction.mouse.global.x = x;
+    APP.renderer.plugins.interaction.mouse.global.y = y;
 }
 const EnemyManager = function EnemyManager() {
     return GAME.m_State.m_EnemyManager;
@@ -180,7 +181,7 @@ const InGame = function InGame() {
 }
 
 const WORST_SCORE = -1 / 0;
-const START_POS = pixi.renderer.width;
+const START_POS = APP.renderer.width;
 
 
 const EnemySpeed = function EnemySpeed(enemy) {
@@ -339,7 +340,7 @@ let attacks = [
 ]
 
 if (context.BOT_FUNCTION) {
-    pixi.ticker.remove(context.BOT_FUNCTION);
+    APP.ticker.remove(context.BOT_FUNCTION);
     context.BOT_FUNCTION = undefined;
 }
 
@@ -347,6 +348,13 @@ let reloadingPage = false;
 
 context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
+
+    let difficulties = PIXI.loader.resources['level_config'];
+    if (difficulties)
+        for (let difficulty in difficulties.data) {
+            let freq = difficulties.data[difficulty].enemies.spawn_frequency;
+            freq.min = freq.max;
+        }
 
     let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
     if(buttonsOnErrorMessage[0] != null) {
@@ -381,6 +389,6 @@ context.BOT_FUNCTION = function ticker(delta) {
 }
 
 
-pixi.ticker.add(context.BOT_FUNCTION);
+APP.ticker.add(context.BOT_FUNCTION);
 
 })(window);
