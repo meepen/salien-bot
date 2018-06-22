@@ -59,10 +59,16 @@ const AttackManager = function AttackManager() {
 let isJoining = false;
 const TryContinue = function TryContinue() {
     let continued = false;
+    if (isJoining) 
+        return continued;
     if (GAME.m_State.m_VictoryScreen) {
         GAME.m_State.m_VictoryScreen.children.forEach(function(child) {
             if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
                 continued = true;
+                isJoining = true;
+                setTimeout(() => {
+                    isJoining = false
+                }, 1000);
                 child.click();
             }
         })
@@ -72,12 +78,16 @@ const TryContinue = function TryContinue() {
         GAME.m_State.m_LevelUpScreen.children.forEach(function(child) {
             if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
                 continued = true;
+                isJoining = true;
                 child.click();
+                setTimeout(() => {
+                    isJoining = false
+                }, 1000);
             }
         })
     }
     if (GAME.m_State instanceof CBootState) { // First screen
-        gGame.m_State.button.click();
+        GAME.m_State.button.click();
     }
     if (GAME.m_State instanceof CPlanetSelectionState && !isJoining) { // Planet Selectiong
         GAME.m_State.m_rgPlanetSprites[0].click();
@@ -103,6 +113,13 @@ const TryContinue = function TryContinue() {
                     isJoining = false;
                 }
             );
+        }
+        else {
+            isJoining = true;
+            GAME.m_State.m_LeaveButton.click()
+            setTimeout(() => {
+                isJoining = false
+            }, 1000);
         }
         console.log(bestZoneIdx);
         return;
