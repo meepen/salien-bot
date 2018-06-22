@@ -124,7 +124,7 @@ class Client {
             this.int.JoinZone(id, d => {
                 res(d.response.zone_info);
             }, () => {
-                this.JoinZone(id).then(res);
+                this.Connect().then(res);
             });
         })
     }
