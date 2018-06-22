@@ -13,7 +13,7 @@
 // @grant        none
 // ==/UserScript==
 
-const MAX_LEVEL = 9;
+const MAX_LEVEL = 13;
 
 if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") == "Greasemonkey") {
     alert("It's not possible to support Greasemonkey, please try Tampermonkey or ViolentMonkey.");
@@ -117,6 +117,7 @@ const TryContinue = function TryContinue() {
         else {
             isJoining = true;
             GAME.m_State.m_LeaveButton.click()
+            console.log("Leaving planet, no zones left");
             setTimeout(() => {
                 isJoining = false
             }, 1000);

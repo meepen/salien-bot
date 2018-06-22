@@ -4,7 +4,7 @@ const CServerInterface = network.CServerInterface;
 const config = network.config;
 const k_NumMapTilesW = 12;
 
-const MAX_LEVEL = 9;
+const MAX_LEVEL = 13;
 const WAIT_TIME = 120;
 
 const difficulty_multipliers = [
