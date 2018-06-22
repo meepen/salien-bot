@@ -4,6 +4,7 @@ const CServerInterface = network.CServerInterface;
 const config = network.config;
 const k_NumMapTilesW = 12;
 
+const MAX_LEVEL = 99;
 const WAIT_TIME = 110;
 
 const difficulty_multipliers = [
@@ -146,7 +147,7 @@ const GetBestZone = function GetBestZone(planet) {
     let bestZone;
     let highestDifficulty = -1;
 
-    let isLevelling = cl.gPlayerInfo.level < 9;
+    let isLevelling = cl.gPlayerInfo.level < MAX_LEVEL;
     let maxProgress = isLevelling ? 10000 : 0;
 
     for (let idx in planet.zones) {
