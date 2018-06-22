@@ -280,7 +280,7 @@ class ProjectileAttack extends Attack {
             this.attack.apply(this, EnemyCenter(target));
     }
     attack(x, y) {
-        SetMouse(x, y)
+        SetMouse(x - 50, y)
         AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)()
     }
 }
