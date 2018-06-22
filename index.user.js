@@ -13,7 +13,7 @@
 // @grant        none
 // ==/UserScript==
 
-const MAX_LEVEL = 99;
+const MAX_LEVEL = 9;
 
 if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") == "Greasemonkey") {
     alert("It's not possible to support Greasemonkey, please try Tampermonkey or ViolentMonkey.");
