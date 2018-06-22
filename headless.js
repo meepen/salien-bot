@@ -5,7 +5,8 @@ const config = network.config;
 const k_NumMapTilesW = 12;
 
 const MAX_LEVEL = 13;
-const WAIT_TIME = 120;
+const WAIT_TIME = 110;
+const SCORE_TIME = 120;
 
 const difficulty_multipliers = [
     0, 1, 2, 4, 4
@@ -44,7 +45,7 @@ class Client {
                     setTimeout(() => process.title = `${WAIT_TIME - i - this.gPlayerInfo.time_in_zone} seconds remaining`, i * 1000);
                 setTimeout(() => {
                     let planet = this.gPlanets[this.gPlayerInfo.active_planet];
-                    cl.ReportScore(5 * difficulty_multipliers[planet.zones[this.gPlayerInfo.active_zone_position].difficulty] * WAIT_TIME).then(res);
+                    cl.ReportScore(5 * difficulty_multipliers[planet.zones[this.gPlayerInfo.active_zone_position].difficulty] * SCORE_TIME).then(res);
                 }, 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone));
             }
             else {
@@ -176,7 +177,7 @@ class Client {
                     for (let i = 0; i < WAIT_TIME; i++)
                         setTimeout(() => process.title = `${WAIT_TIME - i} seconds remaining`, i * 1000);
                     setTimeout(() => {
-                        this.ReportScore(5 * difficulty_multipliers[zone_info.difficulty] * WAIT_TIME).then(res);
+                        this.ReportScore(5 * difficulty_multipliers[zone_info.difficulty] * SCORE_TIME).then(res);
                     }, 1000 * WAIT_TIME);
                 });
             });
