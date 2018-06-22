@@ -1,6 +1,6 @@
 ### salien-bot
 
-Salien bot is a WIP for the brand new Salien Summer minigame.
+Salien bot is a WIP for the Salien Minigame that came out for Steam Summer Sale 2018.
 
 I picked this up because it reminded me of a challenge in programming I had before. I won't be manipulating any state, just injecting mouse clicks and other button presses.
 

@@ -1,0 +1,12 @@
+{
+    "name": "salien-bot",
+    "license": "MIT",
+    "author": {
+        "name": "Meepen",
+        "url": "https://github.com/meepen/"
+    },
+    "version": "0.0.1",
+    "dependencies": {
+        "request": "2.87.0"
+    }
+}
