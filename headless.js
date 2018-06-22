@@ -7,4 +7,4 @@ const gettoken = JSON.parse(require("fs").readFileSync("./gettoken.json", "utf8"
 
 let Instance = new CServerInterface(gettoken);
 
-Instance.GetPlanets(console.log,console.log)
+Instance.GetPlayerInfo(console.log,console.log)
