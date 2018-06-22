@@ -1,3 +1,7 @@
+### differences from original salien-bot (for now)
+
+* more AFK support: watchdog timer + reload page if failure count is too much
+
 ### salien-bot
 
 Salien bot is a WIP for the Salien Minigame that came out for Steam Summer Sale 2018.
