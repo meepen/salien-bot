@@ -307,6 +307,11 @@ class BlackholeAttack extends ProjectileAttack {
         return "blackhole";
     }
 }
+class MeteorAttack extends ProjectileAttack {
+    getAttackName() {
+        return "boulder";
+    }
+}
 
 class FreezeAttack extends Attack {
     getCurrent() {
@@ -336,6 +341,7 @@ let attacks = [
     new SpecialAttack(),
     new FreezeAttack(),
     new BombAttack(),
+    new MeteorAttack(),
     new BlackholeAttack()
 ]
 
