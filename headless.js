@@ -8,7 +8,7 @@ const MAX_LEVEL = 13;
 const WAIT_TIME = 120;
 
 const difficulty_multipliers = [
-    0, 1, 2, 4
+    0, 1, 2, 4, 4
 ]
 
 const gettoken = JSON.parse(require("fs").readFileSync("./gettoken.json", "utf8"));
@@ -167,6 +167,10 @@ class Client {
                     return;
                 }
                 this.JoinZone(zone.zone_position).then(zone_info => {
+                    if (!zone_info) {
+                        this.Connect().then(res);
+                        return;
+                    }
                     for (let i = 0; i < WAIT_TIME; i++)
                         setTimeout(() => process.title = `${WAIT_TIME - i} seconds remaining`, i * 1000);
                     setTimeout(() => {
