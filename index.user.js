@@ -27,6 +27,7 @@ CSalien.prototype.UpdateCustomizations = function()
 const pixi = gApp;
 const GAME = gGame;
 const SERVER = gServer;
+const PLAYER = gPlayerInfo;
 const Option = function Option(name, def) {
     if (window.localStorage[name] === undefined) {
         context.localStorage[name] = def;
@@ -63,9 +64,32 @@ const TryContinue = function Continue() {
             }
         })
     }
-    if(GAME.m_State instanceof CBootState) { //First screen
-        GAME.ChangeState( new CBattleSelectionState( context.gPlayerInfo.active_planet ) );
-        continued = true;
+    if(GAME.m_State instanceof CBootState && !isJoining) { //First screen
+        let newState = false;
+
+        if(PLAYER != null && PLAYER.active_planet !== undefined) {
+            newState = new CBattleSelectionState( PLAYER.active_planet );
+        }
+        else {
+            newState =  new CPlanetSelectionState();
+        }
+
+        if(newState !== false) {
+            isJoining = true;
+            setTimeout(function tick() {
+                GAME.ChangeState( newState );
+                isJoining = false;
+            }, 500);
+
+            continued = true;
+        }
+    }
+    if(GAME.m_State instanceof CPlanetSelectionState ) { //Planet Selection
+        let planetId = GetBestPlanet();
+        if(planetId > 0) {
+            gGame.ChangeState( new CBattleSelectionState( planetId ) );
+            continued = true;
+        }
     }
     return continued;
 }
@@ -116,6 +140,26 @@ const GetBestZone = function GetBestZone() {
     }
 
     return bestZoneIdx;
+}
+const GetBestPlanet = function GetBestPlanet() {
+    let bestPlanet = false;
+    let maxProgress = 0;
+
+    for (let planetKV of GAME.m_State.m_mapPlanets) {
+        let planet = planetKV[1];
+        if(planet.state.active && !planet.state.captured && planet.state.capture_progress > maxProgress) {
+            maxProgress = planet.state.capture_progress;
+            bestPlanet = planet;
+        }
+
+    }
+
+    if(bestPlanet) {
+        console.log(`selecting planet ${bestPlanet.state.name} with progress: ${bestPlanet.state.capture_progress}`);
+        return bestPlanet.id;
+    }
+
+    return -1;
 }
 
 // Let's challenge ourselves to be human here!
@@ -299,9 +343,10 @@ context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
 
     let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
-    if(buttonsOnErrorMessage[0] != null) {
-        buttonsOnErrorMessage[0].click();
-        return;
+    if(buttonsOnErrorMessage.length > 0) {
+        setTimeout(function tick() {
+            buttonsOnErrorMessage[0].click();
+        }, 2000);        
     }
 
     if(GAME.m_IsStateLoading || !context.gPlayerInfo) {
@@ -341,6 +386,7 @@ context.BOT_FUNCTION = function ticker(delta) {
     for (let attack of attacks)
         if (attack.shouldAttack(delta, enemies))
             attack.process(enemies);
+
 }
 
 
