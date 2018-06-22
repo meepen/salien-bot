@@ -15,9 +15,14 @@
 // when the error is fixed we should remove the following
 CSalien.prototype.UpdateCustomizations = function()
 {
-    this.SetBodyType(BODY_TYPES[gSalienData.body_type]);
-    this.LoadAttachments();
-}
+    if (this.SetBodyType === "function") { 
+        this.SetBodyType(BODY_TYPES[gSalienData.body_type]);
+    } 
+
+    if ( this.LoadAttachments === "function") { 
+         this.LoadAttachments();
+    }    
+};
 
 
 (function(context) {
