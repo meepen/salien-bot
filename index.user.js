@@ -348,6 +348,13 @@ if (context.BOT_FUNCTION) {
 }
 
 let reloadingPage = false;
+let watchdogTimer  = setInterval(function() {
+    if(Date.now() - watchdogLastGameChange > 5 * 60 * 1000) {
+        window.location.reload();
+    }
+}, 10000);
+
+let watchdogLastGameChange = Date.now();
 
 context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
@@ -379,6 +386,7 @@ context.BOT_FUNCTION = function ticker(delta) {
     if (!InGame()) {
         if (TryContinue()) {
             console.log("continued!");
+            watchdogLastGameChange = Date.now();
         }
         return;
     }
