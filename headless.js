@@ -41,7 +41,7 @@ class Client {
     LeaveGame() {
         // we can probably just finish our thing i guess
         return new Promise(res => {
-            for (let i = 0; i < WAIT_TIME; i++)
+            for (let i = 0; i < (WAIT_TIME - this.gPlayerInfo.time_in_zone); i++)
                 setTimeout(() => process.title = `${WAIT_TIME - i - this.gPlayerInfo.time_in_zone} seconds remaining`, i * 1000);
             setTimeout(() => {
                 let planet = this.gPlanets[this.gPlayerInfo.active_planet];
@@ -132,7 +132,7 @@ class Client {
                     for (let i = 0; i < WAIT_TIME; i++)
                         setTimeout(() => process.title = `${WAIT_TIME - i} seconds remaining`, i * 1000);
                     setTimeout(() => {
-                        this.ReportScore(5 * difficulty_multipliers[zone_info.difficulty] * 100).then(res);
+                        this.ReportScore(5 * difficulty_multipliers[zone_info.difficulty] * 600).then(res);
                     }, 1000 * WAIT_TIME);
                 });
             });
