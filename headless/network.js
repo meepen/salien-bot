@@ -29,10 +29,10 @@ CServerInterface.prototype.Connect = function( callback )
 	});
 };
 
-CServerInterface.prototype.GetPlanets = function( callback, error )
+CServerInterface.prototype.GetPlanets = function( callback, error, noactive )
 {
 	var rgParams = {
-		active_only: 1,
+		active_only: noactive ? 0 : 1,
 		language: gLanguage
 	};
 
