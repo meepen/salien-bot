@@ -120,7 +120,7 @@ const GetBestZone = function GetBestZone() {
                 console.log(`zone ${idx} (${bestZoneIdx % k_NumMapTilesW}, ${(bestZoneIdx / k_NumMapTilesW) | 0}) with boss`);
                 return idx;
             }
-            
+
             if(isLevelling) {
                 if(zone.difficulty > highestDifficulty) {
                     highestDifficulty = zone.difficulty;
@@ -351,7 +351,7 @@ context.BOT_FUNCTION = function ticker(delta) {
         if (!reloadingPage) {
             setTimeout(() => buttonsOnErrorMessage[0].click(), 1000);
         }
-        
+
         return;
     }
 
@@ -366,7 +366,7 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-    
+
 
     let state = EnemyManager();
 
