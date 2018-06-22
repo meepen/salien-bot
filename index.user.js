@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      7
+// @version      9
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame/play
@@ -11,22 +11,19 @@
 // @grant        none
 // ==/UserScript==
 
+if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") == "Greasemonkey") {
+    alert("It's not possible to support Greasemonkey, please try Tampermonkey or ViolentMonkey.");
+}
+
+(function(context) {
+"use strict";
 
 // when the error is fixed we should remove the following
 CSalien.prototype.UpdateCustomizations = function()
 {
-    if (this.SetBodyType === "function") { 
-        this.SetBodyType(BODY_TYPES[gSalienData.body_type]);
-    } 
-
-    if ( this.LoadAttachments === "function") { 
-         this.LoadAttachments();
-    }    
-};
-
-
-(function(context) {
-"use strict";
+    this.SetBodyType(BODY_TYPES[gSalienData.body_type]);
+    this.LoadAttachments();
+}
 const pixi = gApp;
 const GAME = gGame;
 const SERVER = gServer;
