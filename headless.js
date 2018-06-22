@@ -45,7 +45,7 @@ class Client {
                 setTimeout(() => process.title = `${WAIT_TIME - i - this.gPlayerInfo.time_in_zone} seconds remaining`, i * 1000);
             setTimeout(() => {
                 let planet = this.gPlanets[this.gPlayerInfo.active_planet];
-                cl.ReportScore(5 * difficulty_multipliers[planet.zones[this.gPlayerInfo.active_zone_position].difficulty]).then((d) => {
+                cl.ReportScore(5 * difficulty_multipliers[planet.zones[this.gPlayerInfo.active_zone_position].difficulty] * WAIT_TIME).then((d) => {
                     res();
                 });
             }, 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone));
@@ -132,7 +132,7 @@ class Client {
                     for (let i = 0; i < WAIT_TIME; i++)
                         setTimeout(() => process.title = `${WAIT_TIME - i} seconds remaining`, i * 1000);
                     setTimeout(() => {
-                        this.ReportScore(5 * difficulty_multipliers[zone_info.difficulty] * 600).then(res);
+                        this.ReportScore(5 * difficulty_multipliers[zone_info.difficulty] * WAIT_TIME).then(res);
                     }, 1000 * WAIT_TIME);
                 });
             });
