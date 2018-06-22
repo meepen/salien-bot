@@ -15,9 +15,6 @@ const gettoken = JSON.parse(require("fs").readFileSync("./gettoken.json", "utf8"
 
 let Instance = new CServerInterface(gettoken);
 
-const fail = function fail() {
-    throw new Error("failed");
-}
 
 class Client {
     constructor(int) {
@@ -50,7 +47,6 @@ class Client {
                     res();
                 });
             }, 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone));
-            // this.int.LeaveGameInstance(this.gPlayerInfo.
         });
     }
 
@@ -59,7 +55,11 @@ class Client {
             this.int.GetPlanets(data => {
                 this.m_Planets = data.response.planets;
                 res(this.m_Planets);
-            }, fail, shh);
+            }, () => {
+                this.Connect().then(() => {
+                    this.GetPlanets(shh).then(res);
+                });
+            }, shh);
         });
     }
 
@@ -68,7 +68,11 @@ class Client {
             this.int.GetPlayerInfo(d => {
                 this.gPlayerInfo = d.response;
                 res(this.gPlayerInfo);
-            }, fail);
+            }, () => {
+                this.Connect().then(() => {
+                    this.GetPlayerInfo(shh).then(res);
+                });
+            });
         });
     }
 
@@ -77,7 +81,11 @@ class Client {
             this.int.GetPlayerInfo(d => {
                 this.gPlayerInfo.active_planet = id;
                 res();
-            }, fail);
+            }, () => {
+                this.Connect().then(() => {
+                    this.JoinPlanet(id).then(res);
+                });
+            });
         });
     }
 
@@ -98,7 +106,9 @@ class Client {
                             this.gPlanets[planet.id] = planet;
                         }
                         res();
-                    }, fail);
+                    }, () => {
+                        this.GetPlanet().then(res);
+                    });
                 }
             });
         });
@@ -108,7 +118,9 @@ class Client {
         return new Promise(res => {
             this.int.JoinZone(id, d => {
                 res(d.response.zone_info);
-            }, fail);
+            }, () => {
+                this.JoinZone(id).then(res);
+            });
         })
     }
 
@@ -118,8 +130,18 @@ class Client {
                 let r = d.response;
                 console.log(`level ${r.new_level} (${r.new_score} / ${r.next_level_score})`);
                 res(r);
-            }, fail)
+            }, () => {
+                this.ReportScore(score).then(res);
+            })
         })
+    }
+
+    LeavePlanet() {
+        return new Promise(res => {
+            this.int.LeaveGameInstance(this.gPlayerInfo.active_planet, () => {
+                res();
+            });
+        });
     }
 
     FinishGame() {
@@ -127,9 +149,19 @@ class Client {
             this.GetPlanet().then(() => {
                 let planet = this.gPlanets[this.gPlayerInfo.active_planet];
                 if (!planet)
-                    fail();
+                    return fail(this, res);
                 
-                    this.JoinZone(GetBestZone(planet).zone_position).then(zone_info => {
+                let zone = GetBestZone(planet);
+                if (!zone) {
+                    console.log("Leaving planet");
+                    this.LeavePlanet().then(() => {
+                        this.Connect().then(() => {
+                            this.FinishGame().then(res)
+                        });
+                    });
+                    return;
+                }
+                this.JoinZone(GetBestZone(planet).zone_position).then(zone_info => {
                     for (let i = 0; i < WAIT_TIME; i++)
                         setTimeout(() => process.title = `${WAIT_TIME - i} seconds remaining`, i * 1000);
                     setTimeout(() => {
