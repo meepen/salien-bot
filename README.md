@@ -1,3 +1,30 @@
+## Headless mode
+
+Headless mode is a version of this game that is ran without a ui, in your command prompt / terminal
+
+Here are the steps to use: 
+
+- Download nodejs - https://nodejs.org
+- Download https://github.com/meepen/salien-bot/archive/master.zip
+- Extract salien-bot-master.zip
+- Open command line in salien-bot-master
+- Write 
+```
+npm install
+notepad gettoken.json
+```
+- Open https://steamcommunity.com/saliengame/play/ in browser with steam logged in
+- Hit f12 -> network (idk firefox)
+- Find `gettoken`, right click, copy -> response
+- Paste that into notepad and immediately copy something else so you don't accidentally give it out to someone
+- Save and exit
+- Back to command line:
+```
+node headless.js
+```
+
+It should be running now!
+
 ### salien-bot
 
 Salien bot is a WIP for the Salien Minigame that came out for Steam Summer Sale 2018.
