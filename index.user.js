@@ -8,8 +8,6 @@
 // @match        https://steamcommunity.com/saliengame/
 // @match        https://steamcommunity.com/saliengame/play
 // @match        https://steamcommunity.com/saliengame/play/
-// @downloadURL  https://github.com/meepen/salien-bot/raw/master/index.user.js
-// @updateURL    https://github.com/meepen/salien-bot/raw/master/index.user.js
 // @grant        none
 // ==/UserScript==
 
