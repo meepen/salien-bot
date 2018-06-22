@@ -225,6 +225,15 @@ const EnemyCenter = function EnemyCenter(enemy) {
         enemy.m_Sprite.y + enemy.m_Sprite.height / 2
     ];
 }
+const EnemyWillAffectedByBoulder = function EnemyWillAffectedByBoulder(enemy) {
+    if(GAME.m_State.m_AttackManager.m_mapBoulders.size > 0) {
+        let boulder = GAME.m_State.m_AttackManager.m_mapBoulders.values().next().value;
+        if(boulder.x < enemy.m_Sprite.x && boulder.y < enemy.m_Sprite.y + 100 && boulder.y > enemy.m_Sprite.y - 100) {
+            return true;
+        }
+    }
+    return false;
+}
 
 
 class Attack {
@@ -260,7 +269,13 @@ class ClickAttack extends Attack {
     score(enemy) {
         if (enemy.m_bDead)
             return WORST_SCORE;
-        return 1 - EnemyDistance(enemy);
+        let score = 1 - EnemyDistance(enemy);
+        
+        if(EnemyWillAffectedByBoulder(enemy)) {
+            score = score / 10;
+        }
+
+        return score;        
     }
     process(enemies) {
         let target, target_score = WORST_SCORE;
@@ -290,7 +305,13 @@ class ProjectileAttack extends Attack {
     score(enemy) {
         if (enemy.m_bDead)
             return WORST_SCORE;
-        return enemy.m_nHealth;
+        let score =  enemy.m_nHealth;
+        
+        if(EnemyWillAffectedByBoulder(enemy)) {
+            score = score / 10;
+        }
+
+        return score;
     }
     process(enemies) {
         let target, target_score = WORST_SCORE;
@@ -335,6 +356,9 @@ class BlackholeAttack extends ProjectileAttack {
         return "blackhole";
     }
     shouldAttack(delta, enemies) {
+        if(enemies.length < 3) {
+            return false;
+        }
         return CanAttack(this.getAttackName());
     } 
     attack(x, y) {
@@ -350,7 +374,7 @@ class MeteorAttack extends ProjectileAttack {
         return CanAttack(this.getAttackName());
     } 
     attack(x, y) {
-        SetMouse(k_nDamagePointx + 200,  (APP.renderer.height / 2) + 100);
+        SetMouse(k_nDamagePointx + 50,  (APP.renderer.height / 2) + 100);
         AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)();
     }    
 }
