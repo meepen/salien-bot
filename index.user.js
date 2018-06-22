@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      12
+// @version      13
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame/play
@@ -45,6 +45,8 @@ const EnemyManager = function EnemyManager() {
 const AttackManager = function AttackManager() {
     return GAME.m_State.m_AttackManager;
 }
+
+let isJoining = false;
 const TryContinue = function TryContinue() {
     let continued = false;
     if (GAME.m_State.m_VictoryScreen) {
@@ -64,32 +66,36 @@ const TryContinue = function TryContinue() {
             }
         })
     }
-    if(GAME.m_State instanceof CBootState && !isJoining) { // First screen
-        let newState = false;
-
-        if(PLAYER != null && PLAYER.active_planet !== undefined) {
-            newState = new CBattleSelectionState( PLAYER.active_planet );
-        }
-        else {
-            newState =  new CPlanetSelectionState();
-        }
-
-        if(newState !== false) {
-            isJoining = true;
-            setTimeout(function tick() {
-                GAME.ChangeState( newState );
-                isJoining = false;
-            }, 500);
-
-            continued = true;
-        }
+    if (GAME.m_State instanceof CBootState) { // First screen
+        gGame.m_State.button.click();
     }
-    if(GAME.m_State) { // Planet Selection
-        let planetId = GetBestPlanet();
-        if(planetId > 0) {
-            gGame.ChangeState( new CBattleSelectionState( planetId ) );
-            continued = true;
+    if (GAME.m_State instanceof CPlanetSelectionState && !isJoining) { // Planet Selectiong
+        GAME.m_State.m_rgPlanetSprites[0].click();
+        isJoining = true;
+        setTimeout(() => isJoining = false, 1000);
+        continued = true;
+    }
+    if (GAME.m_State instanceof CBattleSelectionState && !isJoining) {
+        let bestZoneIdx = GetBestZone();
+        if(bestZoneIdx) {
+            console.log(GAME.m_State.m_SalienInfoBox.m_LevelText.text, GAME.m_State.m_SalienInfoBox.m_XPValueText.text);
+            console.log("join to zone", bestZoneIdx);
+            isJoining = true;
+            SERVER.JoinZone(
+                bestZoneIdx,
+                (results) => {
+                    GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, bestZoneIdx));
+                    isJoining = false;
+                    console.log(results);
+                },
+                () => {
+                    console.log("fail");
+                    isJoining = false;
+                }
+            );
         }
+        console.log(bestZoneIdx);
+        return;
     }
     return continued;
 }
@@ -171,15 +177,9 @@ const InGame = function InGame() {
     return GAME.m_State.m_bRunning;
 }
 
-const InZoneSelect = function InZoneSelect() {
-    return GAME.m_State instanceof CBattleSelectionState;
-}
-
 const WORST_SCORE = -1 / 0;
 const START_POS = pixi.renderer.width;
 
-// context.lastZoneIndex;
-let isJoining = false;
 
 const EnemySpeed = function EnemySpeed(enemy) {
     return enemy.m_Sprite.vx;
@@ -359,24 +359,6 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-    if (InZoneSelect() && !isJoining) {
-        let bestZoneIdx = GetBestZone();
-        if(bestZoneIdx) {
-            isJoining = true;
-            console.log(GAME.m_State.m_SalienInfoBox.m_LevelText.text, GAME.m_State.m_SalienInfoBox.m_XPValueText.text);
-            console.log("join to zone", bestZoneIdx);
-                SERVER.JoinZone(
-                bestZoneIdx,
-                function (results) {
-                    GAME.ChangeState(new CBattleState(GAME.m_State.m_PlanetData, bestZoneIdx));
-                },
-                GameLoadError
-            );
-
-            return;
-        }
-    }
-
     if (!InGame()) {
         if (TryContinue()) {
             console.log("continued!");
@@ -384,7 +366,7 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-    isJoining = false;
+    
 
     let state = EnemyManager();
 
