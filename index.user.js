@@ -50,6 +50,8 @@ const AttackManager = function AttackManager() {
 }
 
 let isJoining = false;
+let failCount = 0;
+
 const TryContinue = function TryContinue() {
     let continued = false;
     if (GAME.m_State.m_VictoryScreen) {
@@ -94,6 +96,7 @@ const TryContinue = function TryContinue() {
                 () => {
                     console.log("fail");
                     isJoining = false;
+                    failCount++;
                 }
             );
         }
@@ -365,6 +368,10 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
+    if(failCount > 100) {
+        window.location.reload();
+    }
+
     if(GAME.m_IsStateLoading || !context.gPlayerInfo) {
         return;
     }
@@ -375,7 +382,7 @@ context.BOT_FUNCTION = function ticker(delta) {
         }
         return;
     }
-
+    failCount = 0;
 
 
     let state = EnemyManager();
