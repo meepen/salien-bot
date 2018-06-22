@@ -109,8 +109,7 @@ const TryContinue = function TryContinue() {
                     console.log(results);
                 },
                 () => {
-                    console.log("fail");
-                    isJoining = false;
+                    setTimeout(() => isJoining = false, 1000);
                 }
             );
         }
@@ -120,7 +119,6 @@ const TryContinue = function TryContinue() {
             console.log("Leaving planet, no zones left");
             setTimeout(() => {
                 window.location.reload();
-                isJoining = false;
             }, 1000);
         }
         console.log(bestZoneIdx);
