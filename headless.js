@@ -168,7 +168,9 @@ class Client {
                 }
                 this.JoinZone(zone.zone_position).then(zone_info => {
                     if (!zone_info) {
-                        this.Connect().then(res);
+                        this.Connect().then(() => {
+                            this.FinishGame().then(res);
+                        });
                         return;
                     }
                     for (let i = 0; i < WAIT_TIME; i++)
