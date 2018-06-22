@@ -161,7 +161,7 @@ class Client {
                     });
                     return;
                 }
-                this.JoinZone(GetBestZone(planet).zone_position).then(zone_info => {
+                this.JoinZone(zone.zone_position).then(zone_info => {
                     for (let i = 0; i < WAIT_TIME; i++)
                         setTimeout(() => process.title = `${WAIT_TIME - i} seconds remaining`, i * 1000);
                     setTimeout(() => {
