@@ -29,6 +29,15 @@ class AjaxResponse {
     }
 }
 
+class AjaxResponseObject {
+    constructor(resp) {
+        this._ = resp;
+    }
+    getResponseHeader(name) {
+        return this._.headers[name];
+    }
+}
+
 const jar = request.jar();
 
 
@@ -45,11 +54,15 @@ j.ajax = function ajax(data) {
 
     request({
         url: url,
+        headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.87 Safari/537.36",
+            "Referer": "https://steamcommunity.com/saliengame/play/",
+            "Origin": "https://steamcommunity.com"
+        },
         method: data.method,
         jar: jar,
         form: form
     }, function response(err, resp, body) {
-        console.log(err,body)
         if (err) {
             if (ajax_object.nosucc)
                 ajax_object.nosucc();
@@ -60,8 +73,8 @@ j.ajax = function ajax(data) {
         if (data.dataType == "json")
             value = JSON.parse(value);
         
-        if (ajax.succ)
-            ajax.succ(value);
+        if (ajax_object.succ)
+            ajax_object.succ(value, null, new AjaxResponseObject(resp));
     })
 
     return ajax_object;
