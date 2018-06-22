@@ -23,7 +23,7 @@ if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") 
 "use strict";
 
 // reload automatically instead of clicking ok
-GameLoadError = function() {
+context.error = context.GameLoadError = function() {
 	window.location.reload();
 }
 
@@ -116,10 +116,11 @@ const TryContinue = function TryContinue() {
         }
         else {
             isJoining = true;
-            GAME.m_State.m_LeaveButton.click()
+            GAME.m_State.m_LeaveButton.click();
             console.log("Leaving planet, no zones left");
             setTimeout(() => {
-                isJoining = false
+                window.location.reload();
+                isJoining = false;
             }, 1000);
         }
         console.log(bestZoneIdx);
