@@ -329,6 +329,21 @@ class MeteorAttack extends ProjectileAttack {
     getAttackName() {
         return "boulder";
     }
+    shouldAttack(delta, enemies) {
+        let shouldAttack = false;
+        if (CanAttack(this.getAttackName())) {
+            enemies.forEach((enemy) => {
+                if (EnemyDistance(enemy) <= 0.7) {
+                    shouldAttack = true;
+                }
+            });
+        }
+        return shouldAttack;
+    } 
+    attack(x, y) {
+        SetMouse(k_nDamagePointx + 200, y)
+        AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)()
+    }    
 }
 
 class FreezeAttack extends Attack {
