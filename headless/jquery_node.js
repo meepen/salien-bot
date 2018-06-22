@@ -65,9 +65,7 @@ let internal_ajax = function internal_ajax(data, ajax_object) {
         timeout: 5000
     }, function response(err, resp, body) {
         if (err || resp.statusCode == 500 || resp.statusCode == 503) {
-            console.log(`failed url ${url}, retrying ${++ajax_object._fails} err code ${resp.statusCode}`);
-            console.log(err);
-            console.log(body);
+            console.log(`failed url ${url}, retrying ${++ajax_object._fails}`);
             if (ajax_object._fails > 1)
                 ajax_object.nosucc();
             else

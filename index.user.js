@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      18
+// @version      19
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame
@@ -11,7 +11,6 @@
 // @grant        none
 // ==/UserScript==
 
-const MAX_LEVEL = 13;
 
 if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") == "Greasemonkey") {
     alert("It's not possible to support Greasemonkey, please try Tampermonkey or ViolentMonkey.");
@@ -19,6 +18,8 @@ if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") 
 
 (function(context) {
 "use strict";
+
+const MAX_LEVEL = 13;
 
 // reload automatically instead of clicking ok
 context.error = context.GameLoadError = function() {
