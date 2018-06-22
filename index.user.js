@@ -4,6 +4,8 @@
 // @version      13
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
+// @match        https://steamcommunity.com/saliengame
+// @match        https://steamcommunity.com/saliengame/
 // @match        https://steamcommunity.com/saliengame/play
 // @match        https://steamcommunity.com/saliengame/play/
 // @downloadURL  https://github.com/meepen/salien-bot/raw/master/index.user.js
