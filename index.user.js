@@ -13,12 +13,19 @@
 // @grant        none
 // ==/UserScript==
 
+const MAX_LEVEL = 99;
+
 if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") == "Greasemonkey") {
     alert("It's not possible to support Greasemonkey, please try Tampermonkey or ViolentMonkey.");
 }
 
 (function(context) {
 "use strict";
+
+// reload automatically instead of clicking ok
+GameLoadError = function() {
+	window.location.reload();
+}
 
 // when the error is fixed we should remove the following
 CSalien.prototype.UpdateCustomizations = function()
@@ -123,7 +130,7 @@ const GetBestZone = function GetBestZone() {
     let bestZoneIdx;
     let highestDifficulty = -1;
 
-    let isLevelling = context.gPlayerInfo.level < 9 || Option("forceLevellingMode");
+    let isLevelling = context.gPlayerInfo.level < MAX_LEVEL || Option("forceLevellingMode");
     let maxProgress = isLevelling ? 10000 : 0;
 
     for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) {
@@ -319,6 +326,11 @@ class BlackholeAttack extends ProjectileAttack {
         return "blackhole";
     }
 }
+class MeteorAttack extends ProjectileAttack {
+    getAttackName() {
+        return "boulder";
+    }
+}
 
 class FreezeAttack extends Attack {
     getCurrent() {
@@ -348,6 +360,7 @@ let attacks = [
     new SpecialAttack(),
     new FreezeAttack(),
     new BombAttack(),
+    new MeteorAttack(),
     new BlackholeAttack()
 ]
 
