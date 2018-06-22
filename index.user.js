@@ -390,7 +390,7 @@ context.BOT_FUNCTION = function ticker(delta) {
     }
 
     if(failCount > MAX_FAIL_COUNT) {
-        window.location.reload();
+        ReloadPage();
     }
 
     if(GAME.m_IsStateLoading || !context.gPlayerInfo) {
