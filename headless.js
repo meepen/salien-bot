@@ -75,7 +75,7 @@ class Client {
                 res(this.gPlayerInfo);
             }, () => {
                 this.Connect().then(() => {
-                    this.GetPlayerInfo(shh).then(res);
+                    this.GetPlayerInfo().then(res);
                 });
             });
         });
