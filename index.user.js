@@ -20,6 +20,11 @@ if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") 
 (function(context) {
 "use strict";
 
+// reload automatically instead of clicking ok
+GameLoadError = function() {
+	window.location.reload();
+}
+
 // when the error is fixed we should remove the following
 CSalien.prototype.UpdateCustomizations = function()
 {
