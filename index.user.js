@@ -94,7 +94,7 @@ const TryContinue = function TryContinue() {
                     console.log(results);
                 },
                 () => {
-                    console.log("fail");
+                    console.log(`fail ${failCount}/${MAX_FAIL_COUNT}`);
                     isJoining = false;
                     failCount++;
                 }
@@ -178,6 +178,8 @@ const GetBestPlanet = function GetBestPlanet() {
 
 // Let's challenge ourselves to be human here!
 const CLICKS_PER_SECOND = 15;
+const STATE_TIMEOUT_MINUTES = 5;
+const MAX_FAIL_COUNT = 50;
 
 const InGame = function InGame() {
     return GAME.m_State.m_bRunning;
@@ -349,7 +351,7 @@ if (context.BOT_FUNCTION) {
 
 let reloadingPage = false;
 let watchdogTimer  = setInterval(function() {
-    if(Date.now() - watchdogLastGameChange > 5 * 60 * 1000) {
+    if(Date.now() - watchdogLastGameChange > STATE_TIMEOUT_MINUTES * 60 * 1000) {
         window.location.reload();
     }
 }, 10000);
@@ -375,7 +377,7 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-    if(failCount > 100) {
+    if(failCount > MAX_FAIL_COUNT) {
         window.location.reload();
     }
 
