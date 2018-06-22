@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      9
+// @version      10
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame/play
@@ -45,7 +45,7 @@ const EnemyManager = function EnemyManager() {
 const AttackManager = function AttackManager() {
     return GAME.m_State.m_AttackManager;
 }
-const TryContinue = function Continue() {
+const TryContinue = function TryContinue() {
     let continued = false;
     if (GAME.m_State.m_VictoryScreen) {
         GAME.m_State.m_VictoryScreen.children.forEach(function(child) {
@@ -64,7 +64,7 @@ const TryContinue = function Continue() {
             }
         })
     }
-    if(GAME.m_State instanceof CBootState && !isJoining) { //First screen
+    if(GAME.m_State instanceof CBootState && !isJoining) { // First screen
         let newState = false;
 
         if(PLAYER != null && PLAYER.active_planet !== undefined) {
@@ -84,7 +84,7 @@ const TryContinue = function Continue() {
             continued = true;
         }
     }
-    if(GAME.m_State instanceof CPlanetSelectionState ) { //Planet Selection
+    if(GAME.m_State) { // Planet Selection
         let planetId = GetBestPlanet();
         if(planetId > 0) {
             gGame.ChangeState( new CBattleSelectionState( planetId ) );
@@ -143,8 +143,11 @@ const GetBestZone = function GetBestZone() {
     return bestZoneIdx;
 }
 const GetBestPlanet = function GetBestPlanet() {
-    let bestPlanet = false;
+    let bestPlanet;
     let maxProgress = 0;
+
+    if (!GAME.m_State.m_mapPlanets)
+        return;
 
     for (let planetKV of GAME.m_State.m_mapPlanets) {
         let planet = planetKV[1];
@@ -159,8 +162,6 @@ const GetBestPlanet = function GetBestPlanet() {
         console.log(`selecting planet ${bestPlanet.state.name} with progress: ${bestPlanet.state.capture_progress}`);
         return bestPlanet.id;
     }
-
-    return -1;
 }
 
 // Let's challenge ourselves to be human here!
@@ -344,10 +345,9 @@ context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
 
     let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
-    if(buttonsOnErrorMessage.length > 0) {
-        setTimeout(function tick() {
-            buttonsOnErrorMessage[0].click();
-        }, 2000);        
+    if(buttonsOnErrorMessage[0] != null) {
+        buttonsOnErrorMessage[0].click();
+        return;
     }
 
     if(GAME.m_IsStateLoading || !context.gPlayerInfo) {
@@ -356,7 +356,7 @@ context.BOT_FUNCTION = function ticker(delta) {
 
     if (InZoneSelect() && !isJoining) {
         let bestZoneIdx = GetBestZone();
-        if(bestZoneIdx > -1) {
+        if(bestZoneIdx) {
             isJoining = true;
             console.log(GAME.m_State.m_SalienInfoBox.m_LevelText.text, GAME.m_State.m_SalienInfoBox.m_XPValueText.text);
             console.log("join to zone", bestZoneIdx);
