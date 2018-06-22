@@ -37,16 +37,21 @@ class Client {
     }
 
     LeaveGame() {
-        // we can probably just finish our thing i guess
         return new Promise(res => {
-            for (let i = 0; i < (WAIT_TIME - this.gPlayerInfo.time_in_zone); i++)
-                setTimeout(() => process.title = `${WAIT_TIME - i - this.gPlayerInfo.time_in_zone} seconds remaining`, i * 1000);
-            setTimeout(() => {
-                let planet = this.gPlanets[this.gPlayerInfo.active_planet];
-                cl.ReportScore(5 * difficulty_multipliers[planet.zones[this.gPlayerInfo.active_zone_position].difficulty] * WAIT_TIME).then((d) => {
-                    res();
-                });
-            }, 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone));
+            if (this.gPlayerInfo.time_in_zone <= WAIT_TIME) {
+                // we can probably just finish our thing i guess
+                for (let i = 0; i < (WAIT_TIME - this.gPlayerInfo.time_in_zone); i++)
+                    setTimeout(() => process.title = `${WAIT_TIME - i - this.gPlayerInfo.time_in_zone} seconds remaining`, i * 1000);
+                setTimeout(() => {
+                    let planet = this.gPlanets[this.gPlayerInfo.active_planet];
+                    cl.ReportScore(5 * difficulty_multipliers[planet.zones[this.gPlayerInfo.active_zone_position].difficulty] * WAIT_TIME).then(res);
+                }, 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone));
+            }
+            else {
+                this.int.LeaveGameInstance(this.gPlayerInfo.active_zone_game, res, () => {
+                    this.Connect().then(res);
+                })
+            }
         });
     }
 
@@ -131,7 +136,7 @@ class Client {
                 console.log(`level ${r.new_level} (${r.new_score} / ${r.next_level_score})`);
                 res(r);
             }, () => {
-                this.ReportScore(score).then(res);
+                this.Connect().then(res);
             })
         })
     }

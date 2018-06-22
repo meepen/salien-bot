@@ -195,7 +195,7 @@ CServerInterface.prototype.ReportScore = function( nScore, callback, error )
 	}).fail( error );
 };
 
-CServerInterface.prototype.LeaveGameInstance = function( instanceid, callback )
+CServerInterface.prototype.LeaveGameInstance = function( instanceid, callback, error )
 {
 	var instance = this;
 	var rgParams = {
