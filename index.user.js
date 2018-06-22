@@ -334,25 +334,24 @@ class BlackholeAttack extends ProjectileAttack {
     getAttackName() {
         return "blackhole";
     }
+    shouldAttack(delta, enemies) {
+        return CanAttack(this.getAttackName());
+    } 
+    attack(x, y) {
+        SetMouse(START_POS - k_nDamagePointx, (APP.renderer.height / 2) + 100);
+        AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)();
+    }        
 }
 class MeteorAttack extends ProjectileAttack {
     getAttackName() {
         return "boulder";
     }
     shouldAttack(delta, enemies) {
-        let shouldAttack = false;
-        if (CanAttack(this.getAttackName())) {
-            enemies.forEach((enemy) => {
-                if (EnemyDistance(enemy) <= 0.7) {
-                    shouldAttack = true;
-                }
-            });
-        }
-        return shouldAttack;
+        return CanAttack(this.getAttackName());
     } 
     attack(x, y) {
-        SetMouse(k_nDamagePointx + 200, y)
-        AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)()
+        SetMouse(k_nDamagePointx + 200,  (APP.renderer.height / 2) + 100);
+        AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)();
     }    
 }
 
