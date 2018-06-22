@@ -48,7 +48,14 @@ const EnemyManager = function EnemyManager() {
 const AttackManager = function AttackManager() {
     return GAME.m_State.m_AttackManager;
 }
-
+const ReloadPage = function ReloadPage() {
+    if(Date.now() - lastReloadAttempt < 5 * 60 * 1000) {
+        return;
+    }
+    reloadingPage = true;
+    window.location.reload();
+    console.log("try to reload page");
+}
 let isJoining = false;
 let failCount = 0;
 
@@ -352,13 +359,18 @@ if (context.BOT_FUNCTION) {
 let reloadingPage = false;
 let watchdogTimer  = setInterval(function() {
     if(Date.now() - watchdogLastGameChange > STATE_TIMEOUT_MINUTES * 60 * 1000) {
-        window.location.reload();
+        ReloadPage();
     }
 }, 10000);
-
 let watchdogLastGameChange = Date.now();
+let lastReloadAttempt = Date.now();
+
 
 context.BOT_FUNCTION = function ticker(delta) {
+    if(reloadingPage) {
+        return;
+    }
+
     delta /= 100;
 
     let difficulties = PIXI.loader.resources['level_config'];
