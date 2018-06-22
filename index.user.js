@@ -114,7 +114,6 @@ const TryContinue = function TryContinue() {
                 }
             );
         }
-        console.log(bestZoneIdx);
         return;
     }
     return continued;
