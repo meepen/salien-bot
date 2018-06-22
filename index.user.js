@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      8
+// @version      9
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame/play
@@ -11,7 +11,9 @@
 // @grant        none
 // ==/UserScript==
 
-
+if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") == "Greasemonkey") {
+    alert("It's not possible to support Greasemonkey, please try Tampermonkey or ViolentMonkey.");
+}
 
 (function(context) {
 "use strict";
