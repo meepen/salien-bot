@@ -228,6 +228,7 @@ class Client {
             }
             this.GetPlanets().then(planets => {
                 let i = 0;
+                this.gPlanets = {};
                 var GetPlanetIterator = (cb) => {
                     let planet = planets[i++];
                     this.GetPlanet(planet.id).then(planets[i] ? () => GetPlanetIterator(cb) : cb);
