@@ -304,19 +304,22 @@ const PrintInfo = function PrintInfo() {
 
         if (cl.gPlanets) {
             let current = cl.gPlanets[info.active_planet];
-            if (current)
+            if (current) {
                 info_lines.push(["Current planet", `${current.state.name} [${(current.state.capture_progress * 100).toFixed(2)}%] (id ${current.id})`]);
-            if (cl.gPlayerInfo.active_zone_position) {
-                let zoneIdx = parseInt(cl.gPlayerInfo.active_zone_position);
-                let zoneX = zoneIdx % k_NumMapTilesW, zoneY = (zoneIdx / k_NumMapTilesW) | 0;
-                let zone = current.zones[zoneIdx];
-                
-                info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) (id: ${zoneIdx}) difficulty: ${difficulty_names[zone.difficulty]}`]);
+                if (cl.gPlayerInfo.active_zone_position) {
+                    let zoneIdx = parseInt(cl.gPlayerInfo.active_zone_position);
+                    let zoneX = zoneIdx % k_NumMapTilesW, zoneY = (zoneIdx / k_NumMapTilesW) | 0;
+                    let zone = current.zones[zoneIdx];
 
-                let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
-                date.setTime(cl.endGameTime);
-                score_bias = difficulty_multipliers[zone.difficulty] * 5 * SCORE_TIME;
-                info_lines.push(["Round time left", time_left.toString() + " seconds"]);
+                    if (zone) {
+                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) (id: ${zoneIdx}) difficulty: ${difficulty_names[zone.difficulty]}`]);
+
+                        let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
+                        date.setTime(cl.endGameTime);
+                        score_bias = difficulty_multipliers[zone.difficulty] * 5 * SCORE_TIME;
+                        info_lines.push(["Round time left", time_left.toString() + " seconds"]);
+                    }
+                }
             }
         }
         date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - score_bias) / exp_per_hour * 60 * 60);
