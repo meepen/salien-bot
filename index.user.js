@@ -80,8 +80,10 @@ const TryContinue = function TryContinue() {
                 isJoining = true;
                 setTimeout(() => {
                     isJoining = false
-                }, 1000);
-                child.pointertap();
+                }, 6000);
+		setTimeout(() => {
+		    child.pointertap();
+                }, 5000);
             }
         })
     }
@@ -94,7 +96,10 @@ const TryContinue = function TryContinue() {
                 child.pointertap();
                 setTimeout(() => {
                     isJoining = false
-                }, 1000);
+                }, 6000);
+		setTimeout(() => {
+		    child.pointertap();
+                }, 5000);
             }
         })
     }
