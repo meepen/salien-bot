@@ -370,10 +370,10 @@ class MeteorAttack extends ProjectileAttack {
     getAttackName() {
         return "boulder";
     }
-    shouldAttack(delta, enemies) {
-        return CanAttack(this.getAttackName());
-    } 
-    attack(x, y) {
+    process(enemies) {
+        this.attack();
+    }
+    attack() {
         SetMouse(k_nDamagePointx + 50,  (APP.renderer.height / 2) + 100);
         AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)();
     }    
