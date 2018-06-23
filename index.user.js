@@ -12,8 +12,32 @@
 // ==/UserScript==
 
 
+// Greasemonkey notice if detected, show an info popup with alternatives, stop game loading 
 if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") == "Greasemonkey") {
-    alert("It's not possible to support Greasemonkey, please try Tampermonkey or ViolentMonkey.");
+    window.onload = function () {
+        var e = document.head || document.getElementsByTagName("head")[0],
+            t = document.createElement("style");
+        t.type = "text/css";
+        t.appendChild(document.createTextNode('.overlay{position:absolute;top:0;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);transition:opacity .2s;visibility:hidden;opacity:0}.overlay .cancel{position:absolute;width:100%;height:100%;cursor:default}.overlay:target{visibility:visible;opacity:1}.popup{margin:15% auto;padding:30px;border-radius:15px;background:#fff;border:1px solid #666;width:350px;box-shadow:0 0 50px rgba(255,255,255,.2);position:relative}.popup h2{margin-top:0;}.popup .close{position:absolute;width:20px;height:20px;top:20px;right:20px;opacity:.8;transition:all .2s;font-size:24px;font-weight:700;text-decoration:none;color:#666}.popup .close:hover{opacity:1}.popup .content{max-height:450px;overflow:auto}'));
+        e.appendChild(t);
+
+        function o() {
+            document.getElementById("popup2").style.visibility = "hidden";
+            document.getElementById("popup2").style.opacity = "0";
+            window.location.assign('https://steamcommunity.com/');
+        }
+
+        document.getElementById("salien_game_placeholder").remove();
+        document.getElementsByClassName("responsive_page_content")[0].innerHTML += '<div id="popup2" class="overlay "> <a class="cancel" href="#"></a> <div class="popup"> <h2 style="margin-bottom:10px; text-align: center; color: black;">Sorry, <strong>Greasemonkey</strong> is not supported! <br> <small>Please use one of the alternatives!</small><br></h2> <div class="content" style="text-align: center;"> <a style="padding: 10px; border-radius: 10px; border: solid 1px darkgrey; color: black; font-weight: bold; text-decoration: none; background: #ccc; display: inline-block; margin: 5px;" href="http://tampermonkey.net/">Tampermonkey</a> <a style="padding: 10px; border-radius: 10px; border: solid 1px darkgrey; color: black; font-weight: bold; text-decoration: none; background: #ccc; display: inline-block; margin: 5px;" href="https://violentmonkey.github.io/">Violentmonkey</a> <a class="cancel" style="padding: 10px; border-radius: 10px; border: solid 1px darkgrey; color: black; font-weight: bold; text-decoration: none; background: #ccc; display: block; width: unset; height: unset; margin: 5px; position: initial;" href="#">Cancel</a> </div></div></div>';
+        document.getElementById("popup2").style.visibility = "unset";
+        document.getElementById("popup2").style.opacity = "1";
+        document.getElementsByClassName("cancel")[0].addEventListener("click", o);
+        document.getElementsByClassName("cancel")[1].addEventListener("click", o);
+    };
+    (function(context) {
+        context.gApp = context.gGame = context.gServer = context.PIXI = undefined;
+    })(window);
+    throw new Error('Greasemonkey UserScript Manager detected. Aborting.');
 }
 
 (function(context) {
