@@ -334,12 +334,37 @@ var Finish = () => cl.FinishGame().then(Finish);
 
 let start_time = (Date.now() / 1000) | 0
 
+const FormatTimer = function FormatTimer(timeInSeconds) {
+    if (parseInt(timeInSeconds) <= 0) {
+        return '';
+    }
+
+    const SECONDS_IN_MINUTE = 60;
+    const MINUTES_IN_HOUR = 60;
+    const HOURS_IN_DAY = 24;
+    const SECONDS_IN_HOUR = SECONDS_IN_MINUTE * MINUTES_IN_HOUR;
+    const SECONDS_IN_DAY = SECONDS_IN_HOUR * HOURS_IN_DAY;
+
+    const days = Math.floor(timeInSeconds / SECONDS_IN_DAY);
+    const hours = Math.floor(timeInSeconds / SECONDS_IN_HOUR % HOURS_IN_DAY);
+    const minutes = Math.floor(timeInSeconds / SECONDS_IN_MINUTE % MINUTES_IN_HOUR);
+    const seconds = timeInSeconds % SECONDS_IN_MINUTE;
+
+    let formatted = '';
+    formatted += days ? `${days}d ` : '';
+    formatted += hours ? `${hours}h ` : '';
+    formatted += minutes ? `${minutes}m `: '';
+    formatted += seconds ? `${seconds}s ` : '';
+
+    return formatted;
+}
+
 const PrintInfo = function PrintInfo() {
     // clear screen, taken from https://stackoverflow.com/a/14976765
     let info_lines = [];
     if (cl.gPlayerInfo) {
         let info = cl.gPlayerInfo;
-        info_lines.push(["Running for", ((Date.now() / 1000) | 0) - start_time + " seconds"]);
+        info_lines.push(["Running for", FormatTimer(((Date.now() / 1000) | 0) - start_time)]);
         info_lines.push(["Current level", `${info.level} (${info.score} / ${info.next_level_score})`]);
         info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
         let exp_per_hour = 60 * 60 * 2400 / (WAIT_TIME + 5);
@@ -363,7 +388,7 @@ const PrintInfo = function PrintInfo() {
                         let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
                         date.setTime(cl.endGameTime);
                         score_bias = difficulty_multipliers[zone.difficulty] * 5 * SCORE_TIME;
-                        info_lines.push(["Round time left", time_left.toString() + " seconds"]);
+                        info_lines.push(["Round time left", FormatTimer(time_left)]);
                     }
                 }
             }
