@@ -1,7 +1,7 @@
 const args = process.argv.slice(2);
 const network = require("./headless/network.js");
 
-let CARE_ABOUT_PLANET = true;
+let CARE_ABOUT_PLANET = false;
 
 for (let arg of args) {
     if (arg == "--care-for-planet" || arg == "-c") {
