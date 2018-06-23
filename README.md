@@ -14,7 +14,7 @@ npm install
 notepad gettoken.json
 ```
 - Open https://steamcommunity.com/saliengame/play/ in browser with steam logged in
-- Hit f12 -> network (idk firefox)
+- Hit f12 -> network (Firefox: Ctrl+Shift+E, enable "Persist Logs" on the right, reload page)
 - Find `gettoken`, right click, copy -> response
 - Paste that into notepad and immediately copy something else so you don't accidentally give it out to someone
 - Save and exit
