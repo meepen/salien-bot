@@ -14,7 +14,7 @@ Userscript Mode is a version of this bot that is ran as a script on top of your 
 Here are the steps to use: 
 
 - Download and install the TamperMonkey or GreaseMonkey addon for your browser of choice - https://tampermonkey.net/
-- Open this link: https://raw.githubusercontent.com/meepen/salien-bot/master/index.user.js with TamperMonkey installed; it should open up a tab that prompts you to install the script
+- Open this link: https://github.com/meepen/salien-bot/raw/master/index.user.js with TamperMonkey installed; it should open up a tab that prompts you to install the script
 - And finally, go to the Saliens game page!
 
 It should be running now!
