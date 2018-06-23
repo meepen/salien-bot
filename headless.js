@@ -8,8 +8,9 @@ for (let arg of args) {
         console.log("Caring for previous planet.");
         CARE_ABOUT_PLANET = true;
     }
-    else
+    else {
         throw new Error(`invalid command line argument ${arg}`);
+    }
 }
 
 const CServerInterface = network.CServerInterface;
@@ -93,10 +94,11 @@ class Client {
     GetPlayerInfo() {
         return new Promise(res => {
             this.int.GetPlayerInfo(d => {
-                if (!this.gPlayerInfo) 
+                if (!this.gPlayerInfo) {
                     this.gPlayerInfoOriginal = d.response;
                 this.gPlayerInfo = d.response;
                 res(this.gPlayerInfo);
+                }
             }, () => {
                 this.Connect().then(() => {
                     this.GetPlayerInfo().then(res);
@@ -144,15 +146,16 @@ class Client {
             });
         })
     }
-    
+
     ReportScore() {
         return new Promise(res => {
-            for (let i = 0; i < 4; i++)
+            for (let i = 0; i < 4; i++) {
             this.int.ReportScore(100000, d => {
                 res(d);
             }, () => {
                 this.Connect().then(res);
             })
+            }
         })
     }
 
@@ -169,10 +172,12 @@ class Client {
         return new Promise(res => {
             if (CARE_ABOUT_PLANET && this.gPlayerInfo.active_planet) {
                 this.GetPlanet(this.gPlayerInfo.active_planet).then(planet => {
-                    if (!planet.state.active)
+                    if (!planet.state.active) {
                         this.LeavePlanet(() => this.GetBestPlanet().then(res));
-                    else
+                    }
+                    else {
                         res(this.gPlanets[this.gPlayerInfo.active_planet]);
+                    }
                 });
                 return;
             }
@@ -188,12 +193,14 @@ class Client {
                         let planet = this.gPlanets[id];
                         let best_zone = GetBestZone(planet);
 
-                        if (best_zone && best_zone.difficulty > best_difficulty)
+                        if (best_zone && best_zone.difficulty > best_difficulty) {
                             best_planet = planet, best_difficulty = best_zone.difficulty;
+                        }
                     }
-                    if (best_difficulty === -1)
+                    if (best_difficulty === -1) {
                         throw new Error("no difficulty?!");
                     res(best_planet, best_difficulty);
+                    }
                 });
             })
         });
@@ -266,9 +273,10 @@ const GetBestZone = function GetBestZone(planet) {
                 highestDifficulty = zone.difficulty;
                 maxProgress = zone.capture_progress;
                 bestZone = zone;
-            } 
-            else if (zone.difficulty < highestDifficulty)
+            }
+            else if (zone.difficulty < highestDifficulty) {
                 continue;
+            }
 
             if (zone.capture_progress < maxProgress) {
                 maxProgress = zone.capture_progress;
@@ -294,7 +302,7 @@ const PrintInfo = function PrintInfo() {
         info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
         let exp_per_hour = 60 * 60 * 2400 / (WAIT_TIME + 5);
         info_lines.push(["Estimated exp/hr", exp_per_hour | 0]);
-        
+
         let date = new Date();
         let score_bias = 0;
 
@@ -324,11 +332,13 @@ const PrintInfo = function PrintInfo() {
 
 
     let max_length = 0;
-    for (let i = 0; i < info_lines.length; i++)
+    for (let i = 0; i < info_lines.length; i++) {
         max_length = Math.max(max_length, info_lines[i][0].length);
+    }
 
-    for (let i = 0; i < info_lines.length; i++)
+    for (let i = 0; i < info_lines.length; i++) {
         info_lines[i] = info_lines[i].join(`: ${" ".repeat(max_length - info_lines[i][0].length)}`);
+    }
 
     console.log("\u001b[2J\u001b[0;0H" + info_lines.join("\n"));
 }
