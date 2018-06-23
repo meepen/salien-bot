@@ -251,8 +251,11 @@ const DistBetweenSpriteCenters = function DistBetweenSpriteCenters(sprite1, spri
 const EnemyIsAffectedByBlackhole = function EnemyIsAffectedByBlackhole(enemy) {
     if(GAME.m_State.m_AttackManager.m_mapBlackholes.size > 0) {
         let hole = GAME.m_State.m_AttackManager.m_mapBlackholes.values().next().value;
-        let dist = DistBetweenSpriteCenters(hole, enemy.m_Sprite);
-        if(dist > 200 && dist < 250) {
+        let x = enemy.m_Sprite.x;
+        let y = enemy.m_Sprite.y;
+        if(
+            x < hole.x && x > hole.x - (hole.width / 2) &&
+            y < hole.y && y > hole.y - (hole.height  / 2)) {
             return true;
         }
     }
