@@ -3,7 +3,6 @@
 Headless mode is a version of this game that is ran without a ui, in your command prompt / terminal
 
 Here are the steps to use: 
-
 - Download nodejs - https://nodejs.org
 - Download https://github.com/meepen/salien-bot/archive/master.zip
 - Extract salien-bot-master.zip
@@ -23,8 +22,35 @@ notepad gettoken.json
 ```
 node headless
 ```
+#### If you want automatic restart in case of crash:
 
-It should be running now!
+Open command line/terminal and write:
+```
+npm i -g pm2
+```
+To start bot:
+```
+pm2 start headless.js
+```
+![alt-text](https://i.imgur.com/CPTz57y.png)
+
+Now the bot is running. If there is a crash, it restarts itself. You can close command line/terminal (yes, it doesn't require a running cmd window or anything else).
+
+To view the log open the terminal and write:
+```
+pm2 log
+```
+To close log use `Ctrl + C`
+
+To stop bot:
+```
+pm2 delete id/all
+```
+For first app id is 0, for second - 1... Also, you can see ID in the list of running applications:
+To see a list of all running bots:
+```
+pm2 list
+```
 
 ### Tile selection
 
