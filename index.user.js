@@ -231,6 +231,16 @@ const EnemyCenter = function EnemyCenter(enemy) {
     ];
 }
 
+const BlackholeOfEnemy = function BlackholeOfEnemy(enemy) {
+    for(var [_, blackhole] of AttackManager().m_mapBlackholes) {
+        // Check if enemy is very close to blackhole
+        if ( EnemyCenter(enemy)[0] < blackhole.x || EnemyCenter(enemy)[0] > blackhole.x ||
+             EnemyCenter(enemy)[1] < blackhole.y || EnemyCenter(enemy)[1] > blackhole.y ) {
+            return blackhole;
+        }
+    }
+    return null;
+}
 
 class Attack {
     constructor() {
@@ -289,6 +299,9 @@ class ClickAttack extends Attack {
 }
 
 class ProjectileAttack extends Attack {
+    targetPosition(target) {
+        return EnemyCenter(target);
+    }
     shouldAttack(delta) {
         return CanAttack(this.getAttackName());
     }
@@ -309,8 +322,9 @@ class ProjectileAttack extends Attack {
             }
         });
 
-        if (target)
-            this.attack.apply(this, EnemyCenter(target));
+        if (target) {
+            this.attack.apply(this, this.targetPosition(target));
+        }
     }
     attack(x, y) {
         SetMouse(x, y)
@@ -320,6 +334,22 @@ class ProjectileAttack extends Attack {
 
 // the '1' button (SlimeAttack PsychicAttack BeastAttack - depends on body type of your salien)
 class SpecialAttack extends ProjectileAttack {
+
+    targetPosition(target) {
+        var finalTargetPosition = EnemyCenter(target);
+
+        // SpecialAttack's projectile is quite slow, so we need to aim ahead of the target
+        finalTargetPosition[0] += 50*EnemySpeed(target);
+
+        // If target is stuck in blackhole, shoot at black hole instead
+        var blackhole = BlackholeOfEnemy(target);
+        if(blackhole != null) {
+            finalTargetPosition = [blackhole.x, blackhole.y];
+        }
+
+        return finalTargetPosition;
+    }
+
     getAttackName() {
         if (gSalien.m_BodyType == "slime")
             return "slimeattack";
