@@ -18,7 +18,6 @@ echo Starting Sailen Bots
 :: Debug
 if %debug%==true @echo on
 
-
 :: Sets rootdir var to the currently directory of script
 set rootdir=%~dp0
 
