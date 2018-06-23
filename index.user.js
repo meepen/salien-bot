@@ -81,7 +81,7 @@ const TryContinue = function TryContinue() {
                 setTimeout(() => {
                     isJoining = false
                 }, 1000);
-                child.click();
+                child.pointertap();
             }
         })
     }
@@ -91,7 +91,7 @@ const TryContinue = function TryContinue() {
             if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
                 continued = true;
                 isJoining = true;
-                child.click();
+                child.pointertap();
                 setTimeout(() => {
                     isJoining = false
                 }, 1000);
