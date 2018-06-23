@@ -63,7 +63,7 @@ class Client {
 
     LeaveGame() {
         return new Promise(res => {
-            if (false && this.gPlayerInfo.time_in_zone <= WAIT_TIME) {
+            if (this.gPlayerInfo.time_in_zone <= WAIT_TIME) {
                 // we can probably just finish our thing i guess
                 this.GetPlanet(this.gPlayerInfo.active_planet).then(() => {
                     let time_left = 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone)
