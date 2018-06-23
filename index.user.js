@@ -125,7 +125,16 @@ const TryContinue = function TryContinue() {
                 window.location.reload();
             }, 1000);
         }
-        console.log(bestZoneIdx);
+        else {
+            console.log("planet is clean, leaving");
+            continued = true;
+            isJoining = true;
+            setTimeout(() => {
+                GAME.m_State.m_LeaveButton.click()
+                isJoining = false;
+            }, 1000);            
+            
+        }
         return;
     }
     return continued;
