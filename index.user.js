@@ -230,6 +230,31 @@ const EnemyCenter = function EnemyCenter(enemy) {
         enemy.m_Sprite.y + enemy.m_Sprite.height / 2
     ];
 }
+const EnemyWillAffectedByBoulder = function EnemyWillAffectedByBoulder(enemy) {
+    if(GAME.m_State.m_AttackManager.m_mapBoulders.size > 0) {
+        let boulder = GAME.m_State.m_AttackManager.m_mapBoulders.values().next().value;
+        let x = EnemyCenter(enemy)[0];
+        let y = EnemyCenter(enemy)[1];
+        if(x > boulder.x && y > boulder.y - (boulder.height / 2) && y < boulder.y + (boulder.height / 2)) {
+            return true;
+        }
+    }
+    return false;
+}
+const DistBetweenPoints = function DistBetweenPoints(x1, y1, x2, y2) {
+    return Math.sqrt( Math.pow((x1-x2), 2) + Math.pow((y1-y2), 2) );
+}
+const AllEnemiesHPNearPoint = function AllEnemiesHPNearPoint(x,  y, radius) {
+    let hp = 0;
+    EnemyManager().m_rgEnemies.forEach((enemy) => {
+        if (enemy.m_Sprite.visible && !enemy.m_bDead) {
+            if(DistBetweenPoints(x, y, enemy.m_Sprite.x, enemy.m_Sprite.y) <= radius) {
+                hp += enemy.m_nHealth;
+            }
+        }
+    });
+    return hp;
+}
 
 const BlackholeOfEnemy = function BlackholeOfEnemy(enemy) {
     for(var [_, blackhole] of AttackManager().m_mapBlackholes) {
@@ -275,7 +300,13 @@ class ClickAttack extends Attack {
     score(enemy) {
         if (enemy.m_bDead)
             return WORST_SCORE;
-        return 1 - EnemyDistance(enemy);
+        let score = 1 - EnemyDistance(enemy);
+        
+        if(EnemyWillAffectedByBoulder(enemy)) {
+            score = score / 10;
+        }
+
+        return score;        
     }
     process(enemies) {
         let target, target_score = WORST_SCORE;
@@ -308,7 +339,13 @@ class ProjectileAttack extends Attack {
     score(enemy) {
         if (enemy.m_bDead)
             return WORST_SCORE;
-        return enemy.m_nHealth;
+        let score =  enemy.m_nHealth;
+        
+        if(EnemyWillAffectedByBoulder(enemy)) {
+            score = score / 10;
+        }
+
+        return score;
     }
     process(enemies) {
         let target, target_score = WORST_SCORE;
@@ -361,6 +398,17 @@ class SpecialAttack extends ProjectileAttack {
 }
 
 class BombAttack extends ProjectileAttack {
+    score(enemy) {
+        if (enemy.m_bDead || EnemyWillAffectedByBoulder(enemy) || BlackholeOfEnemy(enemy) != null)
+            return WORST_SCORE;
+
+        let score =  AllEnemiesHPNearPoint(enemy.m_Sprite.x, enemy.m_Sprite.y, 50);
+        if(score < 30) {
+            score = WORST_SCORE;
+        }
+        
+        return score;
+    }    
     getAttackName() {
         return "explosion";
     }
@@ -369,11 +417,28 @@ class BlackholeAttack extends ProjectileAttack {
     getAttackName() {
         return "blackhole";
     }
+    shouldAttack(delta, enemies) {
+        if(enemies.length < 3) {
+            return false;
+        }
+        return CanAttack(this.getAttackName());
+    } 
+    attack(x, y) {
+        SetMouse(START_POS - k_nDamagePointx, (APP.renderer.height / 2) + 100);
+        AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)();
+    }        
 }
 class MeteorAttack extends ProjectileAttack {
     getAttackName() {
         return "boulder";
     }
+    process(enemies) {
+        this.attack();
+    }
+    attack() {
+        SetMouse(k_nDamagePointx + 50,  (APP.renderer.height / 2) + 100);
+        AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)();
+    }    
 }
 
 class FreezeAttack extends Attack {
