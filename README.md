@@ -26,7 +26,8 @@ node headless
 
 It should be running now!
 
-### tile selection
+### Tile selection
+
 By default it will scour all available planets and get the highest exp rewards from difficult tiles, if you don't want this, run the bot with
 ```
 node headless --care-for-planet
