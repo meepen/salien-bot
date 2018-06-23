@@ -12,7 +12,7 @@ const difficulty_multipliers = [
     0, 1, 2, 4, 4
 ]
 
-const gettoken = JSON.parse(require("fs").readFileSync("./gettoken.json", "utf8"));
+const gettoken = eval('('+require("fs").readFileSync("./gettoken.json", "utf8")+')');
 
 let Instance = new CServerInterface(gettoken);
 
