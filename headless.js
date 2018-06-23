@@ -262,6 +262,8 @@ const GetBestZone = function GetBestZone(planet) {
         let zone = planet.zones[idx];
 
         if (!zone.captured) {
+            if (zone.type == 4) // boss
+                return zone;
             if (zone.difficulty > highestDifficulty) {
                 highestDifficulty = zone.difficulty;
                 maxProgress = zone.capture_progress;
