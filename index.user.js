@@ -232,11 +232,13 @@ const SpriteCenter = function SpriteCenter(sprite) {
 }
 const EnemyCenter = function EnemyCenter(enemy) {
     return SpriteCenter(enemy.m_Sprite);
-}
+};
 const EnemyWillAffectedByBoulder = function EnemyWillAffectedByBoulder(enemy) {
     if(GAME.m_State.m_AttackManager.m_mapBoulders.size > 0) {
         let boulder = GAME.m_State.m_AttackManager.m_mapBoulders.values().next().value;
-        if(boulder.x < enemy.m_Sprite.x && boulder.y < enemy.m_Sprite.y + 100 && boulder.y > enemy.m_Sprite.y - 100) {
+        let x = EnemyCenter(enemy)[0];
+        let y = EnemyCenter(enemy)[1];
+        if(x > boulder.x && y > boulder.y - (boulder.height / 2) && y < boulder.y + (boulder.height / 2)) {
             return true;
         }
     }
@@ -248,28 +250,22 @@ const DistBetweenPoints = function DistBetweenPoints(x1, y1, x2, y2) {
 const DistBetweenSpriteCenters = function DistBetweenSpriteCenters(sprite1, sprite2) {
     return DistBetweenPoints(SpriteCenter(sprite1)[0], SpriteCenter(sprite1)[1], SpriteCenter(sprite2)[0], SpriteCenter(sprite2)[1]);
 }
-const EnemyIsAffectedByBlackhole = function EnemyIsAffectedByBlackhole(enemy) {
+const GetEnemyBlackhole = function GetEnemyBlackhole(enemy) {
     if(GAME.m_State.m_AttackManager.m_mapBlackholes.size > 0) {
         let hole = GAME.m_State.m_AttackManager.m_mapBlackholes.values().next().value;
-        let x = enemy.m_Sprite.x;
-        let y = enemy.m_Sprite.y;
+        let x = EnemyCenter(enemy)[0];
+        let y = EnemyCenter(enemy)[1];
         if(
             x < hole.x && x > hole.x - (hole.width / 2) &&
             y < hole.y && y > hole.y - (hole.height  / 2)) {
-            return true;
+            return hole;
         }
     }
     return false;
 }
-const EnemyWillAffectedByBlackhole = function EnemyWillAffectedByBlackhole(enemy) {
-    if(GAME.m_State.m_AttackManager.m_mapBlackholes.size > 0) {
-        let hole = GAME.m_State.m_AttackManager.m_mapBlackholes.values().next().value;
-        let dist = DistBetweenSpriteCenters(hole, enemy.m_Sprite);
-        if(dist > 250 && dist < 400) {
-            return true;
-        }
-    }
-    return false;
+const EnemyAffectingByBlackhole = function EnemyAffectingByBlackhole(enemy) {
+    let hole = GetEnemyBlackhole(enemy);
+    return Boolean(hole);
 }
 const AllEnemiesHPNearPoint = function AllEnemiesHPNearPoint(x,  y, radius) {
     let hp = 0;
@@ -426,7 +422,7 @@ class SpecialAttack extends ProjectileAttack {
 
 class BombAttack extends ProjectileAttack {
     score(enemy) {
-        if (enemy.m_bDead || EnemyWillAffectedByBoulder(enemy) || EnemyWillAffectedByBlackhole(enemy))
+        if (enemy.m_bDead || EnemyWillAffectedByBoulder(enemy) || EnemyAffectingByBlackhole(enemy))
             return WORST_SCORE;
 
         let score =  AllEnemiesHPNearPoint(enemy.m_Sprite.x, enemy.m_Sprite.y, 50);
