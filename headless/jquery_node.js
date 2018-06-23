@@ -47,10 +47,12 @@ const jar = request.jar();
 let internal_ajax = function internal_ajax(data, ajax_object) {
     let url = data.url;
     let form;
-    if (data.method == "POST")
+    if (data.method == "POST") {
         form = data.data;
-    else if (data.method == "GET" && data.data)
+    }
+    else if (data.method == "GET" && data.data) {
         url += "?" + qs.stringify(data.data);
+    }
 
     request({
         url: url,
@@ -66,19 +68,22 @@ let internal_ajax = function internal_ajax(data, ajax_object) {
     }, function response(err, resp, body) {
         if (err || resp.statusCode == 500 || resp.statusCode == 503) {
             console.log(`failed url ${url}, retrying ${++ajax_object._fails}`);
-            if (ajax_object._fails > 1)
+            if (ajax_object._fails > 1) {
                 ajax_object.nosucc();
-            else
+            }
+            else {
                 internal_ajax(data, ajax_object);
+            }
             return;
         }
-        
+
         let value = body;
         //if (data.dataType == "json")
             value = JSON.parse(value);
-        
-        if (ajax_object.succ)
+
+        if (ajax_object.succ) {
             ajax_object.succ(value, null, new AjaxResponseObject(resp));
+        }
     })
 }
 
