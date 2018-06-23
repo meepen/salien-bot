@@ -27,7 +27,7 @@ const difficulty_names = [
     "???", "easy", "medium", "hard", "boss"
 ]
 
-const gettoken = JSON.parse(require("fs").readFileSync("./gettoken.json", "utf8"));
+const gettoken = eval('('+require("fs").readFileSync("./gettoken.json", "utf8")+')');
 
 let Instance = new CServerInterface(gettoken);
 
