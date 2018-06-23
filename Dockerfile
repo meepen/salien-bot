@@ -9,7 +9,7 @@ RUN curl -L -o ./salien.zip https://github.com/meepen/salien-bot/archive/master.
 
 WORKDIR /app
 RUN cp -R /tmp/salien-bot-master/* ./
-
+COPY ./gettoken.json .
 RUN yarn install
 
 ENTRYPOINT ["node", "headless.js"]
