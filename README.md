@@ -21,10 +21,15 @@ notepad gettoken.json
 - Save and exit
 - Back to command line:
 ```
-node headless.js
+node headless
 ```
 
 It should be running now!
+
+By default it will scour all available planets and get the highest exp rewards from difficult tiles, if you don't want this, run the bot with
+```
+node headless --care-for-planet
+```
 
 ### salien-bot
 
