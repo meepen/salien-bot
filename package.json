@@ -8,5 +8,8 @@
     "version": "1.0.0",
     "dependencies": {
         "request": "2.87.0"
+    },
+    "scripts": {
+        "start": "node headless"
     }
 }
