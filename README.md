@@ -12,10 +12,10 @@ Here are the steps to use:
 ```
 npm install
 ```
-- Login to Steam
-- Navigate to https://steamcommunity.com/saliengame/gettoken in your browser
+- Open https://steamcommunity.com/saliengame/gettoken in browser while logged into Steam
 - Copy the entire contents of the page
-- Paste into notepad and save the file as `gettoken.json`. (Be sure to copy something else to avoid accidentally giving your token to someone else!)
+- Paste into notepad and save the file as `gettoken.json`. 
+  - (IMPORTANT) Immediately copy something else to avoid accidentally giving this out to someone else!
 - Save and exit
 - Back to command line:
 ```
