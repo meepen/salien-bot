@@ -18,12 +18,17 @@ global.log = function log(data) {
     fs.appendFileSync(log_file, "\n");
 }
 
-
-for (let arg of args) {
+for (let i = 0; i < args.length; i++) {
+    let arg = args[i];
     if (arg == "--log" || arg == "-l") {
         DO_LOGS = true;
         fs.writeFileSync(log_file, "");
         global.log("Logging activated.");
+    }
+    else if (arg == "--lang" && args[i + 1]) {
+        // https://partner.steamgames.com/doc/store/localization#supported_languages
+        global.log(`language: ${args[++i]}`);
+        network.ChangeLanguage(args[i]);
     }
     else if (arg == "--care-for-planet" || arg == "-c") {
         CARE_ABOUT_PLANET = true;
@@ -228,7 +233,6 @@ class Client {
             }
             this.GetPlanets().then(planets => {
                 let i = 0;
-                this.gPlanets = {};
                 var GetPlanetIterator = (cb) => {
                     let planet = planets[i++];
                     this.GetPlanet(planet.id).then(planets[i] ? () => GetPlanetIterator(cb) : cb);

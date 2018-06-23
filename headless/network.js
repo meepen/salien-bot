@@ -1,9 +1,12 @@
 // <script>
 "use strict";
 
-const gLanguage = "english";
+let gLanguage = "english";
 const CWebAPI = require("./webapi.js").CWebAPI;
 const $J = module.exports.config = require("./jquery_node.js").jQuery;
+module.exports.ChangeLanguage = function ChangeLanguage(lang) {
+	gLanguage = lang;
+}
 
 let CServerInterface = module.exports.CServerInterface = function( rgResult )
 {
