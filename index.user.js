@@ -11,7 +11,6 @@
 // @grant        none
 // ==/UserScript==
 
-
 if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") == "Greasemonkey") {
     alert("It's not possible to support Greasemonkey, please try Tampermonkey or ViolentMonkey.");
 }
@@ -45,8 +44,9 @@ SERVER.ReportScore = function ReportScore(nScore, callback, error) {
         return callback(results);
     }, function ReportScore_error() {
         console.log(arguments);
-        if (error)
+        if (error) {
             error.apply(null, arguments);
+        }
     });
 }
 
@@ -71,8 +71,9 @@ const AttackManager = function AttackManager() {
 let isJoining = false;
 const TryContinue = function TryContinue() {
     let continued = false;
-    if (isJoining) 
+    if (isJoining) {
         return continued;
+    }
     if (GAME.m_State.m_VictoryScreen) {
         GAME.m_State.m_VictoryScreen.children.forEach(function(child) {
             if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
@@ -183,8 +184,9 @@ const GetBestPlanet = function GetBestPlanet() {
     let bestPlanet;
     let maxProgress = 0;
 
-    if (!GAME.m_State.m_mapPlanets)
+    if (!GAME.m_State.m_mapPlanets) {
         return;
+    }
 
     for (let planetKV of GAME.m_State.m_mapPlanets) {
         let planet = planetKV[1];
@@ -252,30 +254,34 @@ class Attack {
 class ClickAttack extends Attack {
     shouldAttack(delta) {
         // Can't do basic attack when station is down
-        if (GAME.m_State.m_PlayerHealth <= 0)
+        if (GAME.m_State.m_PlayerHealth <= 0) {
             return false;
+        }
         this.nextAttackDelta -= delta;
         return this.nextAttackDelta <= 0;;
     }
     score(enemy) {
-        if (enemy.m_bDead)
+        if (enemy.m_bDead) {
             return WORST_SCORE;
+        }
         return 1 - EnemyDistance(enemy);
     }
     process(enemies) {
         let target, target_score = WORST_SCORE;
 
         enemies.forEach((enemy) => {
-            if (!enemy.m_Sprite.visible)
+            if (!enemy.m_Sprite.visible) {
                 return;
+            }
             let now_score = this.score(enemy);
             if (now_score > target_score) {
                 target = enemy, target_score = now_score;
             }
         });
 
-        if (target)
+        if (target) {
             this.attack(target);
+        }
     }
     attack(enemy) {
         enemy.m_Sprite.pointertap();
@@ -288,24 +294,27 @@ class ProjectileAttack extends Attack {
         return CanAttack(this.getAttackName());
     }
     score(enemy) {
-        if (enemy.m_bDead)
+        if (enemy.m_bDead) {
             return WORST_SCORE;
+        }
         return enemy.m_nHealth;
     }
     process(enemies) {
         let target, target_score = WORST_SCORE;
 
         enemies.forEach((enemy) => {
-            if (!enemy.m_Sprite.visible)
+            if (!enemy.m_Sprite.visible) {
                 return;
+            }
             let now_score = this.score(enemy);
             if (now_score > target_score) {
                 target = enemy, target_score = now_score;
             }
         });
 
-        if (target)
+        if (target) {
             this.attack.apply(this, EnemyCenter(target));
+        }
     }
     attack(x, y) {
         SetMouse(x, y)
@@ -316,12 +325,15 @@ class ProjectileAttack extends Attack {
 // the '1' button (SlimeAttack PsychicAttack BeastAttack - depends on body type of your salien)
 class SpecialAttack extends ProjectileAttack {
     getAttackName() {
-        if (gSalien.m_BodyType == "slime")
+        if (gSalien.m_BodyType == "slime") {
             return "slimeattack";
-        else if (gSalien.m_BodyType == "beast")
+        }
+        else if (gSalien.m_BodyType == "beast") {
             return "beastattack";
-        else
+        }
+        else {
             return "psychicattack";
+        }
     }
 }
 
@@ -384,11 +396,12 @@ context.BOT_FUNCTION = function ticker(delta) {
     delta /= 100;
 
     let difficulties = PIXI.loader.resources['level_config'];
-    if (difficulties)
+    if (difficulties) {
         for (let difficulty in difficulties.data) {
             let freq = difficulties.data[difficulty].enemies.spawn_frequency;
             freq.min = freq.max;
         }
+    }
 
     let buttonsOnErrorMessage = document.getElementsByClassName("btn_grey_white_innerfade btn_medium");
     if(buttonsOnErrorMessage[0] != null) {
@@ -410,18 +423,16 @@ context.BOT_FUNCTION = function ticker(delta) {
         return;
     }
 
-
-
     let state = EnemyManager();
 
     let enemies = state.m_rgEnemies;
 
-    for (let attack of attacks)
-        if (attack.shouldAttack(delta, enemies))
+    for (let attack of attacks) {
+        if (attack.shouldAttack(delta, enemies)) {
             attack.process(enemies);
-
+        }
+    }
 }
-
 
 APP.ticker.add(context.BOT_FUNCTION);
 
