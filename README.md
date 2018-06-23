@@ -13,8 +13,8 @@ Userscript Mode is a version of this bot that is ran as a script on top of your 
 
 Here are the steps to use: 
 
-- Download and install the TamperMonkey addon for your browser of choice - https://tampermonkey.net/
-- Open this link: https://tampermonkey.net/ with TamperMonkey installed; it should open up a tab that prompts you to install the script
+- Download and install the TamperMonkey or GreaseMonkey addon for your browser of choice - https://tampermonkey.net/
+- Open this link: https://raw.githubusercontent.com/meepen/salien-bot/master/index.user.js with TamperMonkey installed; it should open up a tab that prompts you to install the script
 - And finally, go to the Saliens game page!
 
 It should be running now!
@@ -56,7 +56,7 @@ It should be running now!
 
 ### Tile Selection
 
-This versionl, by default, will scour all available planets and get the highest EXP rewards from difficult tiles; if you don't want this, run the bot with:
+This version, by default, will scour all available planets and get the highest EXP rewards from difficult tiles; if you don't want this, run the bot with:
 ```
 node headless --care-for-planet
 ```
