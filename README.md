@@ -13,8 +13,11 @@ Here are the steps to use:
 npm install
 notepad gettoken.json
 ```
+- Log into Steam
 - Open https://steamcommunity.com/saliengame/gettoken in browser with steam logged in
-- Paste that into notepad and immediately copy something else so you don't accidentally give it out to someone
+- Copy the entire contents of the page
+- Paste into notepad and save the file as `gettoken.json`. 
+- (IMPORTANT) Immediately copy something else to avoid accidentally giving this out to someone else!
 - Save and exit
 - Back to command line:
 ```
