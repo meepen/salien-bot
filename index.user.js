@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      20
+// @version      21
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame
@@ -36,6 +36,19 @@ const APP = context.gApp;
 const GAME = context.gGame;
 const SERVER = context.gServer;
 const PIXI = context.PIXI;
+
+SERVER._ReportScore = SERVER._ReportScore || SERVER.ReportScore;
+SERVER.ReportScore = function ReportScore(nScore, callback, error) {
+    return this._ReportScore(nScore, function ReportScore_callback(results) {
+        let response = results.response;
+        console.log(`Server reported level ${response.new_level} (${response.new_score} / ${response.next_level_score})`)
+        return callback(results);
+    }, function ReportScore_error() {
+        console.log(arguments);
+        if (error)
+            error.apply(null, arguments);
+    });
+}
 
 const Option = function Option(name, def) {
     if (window.localStorage[name] === undefined) {
@@ -99,7 +112,6 @@ const TryContinue = function TryContinue() {
     if (GAME.m_State instanceof CBattleSelectionState && !isJoining) {
         let bestZoneIdx = GetBestZone();
         if(bestZoneIdx) {
-            console.log(GAME.m_State.m_SalienInfoBox.m_LevelText.text, GAME.m_State.m_SalienInfoBox.m_XPValueText.text);
             console.log("join to zone", bestZoneIdx);
             isJoining = true;
             GAME.m_State.m_Grid.click(bestZoneIdx % k_NumMapTilesW, (bestZoneIdx / k_NumMapTilesW) | 0);
