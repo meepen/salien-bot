@@ -103,7 +103,7 @@ const TryContinue = function TryContinue() {
         setTimeout(() => isJoining = false, 1000);
         GAME.m_State.button.click();
     }
-    if (GAME.m_State instanceof CPlanetSelectionState && !isJoining) { // Planet Selectiong
+    if (GAME.m_State instanceof CPlanetSelectionState && !isJoining) { // Planet Selection
         GAME.m_State.m_rgPlanetSprites[0].pointertap();
         isJoining = true;
         setTimeout(() => isJoining = false, 1000);
