@@ -1,3 +1,5 @@
+"use strict";
+
 const args = process.argv.slice(2);
 const network = require("./headless/network.js");
 const fs = require("fs");
