@@ -289,6 +289,9 @@ class ClickAttack extends Attack {
 }
 
 class ProjectileAttack extends Attack {
+    targetPosition(target) {
+        return EnemyCenter(target);
+    }
     shouldAttack(delta) {
         return CanAttack(this.getAttackName());
     }
@@ -309,8 +312,9 @@ class ProjectileAttack extends Attack {
             }
         });
 
-        if (target)
-            this.attack.apply(this, EnemyCenter(target));
+        if (target) {
+            this.attack.apply(this, this.targetPosition(target));
+        }
     }
     attack(x, y) {
         SetMouse(x, y)
@@ -320,6 +324,12 @@ class ProjectileAttack extends Attack {
 
 // the '1' button (SlimeAttack PsychicAttack BeastAttack - depends on body type of your salien)
 class SpecialAttack extends ProjectileAttack {
+
+    // SpecialAttack's projectile is quite slow, so we need to aim ahead of the target
+    targetPosition(target) {
+        return [EnemyCenter(target)[0] + 50*EnemySpeed(target), EnemyCenter(target)[1]];
+    }
+
     getAttackName() {
         if (gSalien.m_BodyType == "slime")
             return "slimeattack";
