@@ -1,4 +1,16 @@
+const args = process.argv.slice(2);
 const network = require("./headless/network.js");
+
+let CARE_ABOUT_PLANET = true;
+
+for (let arg of args) {
+    if (arg == "--care-for-planet" || arg == "-c") {
+        console.log("Caring for previous planet.");
+        CARE_ABOUT_PLANET = true;
+    }
+    else
+        throw new Error(`invalid command line argument ${arg}`);
+}
 
 const CServerInterface = network.CServerInterface;
 const k_NumMapTilesW = 12;
@@ -51,7 +63,7 @@ class Client {
 
     LeaveGame() {
         return new Promise(res => {
-            if (this.gPlayerInfo.time_in_zone <= WAIT_TIME) {
+            if (false && this.gPlayerInfo.time_in_zone <= WAIT_TIME) {
                 // we can probably just finish our thing i guess
                 this.GetPlanet(this.gPlayerInfo.active_planet).then(() => {
                     let time_left = 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone)
@@ -120,7 +132,7 @@ class Client {
                     let planet = d.response.planets[i];
                     this.gPlanets[planet.id] = planet;
                 }
-                res();
+                res(this.gPlanets[id]);
             }, () => {
                 this.GetPlanet(id).then(res);
             });
@@ -159,6 +171,15 @@ class Client {
 
     GetBestPlanet() {
         return new Promise(res => {
+            if (CARE_ABOUT_PLANET && this.gPlayerInfo.active_planet) {
+                this.GetPlanet(this.gPlayerInfo.active_planet).then(planet => {
+                    if (!planet.state.active)
+                        this.LeavePlanet(() => this.GetBestPlanet().then(res));
+                    else
+                        res(this.gPlanets[this.gPlayerInfo.active_planet]);
+                });
+                return;
+            }
             this.GetPlanets().then(planets => {
                 let i = 0;
                 var GetPlanetIterator = (cb) => {
@@ -184,7 +205,7 @@ class Client {
 
     ForcePlanet(id) {
         return new Promise(res => {
-            if (this.gPlayerInfo.active_planet) {
+            if (this.gPlayerInfo.active_planet && this.gPlayerInfo.active_planet != id) {
                 this.LeavePlanet().then(() => {
                     this.ForcePlanet(id).then(res);
                 })
