@@ -1,12 +1,31 @@
 const args = process.argv.slice(2);
 const network = require("./headless/network.js");
+const fs = require("fs");
 
 let CARE_ABOUT_PLANET = false;
+let DO_LOGS = false;
+
+const log_file = "./log.txt"
+
+// clear log
+
+global.log = function log(data) {
+    if (!DO_LOGS)
+        return;
+    fs.appendFileSync(log_file, data);
+    fs.appendFileSync(log_file, "\n");
+}
+
 
 for (let arg of args) {
-    if (arg == "--care-for-planet" || arg == "-c") {
-        console.log("Caring for previous planet.");
+    if (arg == "--log" || arg == "-l") {
+        DO_LOGS = true;
+        fs.writeFileSync(log_file, "");
+        global.log("Logging activated.");
+    }
+    else if (arg == "--care-for-planet" || arg == "-c") {
         CARE_ABOUT_PLANET = true;
+        global.log("Caring for previous planet.");
     }
     else
         throw new Error(`invalid command line argument ${arg}`);
@@ -27,7 +46,7 @@ const difficulty_names = [
     "???", "easy", "medium", "hard", "boss"
 ]
 
-const gettoken = JSON.parse(require("fs").readFileSync("./gettoken.json", "utf8"));
+const gettoken = JSON.parse(fs.readFileSync("./gettoken.json", "utf8"));
 
 let Instance = new CServerInterface(gettoken);
 
@@ -77,6 +96,15 @@ class Client {
             else {
                 this.int.LeaveGameInstance(this.gPlayerInfo.active_zone_game, res, () => {
                     this.Connect().then(res);
+                }, () => {
+                    this.GetPlayerInfo().then(() => {
+                        if (this.gPlayerInfo.active_zone_game) {
+                            this.LeaveGame().then(res);
+                        }
+                        else {
+                            res();
+                        }
+                    })
                 })
             }
         });
@@ -153,9 +181,16 @@ class Client {
     ReportScore(score) {
         return new Promise(res => {
             this.int.ReportScore(score, d => {
-                res(d);
+                res();
             }, () => {
-                this.Connect().then(res);
+                this.GetPlayerInfo(() => {
+                    if (this.gPlayerInfo.active_zone_game) {
+                        this.LeaveGame().then(res);
+                    }
+                    else {
+                        res();
+                    }
+                })
             })
         })
     }
@@ -165,6 +200,15 @@ class Client {
             this.int.LeaveGameInstance(this.gPlayerInfo.active_planet, () => {
                 this.gPlayerInfo.active_planet = undefined;
                 res();
+            }, () => {
+                this.GetPlayerInfo().then(() => {
+                    if (this.gPlayerInfo.active_planet) {
+                        this.LeavePlanet().then(res);
+                    }
+                    else {
+                        res();
+                    }
+                })
             });
         });
     }

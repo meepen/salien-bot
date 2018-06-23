@@ -52,6 +52,7 @@ let internal_ajax = function internal_ajax(data, ajax_object) {
     else if (data.method == "GET" && data.data)
         url += "?" + qs.stringify(data.data);
 
+    global.log(`url ${url} requested`);
     request({
         url: url,
         headers: {
@@ -64,8 +65,11 @@ let internal_ajax = function internal_ajax(data, ajax_object) {
         form: form,
         timeout: 5000
     }, function response(err, resp, body) {
+        if (!ajax_object.nosucc)
+            global.log(new Error("no ajax fail function"));
+
         if (err || resp.statusCode == 500 || resp.statusCode == 503) {
-            console.log(`failed url ${url}, retrying ${++ajax_object._fails}`);
+            global.log(`failed url ${url}, count ${++ajax_object._fails}`);
             if (ajax_object._fails > 1)
                 ajax_object.nosucc();
             else
