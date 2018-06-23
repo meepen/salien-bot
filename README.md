@@ -26,12 +26,14 @@ node headless
 
 It should be running now!
 
+### tile selection
 By default it will scour all available planets and get the highest exp rewards from difficult tiles, if you don't want this, run the bot with
 ```
 node headless --care-for-planet
 ```
 
-### salien-bot
+
+## Userscript mode
 
 Salien bot is a WIP for the Salien Minigame that came out for Steam Summer Sale 2018.
 
@@ -41,6 +43,6 @@ To use, copy and paste index.user.js in console, or use GreaseMonkey or TamperMo
 
 Also, a note: playing this game AT ALL will not net you better rewards! It's only the time you have been on the page. No need to waste computer resources :)
 
-## Tile selection
+### Tile selection
 
-Currently, the tile select code focuses on levelling up to level 9 on hard tiles; after you hit level 9 it will try and target the highest progress tile
+The tile select code focuses on levelling up to level 13 on hard tiles; after you hit level 9 it will try and target the highest progress tile
