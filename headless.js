@@ -324,6 +324,16 @@ const PrintInfo = function PrintInfo() {
         }
         date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - score_bias) / exp_per_hour * 60 * 60);
         info_lines.push(["Next level up", date.toLocaleString()]);
+        
+        let seconds = Math.floor((date - (Date.now())) / 1000);
+        let minutes = Math.floor(seconds / 60);
+        let hours = Math.floor(minutes / 60);
+        let days = Math.floor(hours / 24);
+        
+        hours = hours - (days * 24);
+        minutes = minutes - (days * 24 * 60) - (hours * 60);
+        seconds = seconds - (days * 24 * 60 * 60) - (hours * 60 * 60) - (minutes * 60);
+        info_lines.push(["Time to level up", days + "d. " + hours + "h. " + minutes + "m. " + seconds + "s."]);
     }
 
 
