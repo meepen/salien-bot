@@ -21,7 +21,7 @@ const WAIT_TIME = 110;
 
 // TODO: get these from json
 const difficulty_multipliers = [
-    0, 1, 2, 4, 8
+    0, 1, 2, 4
 ]
 const difficulty_names = [
     "???", "easy", "medium", "hard", "boss"
@@ -30,6 +30,11 @@ const difficulty_names = [
 const gettoken = JSON.parse(require("fs").readFileSync("./gettoken.json", "utf8"));
 
 let Instance = new CServerInterface(gettoken);
+
+const StartTimer = function StartTimer() {
+    
+}
+
 
 class Client {
     constructor(int) {
@@ -65,7 +70,7 @@ class Client {
                     this.GameInfo(time_left);
                     setTimeout(() => {
                         let planet = this.gPlanets[this.gPlayerInfo.active_planet];
-                        cl.ReportScore().then(res);
+                        cl.ReportScore(5 * difficulty_multipliers[planet.zones[this.gPlayerInfo.active_zone_position].difficulty] * SCORE_TIME).then(res);
                     }, time_left);
                 });
             }
@@ -145,10 +150,9 @@ class Client {
         })
     }
     
-    ReportScore() {
+    ReportScore(score) {
         return new Promise(res => {
-            for (let i = 0; i < 4; i++)
-            this.int.ReportScore(100000, d => {
+            this.int.ReportScore(score, d => {
                 res(d);
             }, () => {
                 this.Connect().then(res);
@@ -240,7 +244,7 @@ class Client {
                             let time_left = 1000 * WAIT_TIME;
                             this.GameInfo(time_left);
                             setTimeout(() => {
-                                this.ReportScore().then(res);
+                                this.ReportScore(5 * difficulty_multipliers[zone_info.difficulty] * SCORE_TIME).then(res);
                             }, time_left);
                         });
                     });
