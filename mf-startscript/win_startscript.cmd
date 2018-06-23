@@ -2,7 +2,7 @@
 
 :: Made by Main Fighter [mainfighter.com]
 :: Simple start script for meepen's sailen-bot [https://github.com/meepen/salien-bot]
-:: v1.4.0 [23-06-2018]
+:: v1.4.1 [23-06-2018]
 
 ::===============================================================================================================::
 
@@ -18,6 +18,8 @@ echo Starting Sailen Bots
 :: Debug
 if %debug%==true @echo on
 
+
+:: Sets rootdir var to the currently directory of script
 set rootdir=%~dp0
 
 :: Clone botfiles
@@ -46,8 +48,10 @@ exit
 
 :DownloadBotFiles
 
-echo Downloading Bot Files for %name%
+echo.
+echo %name% - Downloading Bot Files
 
+:: Sets the directory back to the root
 cd "%rootdir%"
 
 :: Sets directory to be the same as name if not defined
@@ -58,7 +62,7 @@ if %enabled%==false goto :eof
 if %autodownloadbot%==false goto :eof
 
 :: Checks if bot files don't already exist > if they don't creates folder > if they don't clones bot to directory
-if not exist botfiles\%directory% ( mkdir botfiles\%directory% & git clone https://github.com/meepen/salien-bot.git botfiles\%directory% ) else ( echo Bot files already exist )
+if not exist botfiles\%directory% ( mkdir botfiles\%directory% & git clone --quiet https://github.com/meepen/salien-bot.git botfiles\%directory% & echo %name% - Bot files downloaded ) else ( echo %name% - Bot files already exist )
 
 call :SetDefaults
 
@@ -68,8 +72,10 @@ goto :eof
 
 :UpdateBotFiles
 
-echo Updating Bot Files for %name%
+echo.
+echo %name% - Updating Bot Files
 
+:: Sets the directory back to the root
 cd "%rootdir%"
 
 :: Sets directory to be the same as name if not defined
@@ -79,7 +85,7 @@ if not defined directory set directory=%name%
 if %enabled%==false goto :eof
 if %autoupdatebot%==false goto :eof
 
-if exist botfiles\%directory% ( cd botfiles\%directory% & git pull ) else ( echo Bot files don't exist )
+if exist botfiles\%directory% ( cd botfiles\%directory% & git pull --quiet & echo %name% - Bot files updated ) else ( echo %name% - Bot files don't exist )
 
 call :SetDefaults
 
@@ -89,8 +95,10 @@ goto :eof
 
 :StartScript
 
-echo Starting %name%
+echo.
+echo %name% - Starting bot
 
+:: Sets the directory back to the root
 cd "%rootdir%"
 
 :: Sets directory to be the same as name if not defined
