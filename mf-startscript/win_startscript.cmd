@@ -30,6 +30,8 @@ exit
 
 :StartScript
 
+echo Starting %name%
+
 :: Opens CMD Window > Sets title and color of window > Changes to dir > runs npm install if enabled > starts bot
 set commandline="title Sailen Bot - %name% & color %color% & cd botfiles\%directory% & if %npminstall%==true call npm install & node headless & exit"
 if %enabled%==true if %minimized%==true (start /min cmd /k  %commandline%) else (start cmd /k %commandline%)
