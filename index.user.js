@@ -278,7 +278,7 @@ class ClickAttack extends Attack {
             this.attack(target);
     }
     attack(enemy) {
-        enemy.m_Sprite.click();
+        enemy.m_Sprite.pointertap();
         this.nextAttackDelta = 1 / CLICKS_PER_SECOND;
     }
 }
