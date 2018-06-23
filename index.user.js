@@ -104,7 +104,7 @@ const TryContinue = function TryContinue() {
         GAME.m_State.button.click();
     }
     if (GAME.m_State instanceof CPlanetSelectionState && !isJoining) { // Planet Selectiong
-        GAME.m_State.m_rgPlanetSprites[0].click();
+        GAME.m_State.m_rgPlanetSprites[0].pointertap();
         isJoining = true;
         setTimeout(() => isJoining = false, 1000);
         continued = true;
