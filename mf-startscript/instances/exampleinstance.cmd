@@ -3,7 +3,7 @@
 :: gettoken; paste your token here
 :: enabled; whether the instance is enabled or not
 :: minimized; whether the cmd window starts minimized or not
-:: name; name of the instance
+:: name; name of the instance, don't use spaces in the name just in case
 :: directory; sets the bot directory, if not set this will just use %name% as the directory name
 :: color; colors in the cmd window
 
@@ -20,5 +20,5 @@
 set token={"webapi_host":"https:\/\/community.steam-api.com\/","webapi_host_secure":"https:\/\/community.steam-api.com\/","token":"473jsha28s8f78391029sh27s","steamid":"76561198230883500","persona_name":"Main Fighter","success":1}
 set enabled=true
 set minimized=false
-set name=Main Fighter
+set name=mainfighter3302
 set color 0A
