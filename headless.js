@@ -53,24 +53,18 @@ const WAIT_TIME = 110;
 
 // TODO: get these from json
 const difficulty_multipliers = [
-    0, 1, 2, 4, 4
-]
+    0, 1, 2, 4
+];
+
 const difficulty_names = [
     "???", "easy", "medium", "hard"
-]
+];
 
 const MaxScore = function MaxScore(difficulty) {
     return SCORE_TIME * 5 * difficulty_multipliers[difficulty];
 }
 
 const gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
-
-let Instance = new CServerInterface(gettoken);
-
-const StartTimer = function StartTimer() {
-
-}
-
 
 class Client {
     constructor(int) {
@@ -155,12 +149,20 @@ class Client {
     }
 
     JoinPlanet(id) {
-        return new Promise(res => {
+        return new Promise((res, rej) => {
             this.int.JoinPlanet(id, d => {
                 this.gPlayerInfo.active_planet = id;
                 res();
             }, () => {
-                this.JoinPlanet(id).then(res);
+                this.GetPlanets().then(planets => {
+                    for (let i = 0; i < planets.length; i++) {
+                        if (planets[i].id == id) {
+                            this.JoinPlanet(id).then(res);
+                            return;
+                        }
+                    }
+                    rej();
+                })
             });
         });
     }
@@ -185,7 +187,14 @@ class Client {
                 this.gPlayerInfo.active_zone_position = id;
                 res(d.response.zone_info);
             }, () => {
-                this.JoinZone(id).then(res);
+                this.GetPlayerInfo().then(() => {
+                    if (this.gPlayerInfo.active_zone_game) {
+                        res();
+                    }
+                    else {
+                        this.JoinZone(id).then(res);
+                    }
+                });
             });
         })
     }
@@ -266,15 +275,15 @@ class Client {
     }
 
     ForcePlanet(id) {
-        return new Promise(res => {
+        return new Promise((res, rej) => {
             if (this.gPlayerInfo.active_planet && this.gPlayerInfo.active_planet != id) {
                 this.LeavePlanet().then(() => {
-                    this.ForcePlanet(id).then(res);
+                    this.ForcePlanet(id).then(res).catch(rej);
                 })
                 return;
             }
             else if (this.gPlayerInfo.active_planet != id) {
-                this.JoinPlanet(id).then(res);
+                this.JoinPlanet(id).then(res).catch(rej);
             }
             else {
                 res();
@@ -309,6 +318,8 @@ class Client {
                                 this.ReportScore(MaxScore(zone_info.difficulty)).then(res);
                             }, time_left);
                         });
+                    }).catch(() => {
+                        this.FinishGame().then(res);
                     });
                 });
             });
@@ -316,7 +327,7 @@ class Client {
     }
 }
 
-let cl = new Client(Instance);
+const cl = new Client(new CServerInterface(gettoken));
 
 const GetBestZone = function GetBestZone(planet) {
     let bestZone;
@@ -330,6 +341,7 @@ const GetBestZone = function GetBestZone(planet) {
         if (!zone.captured) {
             if (zone.type == 4) // boss
                 return zone;
+
             if (zone.difficulty > highestDifficulty) {
                 highestDifficulty = zone.difficulty;
                 maxProgress = zone.capture_progress;
@@ -402,7 +414,7 @@ const PrintInfo = function PrintInfo() {
                     let zone = current.zones[zoneIdx];
 
                     if (zone) {
-                        let max_score = MaxScore(difficulty_multipliers[zone.difficulty]);
+                        let max_score = MaxScore(zone.difficulty);
                         let exp_per_hour = 60 * 60 * max_score / (WAIT_TIME + 5);
 
                         // keep in old position
@@ -433,7 +445,7 @@ const PrintInfo = function PrintInfo() {
     for (let i = 0; i < info_lines.length; i++)
         info_lines[i] = "\x1b[33m" + info_lines[i].join(`${reset_code}: ${" ".repeat(max_length - info_lines[i][0].length)}`);
 
-    console.log("\u001b[2J\u001b[0;0H" + info_lines.join("\n"));
+    console.log("\x1b[2J\x1b[0;0H" + info_lines.join("\n"));
 }
 
 setInterval(PrintInfo, 1000);
