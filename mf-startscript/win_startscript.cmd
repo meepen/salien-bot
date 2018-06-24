@@ -2,7 +2,7 @@
 
 :: Made by Main Fighter [mainfighter.com]
 :: Simple start script for meepen's sailen-bot [https://github.com/meepen/salien-bot]
-:: v1.5.0 [23-06-2018]
+:: v1.5.0 [24-06-2018]
 
 ::===============================================================================================================::
 
