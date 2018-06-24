@@ -30,17 +30,29 @@ Headless Mode is a version of this game that is ran without a UI with the bot co
 
 Here are the steps to use: 
 
+Windows:
 - Download and install https://nodejs.org/ - Need for bot
 - Download and install https://git-scm.com/ - Needed for auto download/update
 - Download https://github.com/MainFighter/salien-bot/archive/winstartscript.zip and extract somewhere
 - Create a config in instances folder using the exampleinstance.cmd as a starting point
 - Run start.cmd
+It should be running now!
 
-### How to get your token
+Linux:
+- Install nodejs https://nodejs.org/en/download/package-manager/
+- Download and extract https://github.com/meepen/salien-bot/archive/master.zip
+- Create gettoken.json and enter your token
+- Open a terminal in the directory and enter the following
+```
+npm install
+node headless
+```
+It should be running now!
+
+How to get your token:
 - Log into Steam
 - Open https://steamcommunity.com/saliengame/gettoken in browser with Steam logged in
 - Copy the entire contents of the page
-- Paste the entire thing into your instance config in gettoken=
 - (IMPORTANT) Immediately copy something else to avoid accidentally giving this out to someone else!
 
 ### Tile Selection
