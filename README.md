@@ -50,6 +50,11 @@ notepad gettoken.json
 node headless
 ```
 
+- (optional) See detailed bot options
+```
+node headless --help
+```
+
 It should be running now!
 
 ### Tile Selection

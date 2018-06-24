@@ -4,6 +4,22 @@ const args = process.argv.slice(2);
 const network = require("./headless/network.js");
 const fs = require("fs");
 
+const help_page = `
+Meeden's headless Salien bot
+https://github.com/meepen/salien-bot
+
+Usage: node headless.js [options]
+Options:
+  -h, --help            Display this information.
+  -l, --log             Writes log output to "log.txt"
+  --lang LANG           Enable changing the language of the steam API
+                        See https://partner.steamgames.com/doc/store/localization#supported_languages
+  --token TOKENFILE     Allow specifying a custom token file
+  -c, --care-for-planet Bot tries to stay on the same planet and does not change the
+                        planet even if difficulty would be better somewhere else.
+`;
+
+
 let CARE_ABOUT_PLANET = false;
 let DO_LOGS = false;
 
@@ -39,6 +55,10 @@ for (let i = 0; i < args.length; i++) {
     else if (arg == "--care-for-planet" || arg == "-c") {
         CARE_ABOUT_PLANET = true;
         global.log("Caring for previous planet.");
+    }
+    else if (arg == "--help" || arg == "-h") {
+        console.log(help_page);
+        process.exit();
     }
     else
         throw new Error(`invalid command line argument ${arg}`);
