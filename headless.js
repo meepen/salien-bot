@@ -53,7 +53,7 @@ const WAIT_TIME = 110;
 
 // TODO: get these from json
 const difficulty_multipliers = [
-    0, 1, 2, 4
+    0, 1, 2, 4, 4
 ]
 const difficulty_names = [
     "???", "easy", "medium", "hard", "boss"
@@ -380,12 +380,8 @@ const PrintInfo = function PrintInfo() {
         info_lines.push(["Running for", FormatTimer(((Date.now() / 1000) | 0) - start_time)]);
         info_lines.push(["Current level", `${info.level} (${info.score} / ${info.next_level_score})`]);
         info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
-        let exp_per_hour = 60 * 60 * 2400 / (WAIT_TIME + 5);
-        info_lines.push(["Estimated exp/hr", exp_per_hour | 0]);
-
         let date = new Date();
-        let score_bias = 0;
-
+        let score_bias = 0; 
         if (cl.gPlanets) {
             let current = cl.gPlanets[info.active_planet];
             if (current) {
@@ -402,12 +398,15 @@ const PrintInfo = function PrintInfo() {
                         date.setTime(cl.endGameTime);
                         score_bias = difficulty_multipliers[zone.difficulty] * 5 * SCORE_TIME;
                         info_lines.push(["Round time left", FormatTimer(time_left)]);
+                        let exp_per_hour = 60 * 60 * score_bias / (WAIT_TIME + 5);
+                        info_lines.push(["Estimated exp/hr", exp_per_hour | 0]);
+                        date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - score_bias) / exp_per_hour * 60 * 60);
+                        info_lines.push(["Next level up", date.toLocaleString()]);
                     }
                 }
             }
         }
-        date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - score_bias) / exp_per_hour * 60 * 60);
-        info_lines.push(["Next level up", date.toLocaleString()]);
+
     }
 
 
