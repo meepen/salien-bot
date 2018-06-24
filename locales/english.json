@@ -1,0 +1,27 @@
+{
+	"LOCALE_CODE": "en-US",
+	"LOCALE_NAME": "English - United States",
+	"DIFFICULTIES": {
+		"UNKNOWN": "???",
+		"EASY": "Easy",
+		"MEDIUM": "Medium",
+		"HARD": "Hard",
+		"BOSS": "Boss"
+	},
+	"ERR_NO_DIFFICULTY": "No difficulty?!",
+	"RUNNING_FOR_TITLE": "Running for",
+	"TIMER_COUNTDOWN": "{days, plural, =0{} one{# day } other{# days }}{hours, plural, =0{} one{# hour } other{# hours }}{minutes, plural, =0{} one{# minute } other{# minutes }}{seconds, plural, =0{} one{# second} other{# seconds}}",
+	"CURRENT_LEVEL_TITLE": "Current level",
+	"CURRENT_LEVEL_DESC": "{level} ({score} / {next_level_score})",
+	"EXP_SINCE_START_TITLE": "Exp since start",
+	"EXP_SINCE_START_DESC": "{exp, number} XP",
+	"ESTIMATED_EXP_PER_HOUR_TITLE": "Estimated exp/hr",
+	"ESTIMATED_EXP_PER_HOUR_DESC": "{exp, number} XP",
+	"CURRENT_PLANET_TITLE": "Current planet",
+	"CURRENT_PLANET_DESC": "{planet_name} [{capture_progress, number, percent}] (ID: {id})",
+	"CURRENT_ZONE_TITLE": "Current zone",
+	"CURRENT_ZONE_DESC": "({zoneX}, {zoneY}) (ID: {zoneIdx}) | Difficulty: {difficulty_name}",
+	"ROUND_TIME_LEFT_TITLE": "Round time left",
+	"NEXT_LEVEL_UP_TITLE": "Next level up",
+	"NEXT_LEVEL_UP_DESC": "{timestamp, date, long} at {timestamp, time, medium}"
+}
