@@ -7,7 +7,9 @@ const fs = require("fs");
 let CARE_ABOUT_PLANET = false;
 let DO_LOGS = false;
 
-const log_file = "./log.txt"
+const log_file = "./log.txt";
+
+let token_file = "./gettoken.json";
 
 // clear log
 
@@ -29,6 +31,10 @@ for (let i = 0; i < args.length; i++) {
         // https://partner.steamgames.com/doc/store/localization#supported_languages
         global.log(`language: ${args[++i]}`);
         network.ChangeLanguage(args[i]);
+    }
+    else if (arg == "--token" || arg == "-t") {
+        global.log(`token file: ${args[++i]}`);
+        token_file = args[i];
     }
     else if (arg == "--care-for-planet" || arg == "-c") {
         CARE_ABOUT_PLANET = true;
@@ -53,12 +59,12 @@ const difficulty_names = [
     "???", "easy", "medium", "hard", "boss"
 ]
 
-const gettoken = JSON.parse(fs.readFileSync("./gettoken.json", "utf8"));
+const gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
 
 let Instance = new CServerInterface(gettoken);
 
 const StartTimer = function StartTimer() {
-    
+
 }
 
 
@@ -137,7 +143,7 @@ class Client {
                     this.Connect().then(res);
                     return;
                 }
-                if (!this.gPlayerInfo) 
+                if (!this.gPlayerInfo)
                     this.gPlayerInfoOriginal = d.response;
                 this.gPlayerInfo = d.response;
                 res(this.gPlayerInfo);
@@ -188,7 +194,7 @@ class Client {
             });
         })
     }
-    
+
     ReportScore(score) {
         return new Promise(res => {
             this.int.ReportScore(score, d => {
@@ -327,7 +333,7 @@ const GetBestZone = function GetBestZone(planet) {
                 highestDifficulty = zone.difficulty;
                 maxProgress = zone.capture_progress;
                 bestZone = zone;
-            } 
+            }
             else if (zone.difficulty < highestDifficulty)
                 continue;
 
@@ -380,7 +386,7 @@ const PrintInfo = function PrintInfo() {
         info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
         let exp_per_hour = 60 * 60 * 2400 / (WAIT_TIME + 5);
         info_lines.push(["Estimated exp/hr", exp_per_hour | 0]);
-        
+
         let date = new Date();
         let score_bias = 0;
 
