@@ -56,8 +56,8 @@ for(let i = 0; i < args.length; i++) {
 }
 
 const CServerInterface = network.CServerInterface;
-const k_NumMapTilesW = 12;
 
+const k_NumMapTilesW = 12;
 const SCORE_TIME = 120;
 const WAIT_TIME = 110;
 
@@ -68,7 +68,7 @@ const difficulty_multipliers = [
 ]
 const difficulty_names = [
     "???", "easy", "medium", "hard", "boss"
-]
+];
 
 const token = JSON.parse(fs.readFileSync(token_file, "utf8"));
 
@@ -156,14 +156,11 @@ class Client {
 
     async GetPlanet(id) {
         try {
-            const planets = await this.sInterface.GetPlanet(id);
+            const planet = await this.sInterface.GetPlanet(id);
 
-            for (let i in planets) {
-                const planet = planets[i];
-                this.gPlanets[planet.id] = planet;
-            }
+            this.gPlanets[planet.id] = planet;
 
-            return this.gPlanets[id];
+            return planet;
         } catch (e) {
             await this.GetPlanet(id);
         }
@@ -214,19 +211,15 @@ class Client {
             }
         }
 
-        const planets = await this.GetPlanets();
-
         let best_planet = null;
         let best_difficulty = -1;
 
-        const zones = await Promise.all(planets.map((p) => {
-            return this.GetPlanet(p.id);
-        }));
+        const planets = await this.GetPlanets();
 
-        console.log(zones);
+        await Promise.all(planets.map(async (p) => await this.GetPlanet(p.id)));
 
-        for(let i = 0; i < planets.length; i++) {
-            const planet = planets[i];
+        for(let p of planets) {
+            const planet = this.gPlanets[p.id];
             const best_zone = utils.GetBestZone(planet);
 
             if (best_zone && best_zone.difficulty > best_difficulty) {
@@ -260,7 +253,7 @@ class Client {
         const planet = await this.GetBestPlanet();
         await this.ForcePlanet(planet.id);
 
-        const zone = GetBestZone(planet);
+        const zone = utils.GetBestZone(planet);
 
         if (!zone) {
             await this.LeavePlanet();
@@ -296,7 +289,7 @@ async function Finish() {
 };
 
 setInterval(() => {
-    utils.PrintInfo(cl, WAIT_TIME);
+    utils.PrintInfo(cl, WAIT_TIME, SCORE_TIME, k_NumMapTilesW, difficulty_names, difficulty_multipliers);
 }, 1000);
 
 (async () => {

@@ -16,19 +16,29 @@ const CServerInterface = module.exports.CServerInterface = function( rgResult )
 	this.request = async function(url, method = "GET", data = {}) {
 
 		try {
-			const form = Object.assign({
-				access_token: this.m_WebAPI.m_strOAuth2Token
-			}, data);
-
-			const response = await request({
+			const config = {
 				url,
 				method,
-				form,
 				json: true,
 				transform: function(body, response) {
 					return {"headers": response.headers, "data": body.response};
 				}
-			});
+			};
+
+			const actualData = Object.assign({
+				access_token: this.m_WebAPI.m_strOAuth2Token
+			}, data);
+
+			switch(method) {
+				case "GET":
+					config.qs = actualData
+					break;
+				case "POST":
+					config.form = actualData;
+					break;
+			}
+
+			const response = await request(config);
 
 			if(response.headers['x-eresult'] == 1)
 				return response.data;
@@ -71,7 +81,7 @@ CServerInterface.prototype.GetPlanet = async function(planetId)
 		id: planetId,
 		language: gLanguage
 	});
-	return data.planet;
+	return data.planets[0];
 };
 
 CServerInterface.prototype.GetPlayerInfo = async function()

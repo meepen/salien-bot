@@ -26,36 +26,36 @@ function FormatTimer(timeInSeconds) {
     return formatted;
 }
 
-function PrintInfo(cl, waitTime) {
+function PrintInfo(client, waitTime, scoreTime, mapTiles, difficultyNames, difficultyMultipliers) {
     // clear screen, taken from https://stackoverflow.com/a/14976765
     let info_lines = [];
 
-    if (cl.gPlayerInfo) {
-        let info = cl.gPlayerInfo;
+    if (client.gPlayerInfo) {
+        let info = client.gPlayerInfo;
         info_lines.push(["Running for", FormatTimer(((Date.now() / 1000) | 0) - start_time)]);
         info_lines.push(["Current level", `${info.level} (${info.score} / ${info.next_level_score})`]);
-        info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
+        info_lines.push(["Exp since start", info.score - client.gPlayerInfoOriginal.score]);
         let exp_per_hour = 60 * 60 * 2400 / (waitTime + 5);
         info_lines.push(["Estimated exp/hr", exp_per_hour | 0]);
 
         let date = new Date();
         let score_bias = 0;
 
-        if (cl.gPlanets) {
-            let current = cl.gPlanets[info.active_planet];
+        if (client.gPlanets) {
+            let current = client.gPlanets[info.active_planet];
             if (current) {
                 info_lines.push(["Current planet", `${current.state.name} [${(current.state.capture_progress * 100).toFixed(2)}%] (id ${current.id})`]);
-                if (cl.gPlayerInfo.active_zone_position) {
-                    let zoneIdx = parseInt(cl.gPlayerInfo.active_zone_position);
-                    let zoneX = zoneIdx % k_NumMapTilesW, zoneY = (zoneIdx / k_NumMapTilesW) | 0;
+                if (client.gPlayerInfo.active_zone_position) {
+                    let zoneIdx = parseInt(client.gPlayerInfo.active_zone_position);
+                    let zoneX = zoneIdx % mapTiles, zoneY = (zoneIdx / mapTiles) | 0;
                     let zone = current.zones[zoneIdx];
 
                     if (zone) {
-                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) (id: ${zoneIdx}) difficulty: ${difficulty_names[zone.difficulty]}`]);
+                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) (id: ${zoneIdx}) difficulty: ${difficultyNames[zone.difficulty]}`]);
 
-                        let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
-                        date.setTime(cl.endGameTime);
-                        score_bias = difficulty_multipliers[zone.difficulty] * 5 * SCORE_TIME;
+                        let time_left = ((client.endGameTime - Date.now()) / 1000) | 0;
+                        date.setTime(client.endGameTime);
+                        score_bias = difficultyMultipliers[zone.difficulty] * 5 * scoreTime;
                         info_lines.push(["Round time left", FormatTimer(time_left)]);
                     }
                 }
