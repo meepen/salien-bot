@@ -8,7 +8,9 @@ const utils = require("./headless/utils.js");
 let CARE_ABOUT_PLANET = false;
 let DO_LOGS = false;
 
-const log_file = "./log.txt"
+const log_file = "./log.txt";
+
+let token_file = "./gettoken.json";
 
 // clear log
 
@@ -20,7 +22,9 @@ global.log = function log(data) {
     fs.appendFileSync(log_file, "\n");
 }
 
-for(let arg of args) {
+for(let i = 0; i < args.length; i++) {
+    const arg = args[i];
+
     switch(true) {
         case arg == "--log" || arg == "-l":
             {
@@ -42,6 +46,10 @@ for(let arg of args) {
                 global.log("Caring for previous planet.");
             }
             break;
+        case (arg == "--token" || arg == "-t") && args[i + 1]:
+            global.log(`token file: ${args[++i]}`);
+            token_file = args[i];
+            break;
         default:
             throw new Error(`invalid command line argument ${arg}`);
     }
@@ -62,7 +70,7 @@ const difficulty_names = [
     "???", "easy", "medium", "hard", "boss"
 ]
 
-const token = JSON.parse(fs.readFileSync("./gettoken.json", "utf8"));
+const token = JSON.parse(fs.readFileSync(token_file, "utf8"));
 
 const Instance = new CServerInterface(token);
 
