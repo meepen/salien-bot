@@ -6,6 +6,7 @@ const fs = require("fs");
 
 let CARE_ABOUT_PLANET = false;
 let DO_LOGS = false;
+var currentDifficulty;
 
 const log_file = "./log.txt";
 
@@ -56,7 +57,10 @@ const difficulty_multipliers = [
     0, 1, 2, 4
 ]
 const difficulty_names = [
-    "???", "easy", "medium", "hard", "boss"
+    "???", "Easy", "Medium", "Hard", "Boss"
+]
+const difficulty_scores = [
+    0, 600, 1200, 2400, 4800
 ]
 
 const gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
@@ -380,7 +384,7 @@ const PrintInfo = function PrintInfo() {
         info_lines.push(["Running for", FormatTimer(((Date.now() / 1000) | 0) - start_time)]);
         info_lines.push(["Current level", `${info.level} (${info.score} / ${info.next_level_score})`]);
         info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
-        let exp_per_hour = 60 * 60 * 2400 / (WAIT_TIME + 5);
+        let exp_per_hour = 60 * 60 * difficulty_scores[currentDifficulty] / (WAIT_TIME + 5);
         info_lines.push(["Estimated exp/hr", exp_per_hour | 0]);
 
         let date = new Date();
@@ -394,9 +398,10 @@ const PrintInfo = function PrintInfo() {
                     let zoneIdx = parseInt(cl.gPlayerInfo.active_zone_position);
                     let zoneX = zoneIdx % k_NumMapTilesW, zoneY = (zoneIdx / k_NumMapTilesW) | 0;
                     let zone = current.zones[zoneIdx];
+                    currentDifficulty = zone.difficulty;
 
                     if (zone) {
-                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) (id: ${zoneIdx}) difficulty: ${difficulty_names[zone.difficulty]}`]);
+                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) (id: ${zoneIdx}) Difficulty: ${difficulty_names[zone.difficulty]} (Max Score: ${difficulty_scores[zone.difficulty]})`]);
 
                         let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
                         date.setTime(cl.endGameTime);
