@@ -2,7 +2,7 @@
 
 :: Made by Main Fighter [mainfighter.com]
 :: Simple start script for meepen's sailen-bot [https://github.com/meepen/salien-bot]
-:: v1.6.2 [24-06-2018]
+:: v1.6.3 [24-06-2018]
 
 ::===============================================================================================================::
 
@@ -155,11 +155,11 @@ cd "%rootdir%"
 :: Sets directory to be the same as name if not defined
 if not defined directory set directory=%name%
 
-:: Checks
-if not exist "botfiles\%directory%\gettoken.json" ( echo %name% - Token is missing bot not starting & pause & goto :eof )
-
 :: Skip
 if %enabled%==false call :SetDefaults & goto :eof
+
+:: Checks
+if not exist "botfiles\%directory%\gettoken.json" ( echo %name% - Token is missing bot not starting & pause & call :SetDefaults & goto :eof )
 
 :: Opens CMD Window > Sets title and color of window > Changes to dir > runs npm install if enabled > starts bot
 set commandline="title Sailen Bot - %name% & color %color% & cd botfiles\%directory% & if %npminstall%==true call npm install & node headless %botargs% & if %debug%==true pause & exit"
