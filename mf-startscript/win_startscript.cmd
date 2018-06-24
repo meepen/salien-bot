@@ -2,7 +2,7 @@
 
 :: Made by Main Fighter [mainfighter.com]
 :: Simple start script for meepen's sailen-bot [https://github.com/meepen/salien-bot]
-:: v1.5.1 [24-06-2018]
+:: v1.5.2 [24-06-2018]
 
 ::===============================================================================================================::
 
@@ -12,8 +12,12 @@
 call configuration.cmd
 
 :: Checks
-where node >nul 2>nul if %errorlevel%==1 color 40 & echo [NEEDED] Node is needed for bot & start "" https://nodejs.org/en/ & pause & exit
-where git >nul 2>nul if %errorlevel%==1 color 40 & echo [OPTIONAL] Git is required for Auto Download and Update functions & set autodownloadbot=false & set autoupdatebot=false & start "" https://git-scm.com/ & pause
+:: NodeJS
+node.exe --version >nul 2>nul 
+if %errorlevel%==9009 (color 40 & echo [NEEDED] Node is needed for bot & start "" https://nodejs.org/en/ & pause & exit)
+:: Git
+git.exe --version >nul 2>nul 
+if %errorlevel%==9009 (color 40 & echo [OPTIONAL] Git is required for Auto Download and Update functions & set autodownloadbot=false & set autoupdatebot=false & start "" https://git-scm.com/ & pause)
 
 cls
 
