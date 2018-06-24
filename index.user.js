@@ -255,6 +255,12 @@ const AllEnemiesHPNearPoint = function AllEnemiesHPNearPoint(x,  y, radius) {
     });
     return hp;
 }
+const CenterOfSpawnZoneYpos = function CenterOfSpawnZoneX(enemy) {
+    //slime from enemies.json has scale 0.5
+    //texture has height 126
+    let minSpriteHeight = 126 * 0.5;
+    return (((APP.screen.height - minSpriteHeight) - (APP.screen.height - k_SpawnHeightLimit)) / 2) + (APP.screen.height - k_SpawnHeightLimit); //enemy.js:116
+}
 
 const BlackholeOfEnemy = function BlackholeOfEnemy(enemy) {
     for(var [_, blackhole] of AttackManager().m_mapBlackholes) {
@@ -402,7 +408,8 @@ class BombAttack extends ProjectileAttack {
         if (enemy.m_bDead || EnemyWillAffectedByBoulder(enemy) || BlackholeOfEnemy(enemy) != null)
             return WORST_SCORE;
 
-        let score =  AllEnemiesHPNearPoint(enemy.m_Sprite.x, enemy.m_Sprite.y, 50);
+        let explosionWidth = GAME.m_State.m_AttackManager.m_rgExplosionFrames[0].width * 0.4; //attack.js:353 value is 204.8
+        let score =  AllEnemiesHPNearPoint(enemy.m_Sprite.x, enemy.m_Sprite.y, explosionWidth/2);
         if(score < 30) {
             score = WORST_SCORE;
         }
@@ -424,7 +431,7 @@ class BlackholeAttack extends ProjectileAttack {
         return CanAttack(this.getAttackName());
     } 
     attack(x, y) {
-        SetMouse(START_POS - k_nDamagePointx, (APP.renderer.height / 2) + 100);
+        SetMouse(START_POS - k_nDamagePointx, CenterOfSpawnZoneYpos());
         AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)();
     }        
 }
@@ -436,7 +443,7 @@ class MeteorAttack extends ProjectileAttack {
         this.attack();
     }
     attack() {
-        SetMouse(k_nDamagePointx + 50,  (APP.renderer.height / 2) + 100);
+        SetMouse(k_nDamagePointx + 50,  CenterOfSpawnZoneYpos());
         AttackManager().m_mapKeyCodeToAttacks.get(this.getAttackData().keycode)();
     }    
 }
