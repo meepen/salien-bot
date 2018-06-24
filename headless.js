@@ -3,6 +3,7 @@
 const args = process.argv.slice(2);
 const network = require("./headless/network.js");
 const fs = require("fs");
+const utils = require("./headless/utils.js");
 
 let CARE_ABOUT_PLANET = false;
 let DO_LOGS = false;
@@ -16,37 +17,47 @@ let token_file = "./gettoken.json";
 global.log = function log(data) {
     if (!DO_LOGS)
         return;
+
     fs.appendFileSync(log_file, data.toString());
     fs.appendFileSync(log_file, "\n");
 }
 
-for (let i = 0; i < args.length; i++) {
-    let arg = args[i];
-    if (arg == "--log" || arg == "-l") {
-        DO_LOGS = true;
-        fs.writeFileSync(log_file, "");
-        global.log("Logging activated.");
+for(let i = 0; i < args.length; i++) {
+    const arg = args[i];
+
+    switch(true) {
+        case arg == "--log" || arg == "-l":
+            {
+                DO_LOGS = true;
+                fs.writeFileSync(log_file, "");
+                global.log("Logging activated.");
+            }
+            break;
+        case arg == "--lang" && args[i + 1]:
+            {
+                // https://partner.steamgames.com/doc/store/localization#supported_languages
+                global.log(`language: ${args[++i]}`);
+                network.ChangeLanguage(args[i]);
+            }
+            break;
+        case arg == "--care-for-planet" || arg == "-c":
+            {
+                CARE_ABOUT_PLANET = true;
+                global.log("Caring for previous planet.");
+            }
+            break;
+        case (arg == "--token" || arg == "-t") && args[i + 1]:
+            global.log(`token file: ${args[++i]}`);
+            token_file = args[i];
+            break;
+        default:
+            throw new Error(`invalid command line argument ${arg}`);
     }
-    else if (arg == "--lang" && args[i + 1]) {
-        // https://partner.steamgames.com/doc/store/localization#supported_languages
-        global.log(`language: ${args[++i]}`);
-        network.ChangeLanguage(args[i]);
-    }
-    else if (arg == "--token" || arg == "-t") {
-        global.log(`token file: ${args[++i]}`);
-        token_file = args[i];
-    }
-    else if (arg == "--care-for-planet" || arg == "-c") {
-        CARE_ABOUT_PLANET = true;
-        global.log("Caring for previous planet.");
-    }
-    else
-        throw new Error(`invalid command line argument ${arg}`);
 }
 
 const CServerInterface = network.CServerInterface;
-const k_NumMapTilesW = 12;
 
+const k_NumMapTilesW = 12;
 const SCORE_TIME = 120;
 const WAIT_TIME = 110;
 
@@ -57,376 +68,231 @@ const difficulty_multipliers = [
 ]
 const difficulty_names = [
     "???", "easy", "medium", "hard", "boss"
-]
+];
 
-const gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
+const token = JSON.parse(fs.readFileSync(token_file, "utf8"));
 
-let Instance = new CServerInterface(gettoken);
-
-const StartTimer = function StartTimer() {
-
-}
-
+const Instance = new CServerInterface(token);
 
 class Client {
-    constructor(int) {
-        this.int = int;
+    constructor(serverInterface) {
+        this.sInterface = serverInterface;
         this.gPlanets = {};
     }
 
-    Connect() {
-        return new Promise(res => {
-            this.GetPlayerInfo().then(() => {
-                if (this.gPlayerInfo.active_zone_game) {
-                    this.LeaveGame().then(() => {
-                        this.Connect().then(res);
-                    })
-                }
-                else {
-                    res();
-                }
-            })
-        });
+    async Connect() {
+        await this.GetPlayerInfo();
+
+        if (this.gPlayerInfo.active_zone_game) {
+            await this.LeaveGame();
+            await this.Connect();
+        }
     }
 
     GameInfo(offset) {
         this.endGameTime = Date.now() + offset;
     }
 
-    LeaveGame() {
-        return new Promise(res => {
-            if (this.gPlayerInfo.time_in_zone <= WAIT_TIME) {
-                // we can probably just finish our thing i guess
-                this.GetPlanet(this.gPlayerInfo.active_planet).then(() => {
-                    let time_left = 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone)
-                    this.GameInfo(time_left);
-                    setTimeout(() => {
-                        let planet = this.gPlanets[this.gPlayerInfo.active_planet];
-                        cl.ReportScore(5 * difficulty_multipliers[planet.zones[this.gPlayerInfo.active_zone_position].difficulty] * SCORE_TIME).then(res);
-                    }, time_left);
-                });
-            }
-            else {
-                this.int.LeaveGameInstance(this.gPlayerInfo.active_zone_game, res, () => {
-                    this.Connect().then(res);
-                }, () => {
-                    this.GetPlayerInfo().then(() => {
-                        if (this.gPlayerInfo.active_zone_game) {
-                            this.LeaveGame().then(res);
-                        }
-                        else {
-                            res();
-                        }
-                    })
-                })
-            }
-        });
-    }
+    async LeaveGame() {
+        if (this.gPlayerInfo.time_in_zone <= WAIT_TIME) {
+            // we can probably just finish our thing i guess
+            await this.GetPlanet(this.gPlayerInfo.active_planet);
+            const time_left = 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone);
+            this.GameInfo(time_left);
 
-    GetPlanets(shh) {
-        return new Promise(res => {
-            this.int.GetPlanets(data => {
-                this.m_Planets = data.response.planets;
-                res(this.m_Planets);
-            }, () => {
-                this.Connect().then(() => {
-                    this.GetPlanets(shh).then(res);
-                });
-            }, shh);
-        });
-    }
+            await utils.sleep(time_left);
 
-    GetPlayerInfo() {
-        return new Promise(res => {
-            this.int.GetPlayerInfo(d => {
-                if (!d || !d.response) {
-                    this.Connect().then(res);
-                    return;
-                }
-                if (!this.gPlayerInfo)
-                    this.gPlayerInfoOriginal = d.response;
-                this.gPlayerInfo = d.response;
-                res(this.gPlayerInfo);
-            }, () => {
-                this.Connect().then(() => {
-                    this.GetPlayerInfo().then(res);
-                });
-            });
-        });
-    }
-
-    JoinPlanet(id) {
-        return new Promise(res => {
-            this.int.JoinPlanet(id, d => {
-                this.gPlayerInfo.active_planet = id;
-                res();
-            }, () => {
-                this.Connect().then(() => {
-                    this.JoinPlanet(id).then(() => {
-                        this.JoinPlanet(id).then(res);
-                    });
-                });
-            });
-        });
-    }
-
-    GetPlanet(id) {
-        return new Promise(res => {
-            this.int.GetPlanet(id, d => {
-                for (let i in d.response.planets) {
-                    let planet = d.response.planets[i];
-                    this.gPlanets[planet.id] = planet;
-                }
-                res(this.gPlanets[id]);
-            }, () => {
-                this.GetPlanet(id).then(res);
-            });
-        });
-    }
-
-    JoinZone(id) {
-        return new Promise(res => {
-            this.int.JoinZone(id, d => {
-                this.gPlayerInfo.active_zone_position = id;
-                res(d.response.zone_info);
-            }, () => {
-                this.Connect().then(res);
-            });
-        })
-    }
-
-    ReportScore(score) {
-        return new Promise(res => {
-            this.int.ReportScore(score, d => {
-                res();
-            }, () => {
-                this.GetPlayerInfo(() => {
-                    if (this.gPlayerInfo.active_zone_game) {
-                        this.LeaveGame().then(res);
-                    }
-                    else {
-                        res();
-                    }
-                })
-            })
-        })
-    }
-
-    LeavePlanet() {
-        return new Promise(res => {
-            this.int.LeaveGameInstance(this.gPlayerInfo.active_planet, () => {
-                this.gPlayerInfo.active_planet = undefined;
-                res();
-            }, () => {
-                this.GetPlayerInfo().then(() => {
-                    if (this.gPlayerInfo.active_planet) {
-                        this.LeavePlanet().then(res);
-                    }
-                    else {
-                        res();
-                    }
-                })
-            });
-        });
-    }
-
-    GetBestPlanet() {
-        return new Promise(res => {
-            if (CARE_ABOUT_PLANET && this.gPlayerInfo.active_planet) {
-                this.GetPlanet(this.gPlayerInfo.active_planet).then(planet => {
-                    if (!planet.state.active)
-                        this.LeavePlanet(() => this.GetBestPlanet().then(res));
-                    else
-                        res(this.gPlanets[this.gPlayerInfo.active_planet]);
-                });
-                return;
-            }
-            this.GetPlanets().then(planets => {
-                let i = 0;
-                var GetPlanetIterator = (cb) => {
-                    let planet = planets[i++];
-                    this.GetPlanet(planet.id).then(planets[i] ? () => GetPlanetIterator(cb) : cb);
-                }
-                GetPlanetIterator(() => {
-                    let best_planet, best_difficulty = -1;
-                    for (let p of planets) {
-                        let planet = this.gPlanets[p.id];
-                        let best_zone = GetBestZone(planet);
-
-                        if (best_zone && best_zone.difficulty > best_difficulty)
-                            best_planet = planet, best_difficulty = best_zone.difficulty;
-                    }
-                    if (best_difficulty === -1)
-                        throw new Error("no difficulty?!");
-                    res(best_planet, best_difficulty);
-                });
-            })
-        });
-    }
-
-    ForcePlanet(id) {
-        return new Promise(res => {
-            if (this.gPlayerInfo.active_planet && this.gPlayerInfo.active_planet != id) {
-                this.LeavePlanet().then(() => {
-                    this.ForcePlanet(id).then(res);
-                })
-                return;
-            }
-            else if (this.gPlayerInfo.active_planet != id) {
-                this.JoinPlanet(id).then(res);
-            }
-            else {
-                res();
-            }
-        })
-    }
-
-    FinishGame() {
-        return new Promise(res => {
-            this.GetPlayerInfo().then(() => {
-                this.GetBestPlanet().then(planet => {
-                    this.ForcePlanet(planet.id).then(() => {
-                        let zone = GetBestZone(planet);
-                        if (!zone) {
-                            this.LeavePlanet().then(() => {
-                                this.Connect().then(() => {
-                                    this.FinishGame().then(res)
-                                });
-                            });
-                            return;
-                        }
-                        this.JoinZone(zone.zone_position).then(zone_info => {
-                            if (!zone_info) {
-                                this.Connect().then(() => {
-                                    this.FinishGame().then(res);
-                                });
-                                return;
-                            }
-                            let time_left = 1000 * WAIT_TIME;
-                            this.GameInfo(time_left);
-                            setTimeout(() => {
-                                this.ReportScore(5 * difficulty_multipliers[zone_info.difficulty] * SCORE_TIME).then(res);
-                            }, time_left);
-                        });
-                    });
-                });
-            });
-        });
-    }
-}
-
-let cl = new Client(Instance);
-
-const GetBestZone = function GetBestZone(planet) {
-    let bestZone;
-    let highestDifficulty = -1;
-
-    let maxProgress = 10000;
-
-    for (let idx in planet.zones) {
-        let zone = planet.zones[idx];
-
-        if (!zone.captured) {
-            if (zone.type == 4) // boss
-                return zone;
-            if (zone.difficulty > highestDifficulty) {
-                highestDifficulty = zone.difficulty;
-                maxProgress = zone.capture_progress;
-                bestZone = zone;
-            }
-            else if (zone.difficulty < highestDifficulty)
-                continue;
-
-            if (zone.capture_progress < maxProgress) {
-                maxProgress = zone.capture_progress;
-                bestZone = zone;
+            const planet = this.gPlanets[this.gPlayerInfo.active_planet];
+            await this.ReportScore(5 * difficulty_multipliers[planet.zones[this.gPlayerInfo.active_zone_position].difficulty] * SCORE_TIME);
+        } else {
+            try {
+                await this.sInterface.LeaveGameInstance(this.gPlayerInfo.active_zone_game);
+            } catch (e) {
+                await this.Connect();
             }
         }
     }
 
-    return bestZone;
-}
-
-var Finish = () => cl.FinishGame().then(Finish);
-
-let start_time = (Date.now() / 1000) | 0
-
-const FormatTimer = function FormatTimer(timeInSeconds) {
-    if (parseInt(timeInSeconds) <= 0) {
-        return '';
+    async GetPlanets() {
+        try {
+            this.m_Planets = await this.sInterface.GetPlanets();
+            return this.m_Planets;
+        } catch (e) {
+            await this.Connect();
+            await this.GetPlanets();
+        }
     }
 
-    const SECONDS_IN_MINUTE = 60;
-    const MINUTES_IN_HOUR = 60;
-    const HOURS_IN_DAY = 24;
-    const SECONDS_IN_HOUR = SECONDS_IN_MINUTE * MINUTES_IN_HOUR;
-    const SECONDS_IN_DAY = SECONDS_IN_HOUR * HOURS_IN_DAY;
+    async GetPlayerInfo() {
+        try {
+            const data = await this.sInterface.GetPlayerInfo();
 
-    const days = Math.floor(timeInSeconds / SECONDS_IN_DAY);
-    const hours = Math.floor(timeInSeconds / SECONDS_IN_HOUR % HOURS_IN_DAY);
-    const minutes = Math.floor(timeInSeconds / SECONDS_IN_MINUTE % MINUTES_IN_HOUR);
-    const seconds = timeInSeconds % SECONDS_IN_MINUTE;
+            if (!data) {
+                await this.Connect();
+                return;
+            }
 
-    let formatted = '';
-    formatted += days ? `${days}d ` : '';
-    formatted += hours ? `${hours}h ` : '';
-    formatted += minutes ? `${minutes}m `: '';
-    formatted += seconds ? `${seconds}s ` : '';
+            if (!this.gPlayerInfo)
+                this.gPlayerInfoOriginal = data;
 
-    return formatted;
-}
+            this.gPlayerInfo = data;
 
-const PrintInfo = function PrintInfo() {
-    // clear screen, taken from https://stackoverflow.com/a/14976765
-    let info_lines = [];
-    if (cl.gPlayerInfo) {
-        let info = cl.gPlayerInfo;
-        info_lines.push(["Running for", FormatTimer(((Date.now() / 1000) | 0) - start_time)]);
-        info_lines.push(["Current level", `${info.level} (${info.score} / ${info.next_level_score})`]);
-        info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
-        let exp_per_hour = 60 * 60 * 2400 / (WAIT_TIME + 5);
-        info_lines.push(["Estimated exp/hr", exp_per_hour | 0]);
+            return this.gPlayerInfo;
+        } catch (e) {
+            await this.Connect();
+            await this.GetPlayerInfo();
+        }
+    }
 
-        let date = new Date();
-        let score_bias = 0;
+    async JoinPlanet(id) {
+        try {
+            const data = await this.sInterface.JoinPlanet(id);
+            this.gPlayerInfo.active_planet = id;
+        } catch (e) {
+            await this.Connect();
+            await this.JoinPlanet(id);
+        }
+    }
 
-        if (cl.gPlanets) {
-            let current = cl.gPlanets[info.active_planet];
-            if (current) {
-                info_lines.push(["Current planet", `${current.state.name} [${(current.state.capture_progress * 100).toFixed(2)}%] (id ${current.id})`]);
-                if (cl.gPlayerInfo.active_zone_position) {
-                    let zoneIdx = parseInt(cl.gPlayerInfo.active_zone_position);
-                    let zoneX = zoneIdx % k_NumMapTilesW, zoneY = (zoneIdx / k_NumMapTilesW) | 0;
-                    let zone = current.zones[zoneIdx];
+    async GetPlanet(id) {
+        try {
+            const planet = await this.sInterface.GetPlanet(id);
 
-                    if (zone) {
-                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) (id: ${zoneIdx}) difficulty: ${difficulty_names[zone.difficulty]}`]);
+            this.gPlanets[planet.id] = planet;
 
-                        let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
-                        date.setTime(cl.endGameTime);
-                        score_bias = difficulty_multipliers[zone.difficulty] * 5 * SCORE_TIME;
-                        info_lines.push(["Round time left", FormatTimer(time_left)]);
-                    }
-                }
+            return planet;
+        } catch (e) {
+            await this.GetPlanet(id);
+        }
+    }
+
+    async JoinZone(id) {
+        try {
+            const data = await this.sInterface.JoinZone(id);
+            this.gPlayerInfo.active_zone_position = id;
+            return data.response.zone_info;
+        } catch (e) {
+            await this.Connect();
+        }
+    }
+
+    async ReportScore(score) {
+        try {
+            await this.sInterface.ReportScore(score);
+        } catch (e) {
+            await this.GetPlayerInfo();
+
+            if (this.gPlayerInfo.active_zone_game)
+                await this.LeaveGame();
+        }
+    }
+
+    async LeavePlanet() {
+        try {
+            await this.sInterface.LeaveGameInstance(this.gPlayerInfo.active_planet);
+            this.gPlayerInfo.active_planet = undefined;
+        } catch (e) {
+            await this.GetPlayerInfo();
+
+            if (this.gPlayerInfo.active_planet)
+                await this.LeavePlanet();
+        }
+    }
+
+    async GetBestPlanet() {
+        if (CARE_ABOUT_PLANET && this.gPlayerInfo.active_planet) {
+            const planet = await this.GetPlanet(this.gPlayerInfo.active_planet);
+
+            if (!planet.state.active) {
+                await this.LeavePlanet();
+                await this.GetBestPlanet();
+            } else {
+                return this.gPlanets[this.gPlayerInfo.active_planet];
             }
         }
-        date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - score_bias) / exp_per_hour * 60 * 60);
-        info_lines.push(["Next level up", date.toLocaleString()]);
+
+        let best_planet = null;
+        let best_difficulty = -1;
+
+        const planets = await this.GetPlanets();
+
+        await Promise.all(planets.map(async (p) => await this.GetPlanet(p.id)));
+
+        for(let p of planets) {
+            const planet = this.gPlanets[p.id];
+            const best_zone = utils.GetBestZone(planet);
+
+            if (best_zone && best_zone.difficulty > best_difficulty) {
+                best_planet = planet;
+                best_difficulty = best_zone.difficulty;
+            }
+        }
+
+        if (best_difficulty === -1)
+            throw new Error("No best difficulty found");
+
+        return best_planet;
     }
 
+    async ForcePlanet(id) {
+        if (this.gPlayerInfo.active_planet && this.gPlayerInfo.active_planet != id) {
+            await this.LeavePlanet();
+            await this.ForcePlanet(id);
 
-    let max_length = 0;
-    for (let i = 0; i < info_lines.length; i++)
-        max_length = Math.max(max_length, info_lines[i][0].length);
+            return;
+        }
 
-    for (let i = 0; i < info_lines.length; i++)
-        info_lines[i] = info_lines[i].join(`: ${" ".repeat(max_length - info_lines[i][0].length)}`);
+        if (this.gPlayerInfo.active_planet != id) {
+            await this.JoinPlanet(id);
+        }
+    }
 
-    console.log("\u001b[2J\u001b[0;0H" + info_lines.join("\n"));
+    async FinishGame() {
+        await this.GetPlayerInfo();
+
+        const planet = await this.GetBestPlanet();
+        await this.ForcePlanet(planet.id);
+
+        const zone = utils.GetBestZone(planet);
+
+        if (!zone) {
+            await this.LeavePlanet();
+            await this.Connect();
+            await this.FinishGame();
+
+            return;
+        }
+
+        const info = await this.JoinZone(zone.zone_position);
+
+        if (!info) {
+            await this.Connect();
+            await this.FinishGame();
+
+            return;
+        }
+
+        const time_left = 1000 * WAIT_TIME;
+        this.GameInfo(time_left);
+
+        await utils.sleep(time_left);
+
+        await this.ReportScore(5 * difficulty_multipliers[info.difficulty] * SCORE_TIME);
+    }
 }
 
-setInterval(PrintInfo, 1000);
+const cl = new Client(Instance);
 
-cl.Connect().then(() => {
-    Finish();
-});
+async function Finish() {
+    await cl.FinishGame();
+    await Finish();
+};
+
+setInterval(() => {
+    utils.PrintInfo(cl, WAIT_TIME, SCORE_TIME, k_NumMapTilesW, difficulty_names, difficulty_multipliers);
+}, 1000);
+
+(async () => {
+    await cl.Connect();
+    await Finish();
+})();

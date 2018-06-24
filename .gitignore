@@ -2,3 +2,4 @@ node_modules
 package-lock.json
 gettoken.json
 log.txt
+*.log

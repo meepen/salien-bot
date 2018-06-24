@@ -1,223 +1,138 @@
-// <script>
 "use strict";
 
-let gLanguage = "english";
 const CWebAPI = require("./webapi.js").CWebAPI;
-const $J = module.exports.config = require("./jquery_node.js").jQuery;
+const request = require("request-promise-native");
+
+let gLanguage = "english";
+
 module.exports.ChangeLanguage = function ChangeLanguage(lang) {
 	gLanguage = lang;
 }
 
-let CServerInterface = module.exports.CServerInterface = function( rgResult )
+const CServerInterface = module.exports.CServerInterface = function( rgResult )
 {
-    this.m_WebAPI = new CWebAPI( rgResult.webapi_host, rgResult.webapi_host_secure, rgResult.token );
-    $J.token = rgResult.token;
+	this.m_WebAPI = new CWebAPI( rgResult.webapi_host, rgResult.webapi_host_secure, rgResult.token );
+
+	this.request = async function(url, method = "GET", data = {}) {
+
+		try {
+			const config = {
+				url,
+				method,
+				json: true,
+				transform: function(body, response) {
+					return {"headers": response.headers, "data": body.response};
+				}
+			};
+
+			const actualData = Object.assign({
+				access_token: this.m_WebAPI.m_strOAuth2Token
+			}, data);
+
+			switch(method) {
+				case "GET":
+					config.qs = actualData
+					break;
+				case "POST":
+					config.form = actualData;
+					break;
+			}
+
+			const response = await request(config);
+
+			if(response.headers['x-eresult'] == 1)
+				return response.data;
+			else
+				throw new Error("x-eresult != 1");
+		} catch (e) {
+			throw e;
+		}
+	}
 };
 
-CServerInterface.prototype.Connect = function( callback )
+CServerInterface.prototype.Connect = async function()
 {
-	var instance = this;
+	const result = await this.request("https://steamcommunity.com/saliengame/gettoken");
 
-	$J.ajax({
-		url: 'https://steamcommunity.com/saliengame/gettoken',
-		dataType: "json"
-	}).success(function(rgResult){
-		if( rgResult.success == 1)
-		{
-			instance.m_strSteamID = rgResult.steamid;
-			instance.m_strWebAPIHost = rgResult.webapi_host;
-			instance.m_WebAPI = new CWebAPI( rgResult.webapi_host, rgResult.webapi_host_secure, rgResult.token );
-			callback(rgResult);
-		}
+	if(result.success == 1)
+	{
+		this.m_strSteamID = result.steamid;
+		this.m_strWebAPIHost = result.webapi_host;
+		this.m_WebAPI = new CWebAPI(result.webapi_host, result.webapi_host_secure, result.token);
+
+		return result;
+	}
+};
+
+CServerInterface.prototype.GetPlanets = async function(noactive)
+{
+	const url = this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'GetPlanets', true );
+	const data = await this.request(url, 'GET', {
+		active_only: noactive ? 0 : 1,
+		language: gLanguage
+	});
+	return data.planets;
+};
+
+CServerInterface.prototype.GetPlanet = async function(planetId)
+{
+	const url = this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'GetPlanet', true );
+	const data = await this.request(url, 'GET', {
+		id: planetId,
+		language: gLanguage
+	});
+	return data.planets[0];
+};
+
+CServerInterface.prototype.GetPlayerInfo = async function()
+{
+	const url = this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'GetPlayerInfo', true );
+
+	return this.request(url, 'POST');
+};
+
+CServerInterface.prototype.JoinPlanet = async function(planetId)
+{
+	const url = this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'JoinPlanet', true );
+
+	return this.request(url, 'POST', {
+		id: planetId
 	});
 };
 
-CServerInterface.prototype.GetPlanets = function( callback, error, noactive )
+CServerInterface.prototype.JoinZone = async function(zoneId)
 {
-	var rgParams = {
-		active_only: noactive ? 0 : 1,
+	const url = this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'JoinZone', true );
+
+	return this.request(url, 'POST', {
+		zone_position: zoneId
+	});
+};
+
+CServerInterface.prototype.RepresentClan = async function(clanId)
+{
+	const url = this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'RepresentClan', true );
+
+	return this.request(url, 'POST', {
+		clanid: clanId
+	});
+};
+
+CServerInterface.prototype.ReportScore = async function(score)
+{
+	const url = this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'ReportScore', true );
+
+	return this.request(url, 'POST', {
+		score,
 		language: gLanguage
-	};
-
-	$J.ajax({
-		url: this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'GetPlanets', true ),
-		method: 'GET',
-		data: rgParams,
-	}).success( function( results, textStatus, request ) {
-		if ( request.getResponseHeader( 'x-eresult' ) == 1 )
-		{
-			callback( results )
-		}
-		else
-		{
-			error();
-		}
-	}).fail( error );
+	});
 };
 
-CServerInterface.prototype.GetPlanet = function( planetid, callback, error )
+CServerInterface.prototype.LeaveGameInstance = function(instanceId)
 {
-	var rgParams = {
-		id: planetid,
-		language: gLanguage
-	};
+	const url = this.m_WebAPI.BuildURL( 'IMiniGameService', 'LeaveGame', true );
 
-	$J.ajax({
-		url: this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'GetPlanet', true ),
-		method: 'GET',
-		data: rgParams,
-	}).success( function( results, textStatus, request ) {
-		if ( request.getResponseHeader( 'x-eresult' ) == 1 )
-		{
-			callback( results )
-		}
-		else
-		{
-			error();
-		}
-	}).fail( error );
-};
-
-CServerInterface.prototype.GetPlayerInfo = function( callback, error )
-{
-		var instance = this;
-		var rgParams = {
-			access_token: instance.m_WebAPI.m_strOAuth2Token,
-		};
-
-		$J.ajax({
-			url: this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'GetPlayerInfo', true ),
-			method: 'POST',
-			data: rgParams,
-		}).success( function( results, textStatus, request ) {
-			if ( request.getResponseHeader( 'x-eresult' ) == 1 )
-			{
-				callback( results )
-			}
-			else
-			{
-				error();
-			}
-		}).fail( error );
-};
-
-CServerInterface.prototype.JoinPlanet = function( planetid, callback, error )
-{
-	var instance = this;
-	var rgParams = {
-		id: planetid,
-		access_token: instance.m_WebAPI.m_strOAuth2Token
-	};
-
-	$J.ajax({
-		url: this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'JoinPlanet', true ),
-		method: 'POST',
-		data: rgParams,
-	}).success( function( results, textStatus, request ) {
-		if ( request.getResponseHeader( 'x-eresult' ) == 1 )
-		{
-			callback( results )
-		}
-		else
-		{
-			error();
-		}
-	}).fail( error );
-};
-
-CServerInterface.prototype.JoinZone = function( zoneid, callback, error )
-{
-	var instance = this;
-	var rgParams = {
-		zone_position: zoneid,
-		access_token: instance.m_WebAPI.m_strOAuth2Token
-	};
-
-	$J.ajax({
-		url: this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'JoinZone', true ),
-		method: 'POST',
-		data: rgParams,
-	}).success( function( results, textStatus, request ) {
-		if ( request.getResponseHeader( 'x-eresult' ) == 1 )
-		{
-			callback( results )
-		}
-		else
-		{
-			error();
-		}
-	}).fail( error );
-};
-
-CServerInterface.prototype.RepresentClan = function( ulClanid, callback, error )
-{
-	var instance = this;
-	var rgParams = {
-		clanid: ulClanid,
-		access_token: instance.m_WebAPI.m_strOAuth2Token
-	};
-
-	$J.ajax({
-		url: this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'RepresentClan', true ),
-		method: 'POST',
-		data: rgParams,
-	}).success( function( results, textStatus, request ) {
-		if ( request.getResponseHeader( 'x-eresult' ) == 1 )
-		{
-			callback( results )
-		}
-		else
-		{
-			error();
-		}
-	}).fail( error );
-};
-
-CServerInterface.prototype.ReportScore = function( nScore, callback, error )
-{
-	var instance = this;
-	var rgParams = {
-		access_token: instance.m_WebAPI.m_strOAuth2Token,
-		score: nScore,
-		language: gLanguage
-	};
-
-	$J.ajax({
-		url: this.m_WebAPI.BuildURL( 'ITerritoryControlMinigameService', 'ReportScore', true ),
-		method: 'POST',
-		data: rgParams,
-	}).success( function( results, textStatus, request ) {
-		if ( request.getResponseHeader( 'x-eresult' ) == 1 )
-		{
-			callback( results )
-		}
-		else
-		{
-			error();
-		}
-	}).fail( error );
-};
-
-CServerInterface.prototype.LeaveGameInstance = function( instanceid, callback, error )
-{
-	var instance = this;
-	var rgParams = {
-		access_token: instance.m_WebAPI.m_strOAuth2Token,
-		gameid: instanceid,
-	};
-
-	$J.ajax({
-		url: this.m_WebAPI.BuildURL( 'IMiniGameService', 'LeaveGame', true ),
-		method: 'POST',
-		data: rgParams,
-	}).success( function( results, textStatus, request ) {
-		if ( request.getResponseHeader( 'x-eresult' ) == 1 )
-		{
-			callback( results )
-		}
-		else
-		{
-			error();
-		}
+	return this.request(url, 'POST', {
+		gameid: instanceId
 	});
 };
