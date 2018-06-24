@@ -36,7 +36,7 @@ Here are the steps to use:
 - Create a config in instances folder using the exampleinstance.cmd as a starting point
 - Run start.cmd
 
-# How to get your token
+### How to get your token
 - Log into Steam
 - Open https://steamcommunity.com/saliengame/gettoken in browser with Steam logged in
 - Copy the entire contents of the page
