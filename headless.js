@@ -53,14 +53,10 @@ const WAIT_TIME = 110;
 
 // TODO: get these from json
 const difficulty_multipliers = [
-    0, 1, 2, 4
+    0, 1, 2, 4, 4
 ]
 const difficulty_names = [
     "???", "easy", "medium", "hard", "boss"
-]
-
-const difficulty_scores = [
-    "0","600","1200","2400", "2400"
 ]
 
 const gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
@@ -410,7 +406,7 @@ const PrintInfo = function PrintInfo() {
                         date.setTime(cl.endGameTime);
                         score_bias = difficulty_multipliers[zone.difficulty] * 5 * SCORE_TIME;
                         info_lines.push(["Round time left", FormatTimer(time_left)]);
-                        let exp_per_hour = 60 * 60 * difficulty_scores[zone.difficulty] / (WAIT_TIME + 5);
+                        let exp_per_hour = 60 * 60 * score_bias / (WAIT_TIME + 5);
                         info_lines.push(["Estimated exp/hr", exp_per_hour | 0]);
                         date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - score_bias) / exp_per_hour * 60 * 60);
                         info_lines.push(["Next level up", date.toLocaleString()]);
