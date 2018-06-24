@@ -2,10 +2,12 @@
 
 const args = process.argv.slice(2);
 const network = require("./headless/network.js");
+const IntlMessageFormat = require('intl-messageformat');
 const fs = require("fs");
 
 let CARE_ABOUT_PLANET = false;
 let DO_LOGS = false;
+let SALIEN_LOCALE = "english";
 
 const log_file = "./log.txt"
 
@@ -27,8 +29,9 @@ for (let i = 0; i < args.length; i++) {
     }
     else if (arg == "--lang" && args[i + 1]) {
         // https://partner.steamgames.com/doc/store/localization#supported_languages
-        global.log(`language: ${args[++i]}`);
+        global.log(`Language: ${args[++i]}`);
         network.ChangeLanguage(args[i]);
+		SALIEN_LOCALE = args[i];
     }
     else if (arg == "--care-for-planet" || arg == "-c") {
         CARE_ABOUT_PLANET = true;
@@ -37,6 +40,8 @@ for (let i = 0; i < args.length; i++) {
     else
         throw new Error(`invalid command line argument ${arg}`);
 }
+
+const Messages = JSON.parse(fs.readFileSync("./locales/"+SALIEN_LOCALE+".json", "utf8"));
 
 const CServerInterface = network.CServerInterface;
 const k_NumMapTilesW = 12;
@@ -50,7 +55,7 @@ const difficulty_multipliers = [
     0, 1, 2, 4
 ]
 const difficulty_names = [
-    "???", "easy", "medium", "hard", "boss"
+    Messages.DIFFICULTIES.UNKNOWN, Messages.DIFFICULTIES.EASY, Messages.DIFFICULTIES.MEDIUM, Messages.DIFFICULTIES.HARD, Messages.DIFFICULTIES.BOSS
 ]
 
 const gettoken = JSON.parse(fs.readFileSync("./gettoken.json", "utf8"));
@@ -60,7 +65,6 @@ let Instance = new CServerInterface(gettoken);
 const StartTimer = function StartTimer() {
     
 }
-
 
 class Client {
     constructor(int) {
@@ -247,7 +251,7 @@ class Client {
                             best_planet = planet, best_difficulty = best_zone.difficulty;
                     }
                     if (best_difficulty === -1)
-                        throw new Error("no difficulty?!");
+                        throw new Error(Messages.ERR_NO_DIFFICULTY);
                     res(best_planet, best_difficulty);
                 });
             })
@@ -357,11 +361,7 @@ const FormatTimer = function FormatTimer(timeInSeconds) {
     const minutes = Math.floor(timeInSeconds / SECONDS_IN_MINUTE % MINUTES_IN_HOUR);
     const seconds = timeInSeconds % SECONDS_IN_MINUTE;
 
-    let formatted = '';
-    formatted += days ? `${days}d ` : '';
-    formatted += hours ? `${hours}h ` : '';
-    formatted += minutes ? `${minutes}m `: '';
-    formatted += seconds ? `${seconds}s ` : '';
+    let formatted = new IntlMessageFormat(Messages.TIMER_COUNTDOWN,Messages.LOCALE_CODE).format({days:days, hours:hours, minutes:minutes, seconds:seconds});
 
     return formatted;
 }
@@ -371,11 +371,11 @@ const PrintInfo = function PrintInfo() {
     let info_lines = [];
     if (cl.gPlayerInfo) {
         let info = cl.gPlayerInfo;
-        info_lines.push(["Running for", FormatTimer(((Date.now() / 1000) | 0) - start_time)]);
-        info_lines.push(["Current level", `${info.level} (${info.score} / ${info.next_level_score})`]);
-        info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
+        info_lines.push([Messages.RUNNING_FOR_TITLE, FormatTimer(((Date.now() / 1000) | 0) - start_time)]);
+        info_lines.push([Messages.CURRENT_LEVEL_TITLE, new IntlMessageFormat(Messages.CURRENT_LEVEL_DESC,Messages.LOCALE_CODE).format({level:info.level, score:info.score, next_level_score:info.next_level_score})]);
+        info_lines.push([Messages.EXP_SINCE_START_TITLE, new IntlMessageFormat(Messages.EXP_SINCE_START_DESC,Messages.LOCALE_CODE).format({exp:info.score - cl.gPlayerInfoOriginal.score})]);
         let exp_per_hour = 60 * 60 * 2400 / (WAIT_TIME + 5);
-        info_lines.push(["Estimated exp/hr", exp_per_hour | 0]);
+        info_lines.push([Messages.ESTIMATED_EXP_PER_HOUR_TITLE, new IntlMessageFormat(Messages.ESTIMATED_EXP_PER_HOUR_DESC,Messages.LOCALE_CODE).format({exp:exp_per_hour | 0})]);
         
         let date = new Date();
         let score_bias = 0;
@@ -383,25 +383,25 @@ const PrintInfo = function PrintInfo() {
         if (cl.gPlanets) {
             let current = cl.gPlanets[info.active_planet];
             if (current) {
-                info_lines.push(["Current planet", `${current.state.name} [${(current.state.capture_progress * 100).toFixed(2)}%] (id ${current.id})`]);
+                info_lines.push([Messages.CURRENT_PLANET_TITLE, new IntlMessageFormat(Messages.CURRENT_PLANET_DESC,Messages.LOCALE_CODE).format({planet_name:current.state.name, capture_progress:current.state.capture_progress, id:current.id})]);
                 if (cl.gPlayerInfo.active_zone_position) {
                     let zoneIdx = parseInt(cl.gPlayerInfo.active_zone_position);
                     let zoneX = zoneIdx % k_NumMapTilesW, zoneY = (zoneIdx / k_NumMapTilesW) | 0;
                     let zone = current.zones[zoneIdx];
 
                     if (zone) {
-                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) (id: ${zoneIdx}) difficulty: ${difficulty_names[zone.difficulty]}`]);
+                        info_lines.push([Messages.CURRENT_ZONE_TITLE, new IntlMessageFormat(Messages.CURRENT_ZONE_DESC,Messages.LOCALE_CODE).format({zoneX:zoneX, zoneY:zoneY, zoneIdx:zoneIdx, difficulty_name:difficulty_names[zone.difficulty]})]);
 
                         let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
                         date.setTime(cl.endGameTime);
                         score_bias = difficulty_multipliers[zone.difficulty] * 5 * SCORE_TIME;
-                        info_lines.push(["Round time left", FormatTimer(time_left)]);
+                        info_lines.push([Messages.ROUND_TIME_LEFT_TITLE, FormatTimer(time_left)]);
                     }
                 }
             }
         }
         date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - score_bias) / exp_per_hour * 60 * 60);
-        info_lines.push(["Next level up", date.toLocaleString()]);
+        info_lines.push([Messages.NEXT_LEVEL_UP_TITLE, new IntlMessageFormat(Messages.NEXT_LEVEL_UP_DESC,Messages.LOCALE_CODE).format({timestamp:date})]);
     }
 
 

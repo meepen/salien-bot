@@ -1,0 +1,27 @@
+{
+	"LOCALE_CODE": "it-IT",
+	"LOCALE_NAME": "Italian - Italy",
+	"DIFFICULTIES": {
+		"UNKNOWN": "???",
+		"EASY": "Facile",
+		"MEDIUM": "Media",
+		"HARD": "Difficile",
+		"BOSS": "Boss"
+	},
+	"ERR_NO_DIFFICULTY": "Nessuna difficoltà?!",
+	"RUNNING_FOR_TITLE": "In esecuzione da",
+	"TIMER_COUNTDOWN": "{days, plural, =0{} one{# giorno, } other{# giorni, }}{hours, plural, =0{} one{# ora, } other{# ore, }}{minutes, plural, =0{} one{# minuto, } other{# minuti, }}{seconds, plural, =0{} one{# secondo} other{# secondi}}",
+	"CURRENT_LEVEL_TITLE": "Livello attuale",
+	"CURRENT_LEVEL_DESC": "{level}° ({score} / {next_level_score})",
+	"EXP_SINCE_START_TITLE": "PE ottenuti",
+	"EXP_SINCE_START_DESC": "{exp, number} PE",
+	"ESTIMATED_EXP_PER_HOUR_TITLE": "Punti esperienza stimati all'ora",
+	"ESTIMATED_EXP_PER_HOUR_DESC": "{exp, number} PE",
+	"CURRENT_PLANET_TITLE": "Pianeta attuale",
+	"CURRENT_PLANET_DESC": "{planet_name} [{capture_progress, number, percent}] (ID: {id})",
+	"CURRENT_ZONE_TITLE": "Zona attuale",
+	"CURRENT_ZONE_DESC": "({zoneX}, {zoneY}) (ID: {zoneIdx}) | Difficoltà: {difficulty_name}",
+	"ROUND_TIME_LEFT_TITLE": "Tempo residuo",
+	"NEXT_LEVEL_UP_TITLE": "Prossimo livello",
+	"NEXT_LEVEL_UP_DESC": "{timestamp, date, medium} alle {timestamp, time, medium}"
+}
