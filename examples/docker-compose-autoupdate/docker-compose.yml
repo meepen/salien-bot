@@ -1,0 +1,15 @@
+version: '2'
+services:
+  bot:
+    image: meepen/salien-bot:latest
+    restart: always
+    volumes:
+     - ./gettoken.json:/app/gettoken.json
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+  updater:
+    image: v2tec/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 300 --label-enable
