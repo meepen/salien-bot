@@ -68,14 +68,16 @@ let internal_ajax = function internal_ajax(data, ajax_object) {
         timeout: 5000
     }, function response(err, resp, body) {
         if (!ajax_object.nosucc)
-            global.log(new Error("no ajax fail function"));
+            global.log(new Error(`no ajax fail function ${url}`));
 
         if (err || resp.statusCode == 500 || resp.statusCode == 503) {
             global.log(`failed url ${url}, count ${++ajax_object._fails}`);
-            if (ajax_object._fails > 1)
-                ajax_object.nosucc();
-            else
-                internal_ajax(data, ajax_object);
+            setTimeout(() => {
+                if (ajax_object._fails > 1)
+                    ajax_object.nosucc();
+                else
+                    internal_ajax(data, ajax_object);
+            }, 500);
             return;
         }
         
@@ -86,10 +88,12 @@ let internal_ajax = function internal_ajax(data, ajax_object) {
         }
         catch (e) {
             global.log(`failed url ${url}, count ${++ajax_object._fails}`);
-            if (ajax_object._fails > 1)
-                ajax_object.nosucc();
-            else
-                internal_ajax(data, ajax_object);
+            setTimeout(() => {
+                if (ajax_object._fails > 1)
+                    ajax_object.nosucc();
+                else
+                    internal_ajax(data, ajax_object);
+            }, 500);
             return;
         }
         
