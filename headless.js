@@ -14,7 +14,7 @@ const log_file = "./log.txt"
 global.log = function log(data) {
     if (!DO_LOGS)
         return;
-    fs.appendFileSync(log_file, data);
+    fs.appendFileSync(log_file, data.toString());
     fs.appendFileSync(log_file, "\n");
 }
 
@@ -133,6 +133,10 @@ class Client {
     GetPlayerInfo() {
         return new Promise(res => {
             this.int.GetPlayerInfo(d => {
+                if (!d || !d.response) {
+                    this.Connect().then(res);
+                    return;
+                }
                 if (!this.gPlayerInfo) 
                     this.gPlayerInfoOriginal = d.response;
                 this.gPlayerInfo = d.response;
@@ -239,8 +243,8 @@ class Client {
                 }
                 GetPlanetIterator(() => {
                     let best_planet, best_difficulty = -1;
-                    for (let id in this.gPlanets) {
-                        let planet = this.gPlanets[id];
+                    for (let p of planets) {
+                        let planet = this.gPlanets[p.id];
                         let best_zone = GetBestZone(planet);
 
                         if (best_zone && best_zone.difficulty > best_difficulty)
