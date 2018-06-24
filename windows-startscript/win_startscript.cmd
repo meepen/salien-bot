@@ -2,7 +2,7 @@
 
 :: Made by Main Fighter [mainfighter.com]
 :: Simple start script for meepen's sailen-bot [https://github.com/meepen/salien-bot]
-:: v1.6.1 [24-06-2018]
+:: v1.6.2 [24-06-2018]
 
 ::===============================================================================================================::
 
@@ -12,7 +12,7 @@
 call configuration.cmd
 @echo %echo%
 
-title Salien Bot Starter
+title "Start script for meepen's sailent-bot"
 color 0A
 
 :: Checks
@@ -30,6 +30,7 @@ set rootdir=%~dp0
 
 :: Clone botfiles
 cls
+title Downloading bot files
 echo Downloading bot files
 echo.
 for %%a in ("instances\*.cmd") do call "%%a" & call :DownloadBotFiles
@@ -37,6 +38,7 @@ if %debug%==true pause
 
 :: Update botfiles
 cls
+title Updating bot files
 echo Updating bot files
 echo.
 for %%a in ("instances\*.cmd") do call "%%a" & call :UpdateBotFiles
@@ -44,13 +46,15 @@ if %debug%==true pause
 
 :: Sets up token for all bots
 cls
-echo Setting up tokens
+title Setting up bot tokens
+echo Setting up bot tokens
 echo.
 for %%a in ("instances\*.cmd") do call "%%a" & call :SetupToken
 if %debug%==true pause
 
 :: Start all bots in config
 cls
+title Starting bots
 echo Starting bots
 echo.
 for %%a in ("instances\*.cmd") do call "%%a" & call :StartScript
@@ -90,8 +94,9 @@ goto :eof
 
 :UpdateBotFiles
 
+title %name% - Updating bot files
 echo.
-echo %name% - Updating Bot Files
+echo %name% - Updating bot files
 
 :: Sets the directory back to the root
 cd "%rootdir%"
@@ -113,8 +118,9 @@ goto :eof
 
 :SetupToken
 
+title %name% - Setting up token
 echo.
-echo %name% - Setting up Token
+echo %name% - Setting up token
 
 :: Sets the directory back to the root
 cd "%rootdir%"
@@ -139,8 +145,9 @@ goto :eof
 
 :StartScript
 
+title %name% - Starting Bot
 echo.
-echo %name% - Starting Bot
+echo %name% - Starting bot
 
 :: Sets the directory back to the root
 cd "%rootdir%"
