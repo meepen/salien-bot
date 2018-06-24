@@ -114,7 +114,7 @@ goto :eof
 :SetupToken
 
 echo.
-echo %name% - Setting up token
+echo %name% - Setting up Token
 
 :: Sets the directory back to the root
 cd "%rootdir%"
@@ -140,7 +140,7 @@ goto :eof
 :StartScript
 
 echo.
-echo %name% - Starting bot
+echo %name% - Starting Bot
 
 :: Sets the directory back to the root
 cd "%rootdir%"
