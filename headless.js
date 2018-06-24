@@ -108,8 +108,6 @@ class Client {
             }
             else {
                 this.int.LeaveGameInstance(this.gPlayerInfo.active_zone_game, res, () => {
-                    this.Connect().then(res);
-                }, () => {
                     this.GetPlayerInfo().then(() => {
                         if (this.gPlayerInfo.active_zone_game) {
                             this.LeaveGame().then(res);
@@ -123,16 +121,14 @@ class Client {
         });
     }
 
-    GetPlanets(shh) {
+    GetPlanets(active_only) {
         return new Promise(res => {
             this.int.GetPlanets(data => {
                 this.m_Planets = data.response.planets;
                 res(this.m_Planets);
             }, () => {
-                this.Connect().then(() => {
-                    this.GetPlanets(shh).then(res);
-                });
-            }, shh);
+                this.GetPlanets(active_only).then(res);
+            }, active_only);
         });
     }
 
@@ -148,9 +144,7 @@ class Client {
                 this.gPlayerInfo = d.response;
                 res(this.gPlayerInfo);
             }, () => {
-                this.Connect().then(() => {
-                    this.GetPlayerInfo().then(res);
-                });
+                this.GetPlayerInfo().then(res);
             });
         });
     }
@@ -161,11 +155,7 @@ class Client {
                 this.gPlayerInfo.active_planet = id;
                 res();
             }, () => {
-                this.Connect().then(() => {
-                    this.JoinPlanet(id).then(() => {
-                        this.JoinPlanet(id).then(res);
-                    });
-                });
+                this.JoinPlanet(id).then(res);
             });
         });
     }
@@ -190,7 +180,7 @@ class Client {
                 this.gPlayerInfo.active_zone_position = id;
                 res(d.response.zone_info);
             }, () => {
-                this.Connect().then(res);
+                this.JoinZone(id).then(res);
             });
         })
     }
@@ -264,6 +254,8 @@ class Client {
                     }
                     res(best_planet, best_difficulty);
                 });
+            }, () => {
+                this.GetBestPlanet().then(res);
             })
         });
     }
