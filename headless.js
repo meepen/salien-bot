@@ -16,7 +16,7 @@ let token_file = "./gettoken.json";
 global.log = function log(data) {
     if (!DO_LOGS)
         return;
-    fs.appendFileSync(log_file, data.toString());
+    fs.appendFileSync(log_file, (new Date()).toISOString() + ": " + data.toString());
     fs.appendFileSync(log_file, "\n");
 }
 
