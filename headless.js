@@ -377,6 +377,12 @@ const FormatTimer = function FormatTimer(timeInSeconds) {
     return formatted;
 }
 
+// https://stackoverflow.com/a/41407246
+const difficulty_color_codes = [
+    "", "\x1b[1m\x1b[32m", "\x1b[1m\x1b[33m", "\x1b[1m\x1b[31m"
+];
+const reset_code = "\x1b[0m";
+
 const PrintInfo = function PrintInfo() {
     // clear screen, taken from https://stackoverflow.com/a/14976765
     let info_lines = [];
@@ -402,7 +408,7 @@ const PrintInfo = function PrintInfo() {
                         // keep in old position
                         info_lines.splice(info_lines.length - 1, 0, ["Estimated exp/hr", exp_per_hour | 0]);
 
-                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) [${(zone.capture_progress * 100).toFixed(3)}%] (id: ${zoneIdx}) difficulty: ${difficulty_names[zone.difficulty]}`]);
+                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) ${difficulty_color_codes[zone.difficulty]}${difficulty_names[zone.difficulty]}${reset_code} [${(zone.capture_progress * 100).toFixed(3)}%] (id: ${zoneIdx})`]);
 
                         let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
                         info_lines.push(["Round time left", FormatTimer(time_left)]);
@@ -421,8 +427,11 @@ const PrintInfo = function PrintInfo() {
     for (let i = 0; i < info_lines.length; i++)
         max_length = Math.max(max_length, info_lines[i][0].length);
 
+
+    // https://stackoverflow.com/a/41407246
+
     for (let i = 0; i < info_lines.length; i++)
-        info_lines[i] = info_lines[i].join(`: ${" ".repeat(max_length - info_lines[i][0].length)}`);
+        info_lines[i] = "\x1b[33m" + info_lines[i].join(`${reset_code}: ${" ".repeat(max_length - info_lines[i][0].length)}`);
 
     console.log("\u001b[2J\u001b[0;0H" + info_lines.join("\n"));
 }
