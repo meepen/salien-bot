@@ -14,4 +14,4 @@ set npminstall=true
 
 :: Debug Mode
 :: You won't need to use it
-set debug==false
+set debug=false
