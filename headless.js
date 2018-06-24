@@ -1,12 +1,38 @@
+"use strict";
+
 const args = process.argv.slice(2);
 const network = require("./headless/network.js");
+const fs = require("fs");
 
 let CARE_ABOUT_PLANET = false;
+let DO_LOGS = false;
 
-for (let arg of args) {
-    if (arg == "--care-for-planet" || arg == "-c") {
-        console.log("Caring for previous planet.");
+const log_file = "./log.txt"
+
+// clear log
+
+global.log = function log(data) {
+    if (!DO_LOGS)
+        return;
+    fs.appendFileSync(log_file, data);
+    fs.appendFileSync(log_file, "\n");
+}
+
+for (let i = 0; i < args.length; i++) {
+    let arg = args[i];
+    if (arg == "--log" || arg == "-l") {
+        DO_LOGS = true;
+        fs.writeFileSync(log_file, "");
+        global.log("Logging activated.");
+    }
+    else if (arg == "--lang" && args[i + 1]) {
+        // https://partner.steamgames.com/doc/store/localization#supported_languages
+        global.log(`language: ${args[++i]}`);
+        network.ChangeLanguage(args[i]);
+    }
+    else if (arg == "--care-for-planet" || arg == "-c") {
         CARE_ABOUT_PLANET = true;
+        global.log("Caring for previous planet.");
     }
     else
         throw new Error(`invalid command line argument ${arg}`);
@@ -27,7 +53,7 @@ const difficulty_names = [
     "???", "easy", "medium", "hard", "boss"
 ]
 
-const gettoken = JSON.parse(require("fs").readFileSync("./gettoken.json", "utf8"));
+const gettoken = JSON.parse(fs.readFileSync("./gettoken.json", "utf8"));
 
 let Instance = new CServerInterface(gettoken);
 
@@ -77,6 +103,15 @@ class Client {
             else {
                 this.int.LeaveGameInstance(this.gPlayerInfo.active_zone_game, res, () => {
                     this.Connect().then(res);
+                }, () => {
+                    this.GetPlayerInfo().then(() => {
+                        if (this.gPlayerInfo.active_zone_game) {
+                            this.LeaveGame().then(res);
+                        }
+                        else {
+                            res();
+                        }
+                    })
                 })
             }
         });
@@ -153,9 +188,16 @@ class Client {
     ReportScore(score) {
         return new Promise(res => {
             this.int.ReportScore(score, d => {
-                res(d);
+                res();
             }, () => {
-                this.Connect().then(res);
+                this.GetPlayerInfo(() => {
+                    if (this.gPlayerInfo.active_zone_game) {
+                        this.LeaveGame().then(res);
+                    }
+                    else {
+                        res();
+                    }
+                })
             })
         })
     }
@@ -165,6 +207,15 @@ class Client {
             this.int.LeaveGameInstance(this.gPlayerInfo.active_planet, () => {
                 this.gPlayerInfo.active_planet = undefined;
                 res();
+            }, () => {
+                this.GetPlayerInfo().then(() => {
+                    if (this.gPlayerInfo.active_planet) {
+                        this.LeavePlanet().then(res);
+                    }
+                    else {
+                        res();
+                    }
+                })
             });
         });
     }
@@ -266,6 +317,8 @@ const GetBestZone = function GetBestZone(planet) {
         let zone = planet.zones[idx];
 
         if (!zone.captured) {
+            if (zone.type == 4) // boss
+                return zone;
             if (zone.difficulty > highestDifficulty) {
                 highestDifficulty = zone.difficulty;
                 maxProgress = zone.capture_progress;
@@ -288,12 +341,37 @@ var Finish = () => cl.FinishGame().then(Finish);
 
 let start_time = (Date.now() / 1000) | 0
 
+const FormatTimer = function FormatTimer(timeInSeconds) {
+    if (parseInt(timeInSeconds) <= 0) {
+        return '';
+    }
+
+    const SECONDS_IN_MINUTE = 60;
+    const MINUTES_IN_HOUR = 60;
+    const HOURS_IN_DAY = 24;
+    const SECONDS_IN_HOUR = SECONDS_IN_MINUTE * MINUTES_IN_HOUR;
+    const SECONDS_IN_DAY = SECONDS_IN_HOUR * HOURS_IN_DAY;
+
+    const days = Math.floor(timeInSeconds / SECONDS_IN_DAY);
+    const hours = Math.floor(timeInSeconds / SECONDS_IN_HOUR % HOURS_IN_DAY);
+    const minutes = Math.floor(timeInSeconds / SECONDS_IN_MINUTE % MINUTES_IN_HOUR);
+    const seconds = timeInSeconds % SECONDS_IN_MINUTE;
+
+    let formatted = '';
+    formatted += days ? `${days}d ` : '';
+    formatted += hours ? `${hours}h ` : '';
+    formatted += minutes ? `${minutes}m `: '';
+    formatted += seconds ? `${seconds}s ` : '';
+
+    return formatted;
+}
+
 const PrintInfo = function PrintInfo() {
     // clear screen, taken from https://stackoverflow.com/a/14976765
     let info_lines = [];
     if (cl.gPlayerInfo) {
         let info = cl.gPlayerInfo;
-        info_lines.push(["Running for", ((Date.now() / 1000) | 0) - start_time + " seconds"]);
+        info_lines.push(["Running for", FormatTimer(((Date.now() / 1000) | 0) - start_time)]);
         info_lines.push(["Current level", `${info.level} (${info.score} / ${info.next_level_score})`]);
         info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
         let exp_per_hour = 60 * 60 * 2400 / (WAIT_TIME + 5);
@@ -317,7 +395,7 @@ const PrintInfo = function PrintInfo() {
                         let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
                         date.setTime(cl.endGameTime);
                         score_bias = difficulty_multipliers[zone.difficulty] * 5 * SCORE_TIME;
-                        info_lines.push(["Round time left", time_left.toString() + " seconds"]);
+                        info_lines.push(["Round time left", FormatTimer(time_left)]);
                     }
                 }
             }
