@@ -219,5 +219,5 @@ CServerInterface.prototype.LeaveGameInstance = function( instanceid, callback, e
 		{
 			error();
 		}
-	});
+	}).fail( error );
 };
