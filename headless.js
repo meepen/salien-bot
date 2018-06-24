@@ -56,8 +56,12 @@ const difficulty_multipliers = [
     0, 1, 2, 4, 4
 ]
 const difficulty_names = [
-    "???", "easy", "medium", "hard", "boss"
+    "???", "easy", "medium", "hard"
 ]
+
+const MaxScore = function MaxScore(difficulty) {
+    return SCORE_TIME * 5 * difficulty_multipliers[difficulty];
+}
 
 const gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
 
@@ -102,7 +106,8 @@ class Client {
                     this.GameInfo(time_left);
                     setTimeout(() => {
                         let planet = this.gPlanets[this.gPlayerInfo.active_planet];
-                        cl.ReportScore(5 * difficulty_multipliers[planet.zones[this.gPlayerInfo.active_zone_position].difficulty] * SCORE_TIME).then(res);
+                        let zone = planet.zones[this.gPlayerInfo.active_zone_position];
+                        cl.ReportScore(MaxScore(zone.difficulty)).then(res);
                     }, time_left);
                 });
             }
@@ -301,7 +306,7 @@ class Client {
                             let time_left = 1000 * WAIT_TIME;
                             this.GameInfo(time_left);
                             setTimeout(() => {
-                                this.ReportScore(5 * difficulty_multipliers[zone_info.difficulty] * SCORE_TIME).then(res);
+                                this.ReportScore(MaxScore(zone_info.difficulty)).then(res);
                             }, time_left);
                         });
                     });
@@ -380,8 +385,7 @@ const PrintInfo = function PrintInfo() {
         info_lines.push(["Running for", FormatTimer(((Date.now() / 1000) | 0) - start_time)]);
         info_lines.push(["Current level", `${info.level} (${info.score} / ${info.next_level_score})`]);
         info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
-        let date = new Date();
-        let score_bias = 0; 
+
         if (cl.gPlanets) {
             let current = cl.gPlanets[info.active_planet];
             if (current) {
@@ -392,15 +396,19 @@ const PrintInfo = function PrintInfo() {
                     let zone = current.zones[zoneIdx];
 
                     if (zone) {
+                        let max_score = MaxScore(difficulty_multipliers[zone.difficulty]);
+                        let exp_per_hour = 60 * 60 * max_score / (WAIT_TIME + 5);
+
+                        // keep in old position
+                        info_lines.splice(info_lines.length - 1, 0, ["Estimated exp/hr", exp_per_hour | 0]);
+
                         info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) (id: ${zoneIdx}) difficulty: ${difficulty_names[zone.difficulty]}`]);
 
                         let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
-                        date.setTime(cl.endGameTime);
-                        score_bias = difficulty_multipliers[zone.difficulty] * 5 * SCORE_TIME;
                         info_lines.push(["Round time left", FormatTimer(time_left)]);
-                        let exp_per_hour = 60 * 60 * score_bias / (WAIT_TIME + 5);
-                        info_lines.push(["Estimated exp/hr", exp_per_hour | 0]);
-                        date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - score_bias) / exp_per_hour * 60 * 60);
+
+                        let date = new Date(cl.endGameTime);
+                        date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - max_score) / exp_per_hour * 60 * 60);
                         info_lines.push(["Next level up", date.toLocaleString()]);
                     }
                 }
