@@ -12,6 +12,7 @@ set autoupdatebot=true
 :: Runs NPM Install everytime bot starts
 set npminstall=true
 
-:: Debug Mode
+:: Debug/Test
 :: You won't need to use it
+set echo=off
 set debug=false

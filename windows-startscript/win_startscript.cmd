@@ -2,7 +2,7 @@
 
 :: Made by Main Fighter [mainfighter.com]
 :: Simple start script for meepen's sailen-bot [https://github.com/meepen/salien-bot]
-:: v1.5.2 [24-06-2018]
+:: v1.6.0 [24-06-2018]
 
 ::===============================================================================================================::
 
@@ -10,6 +10,10 @@
 
 :: Calls configuration stuff
 call configuration.cmd
+@echo %echo%
+
+title Salien Bot Starter
+color 0A
 
 :: Checks
 :: NodeJS
@@ -19,14 +23,7 @@ if %errorlevel%==9009 (color 40 & echo [NEEDED] Node is needed for bot & start "
 git.exe --version >nul 2>nul 
 if %autodownloadbot%==true if %autoupdatebot%==true if %errorlevel%==9009 (color 40 & echo [OPTIONAL] Git is required for Auto Download and Update functions & set autodownloadbot=false & set autoupdatebot=false & start "" https://git-scm.com/ & pause)
 
-cls
-
-echo Starting Sailen Bots
-
 ::===============================================================================================================::
-
-:: Debug
-if %debug%==true @echo on
 
 :: Sets rootdir var to the currently directory of script
 set rootdir=%~dp0
@@ -53,16 +50,16 @@ if %debug%==true pause
 
 :Farewell
 
-echo All bots started
-
 exit
 
 ::===============================================================================================================::
 
 :DownloadBotFiles
 
+cls
 echo.
 echo %name% - Downloading Bot Files
+echo.
 
 :: Sets the directory back to the root
 cd "%rootdir%"
@@ -85,8 +82,10 @@ goto :eof
 
 :UpdateBotFiles
 
+cls
 echo.
 echo %name% - Updating Bot Files
+echo.
 
 :: Sets the directory back to the root
 cd "%rootdir%"
@@ -108,8 +107,10 @@ goto :eof
 
 :SetupToken
 
+cls
 echo.
 echo %name% - Setting up token
+echo.
 
 :: Sets the directory back to the root
 cd "%rootdir%"
@@ -134,8 +135,10 @@ goto :eof
 
 :StartScript
 
+cls
 echo.
 echo %name% - Starting bot
+echo.
 
 :: Sets the directory back to the root
 cd "%rootdir%"
@@ -150,7 +153,7 @@ if not exist "botfiles\%directory%\gettoken.json" ( echo %name% - Token is missi
 if %enabled%==false call :SetDefaults & goto :eof
 
 :: Opens CMD Window > Sets title and color of window > Changes to dir > runs npm install if enabled > starts bot
-set commandline="title Sailen Bot - %name% & color %color% & cd botfiles\%directory% & if %npminstall%==true call npm install & node headless & exit"
+set commandline="title Sailen Bot - %name% & color %color% & cd botfiles\%directory% & if %npminstall%==true call npm install & node headless %botargs% & if %debug%==true pause & exit"
 if %minimized%==true (start /min cmd /k  %commandline%) else (start cmd /k %commandline%)
 
 call :SetDefaults
@@ -162,8 +165,9 @@ goto :eof
 :SetDefaults
 
 :: Don't change these
-set gettoken=
 set enabled=false
+set gettoken=
+set botargs=
 set minimized=false
 set name=untitled
 set directory=
