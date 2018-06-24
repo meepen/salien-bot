@@ -126,14 +126,14 @@ class Client {
         });
     }
 
-    GetPlanets(active_only) {
+    GetPlanets(active_only=1) {
         return new Promise(res => {
-            this.int.GetPlanets(data => {
+            this.int.GetPlanets(active_only, data => {
                 this.m_Planets = data.response.planets;
                 res(this.m_Planets);
             }, () => {
                 this.GetPlanets(active_only).then(res);
-            }, active_only);
+            });
         });
     }
 

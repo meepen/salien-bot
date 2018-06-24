@@ -32,10 +32,10 @@ CServerInterface.prototype.Connect = function( callback )
 	});
 };
 
-CServerInterface.prototype.GetPlanets = function( callback, error, noactive )
+CServerInterface.prototype.GetPlanets = function( active_only, callback, error )
 {
 	var rgParams = {
-		active_only: noactive ? 0 : 1,
+		active_only: active_only,
 		language: gLanguage
 	};
 
@@ -144,7 +144,7 @@ CServerInterface.prototype.JoinZone = function( zoneid, callback, error )
 		}
 		else
 		{
-			error();
+			error( null, request.getResponseHeader( 'x-eresult' ) );
 		}
 	}).fail( error );
 };
