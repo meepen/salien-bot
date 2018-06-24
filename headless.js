@@ -120,7 +120,9 @@ class Client {
         });
     }
 
-    GetPlanets(active_only=1) {
+    GetPlanets(active_only) {
+        if (active_only === undefined)
+            active_only = 1;
         return new Promise(res => {
             this.int.GetPlanets(active_only, data => {
                 this.m_Planets = data.response.planets;
@@ -420,7 +422,7 @@ const PrintInfo = function PrintInfo() {
                         // keep in old position
                         info_lines.splice(info_lines.length - 1, 0, ["Estimated exp/hr", exp_per_hour | 0]);
 
-                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) ${difficulty_color_codes[zone.difficulty]}${difficulty_names[zone.difficulty]}${reset_code} [${(zone.capture_progress * 100).toFixed(3)}%] (id: ${zoneIdx})`]);
+                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) ${zone.type == 4 ? "BOSS " : ""}${difficulty_color_codes[zone.difficulty]}${difficulty_names[zone.difficulty]}${reset_code} [${(zone.capture_progress * 100).toFixed(3)}%] (id: ${zoneIdx})`]);
 
                         let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
                         info_lines.push(["Round time left", FormatTimer(time_left)]);
