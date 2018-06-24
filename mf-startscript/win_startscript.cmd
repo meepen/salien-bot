@@ -31,6 +31,10 @@ echo Updating bot files
 for %%a in ("instances\*.cmd") do call "%%a" & call :UpdateBotFiles
 if %debug%==true pause
 
+:: Sets up token for all bots
+for %%a in ("instances\*.cmd") do call "%%a" & call :SetupToken
+if %debug%==true pause
+
 :: Start all bots in config
 for %%a in ("instances\*.cmd") do call "%%a" & call :StartScript
 if %debug%==true pause
@@ -54,7 +58,7 @@ echo %name% - Downloading Bot Files
 cd "%rootdir%"
 
 :: Sets directory to be the same as name if not defined
-if not defined directory set directory=%name%
+if "%directory%"=="" set directory=%name%
 
 :: Using this to skip as a workaround for issue I was having
 if %enabled%==false goto :eof
@@ -78,13 +82,36 @@ echo %name% - Updating Bot Files
 cd "%rootdir%"
 
 :: Sets directory to be the same as name if not defined
-if not defined directory set directory=%name%
+if "%directory%"=="" set directory=%name%
 
 :: Using this to skip as a workaround for issue I was having
 if %enabled%==false goto :eof
 if %autoupdatebot%==false goto :eof
 
 if exist botfiles\%directory% ( cd botfiles\%directory% & git pull --quiet & echo %name% - Bot files updated ) else ( echo %name% - Bot files don't exist )
+
+call :SetDefaults
+
+goto :eof
+
+::===============================================================================================================::
+
+:SetupToken
+
+echo.
+echo %name% - Setting up token
+
+:: Sets the directory back to the root
+cd "%rootdir%"
+
+:: Sets directory to be the same as name if not defined
+if "%directory%"=="" set directory=%name%
+
+:: Skip
+if %enabled%==false goto :eof
+if not exist "botfiles\%directory%\gettoken.json" if not defined gettoken echo %name% Token not in instance config & goto :eof
+
+if not exist "botfiles\%directory%\gettoken.json" ( echo %gettoken% >> botfiles\%directory%\gettoken.json & echo %name% - Token setup ) else ( echo %name% - Token already setup )
 
 call :SetDefaults
 
@@ -101,11 +128,14 @@ echo %name% - Starting bot
 cd "%rootdir%"
 
 :: Sets directory to be the same as name if not defined
-if not defined directory set directory=%name%
+if "%directory%"=="" set directory=%name%
+
+:: Skip
+if %enabled%==false goto :eof
 
 :: Opens CMD Window > Sets title and color of window > Changes to dir > runs npm install if enabled > starts bot
 set commandline="title Sailen Bot - %name% & color %color% & cd botfiles\%directory% & if %npminstall%==true call npm install & node headless & exit"
-if %enabled%==true if %minimized%==true (start /min cmd /k  %commandline%) else (start cmd /k %commandline%)
+if %minimized%==true (start /min cmd /k  %commandline%) else (start cmd /k %commandline%)
 
 call :SetDefaults
 
