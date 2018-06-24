@@ -200,7 +200,7 @@ class Client {
             this.int.ReportScore(score, d => {
                 res();
             }, () => {
-                this.GetPlayerInfo(() => {
+                this.GetPlayerInfo().then(() => {
                     if (this.gPlayerInfo.active_zone_game) {
                         this.LeaveGame().then(res);
                     }
@@ -248,7 +248,7 @@ class Client {
                     this.GetPlanet(planet.id).then(planets[i] ? () => GetPlanetIterator(cb) : cb);
                 }
                 GetPlanetIterator(() => {
-                    let best_planet, best_difficulty = -1;
+                    let best_planet = planets[0], best_difficulty = -1;
                     for (let p of planets) {
                         let planet = this.gPlanets[p.id];
                         let best_zone = GetBestZone(planet);
@@ -258,6 +258,10 @@ class Client {
                     }
                     if (best_difficulty === -1)
                         throw new Error("no difficulty?!");
+                    if (!best_planet) {
+                        this.GetBestPlanet().then(res);
+                        return;
+                    }
                     res(best_planet, best_difficulty);
                 });
             })
