@@ -255,7 +255,7 @@ const AllEnemiesHPNearPoint = function AllEnemiesHPNearPoint(x,  y, radius) {
     });
     return hp;
 }
-const CenterOfSpawnZoneYpos = function CenterOfSpawnZoneX(enemy) {
+const CenterOfSpawnZoneYpos = function CenterOfSpawnZoneX() {
     //slime from enemies.json has scale 0.5
     //texture has height 126
     let minSpriteHeight = 126 * 0.5;
