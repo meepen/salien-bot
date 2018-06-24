@@ -81,7 +81,17 @@ let internal_ajax = function internal_ajax(data, ajax_object) {
         
         let value = body;
         //if (data.dataType == "json")
+        try {
             value = JSON.parse(value);
+        }
+        catch (e) {
+            global.log(`failed url ${url}, count ${++ajax_object._fails}`);
+            if (ajax_object._fails > 1)
+                ajax_object.nosucc();
+            else
+                internal_ajax(data, ajax_object);
+            return;
+        }
         
         if (ajax_object.succ)
             ajax_object.succ(value, null, new AjaxResponseObject(resp));
