@@ -30,6 +30,7 @@ Headless Mode is a version of this game that is ran without a UI with the bot co
 
 Here are the steps to use: 
 
+<<<<<<< HEAD
 Windows:
 - Download and install https://nodejs.org/ - Need for bot
 - Download and install https://git-scm.com/ - Needed for auto download/update
@@ -43,6 +44,13 @@ Linux:
 - Download and extract https://github.com/meepen/salien-bot/archive/master.zip
 - Create gettoken.json and enter your token
 - Open a terminal in the directory and enter the following
+=======
+- Download and install nodejs - https://nodejs.org
+- Download https://github.com/meepen/salien-bot/archive/master.zip
+- Extract salien-bot-master.zip
+- Open command line in salien-bot-master
+- Write:
+>>>>>>> upstream/master
 ```
 npm install
 node headless
