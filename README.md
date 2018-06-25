@@ -62,7 +62,7 @@ This will make the bot only use the last planet which you were on and allows you
 
 ### Run the bot inside Docker
 
-This bot can be runned inside a docker container in headless mode.
+This bot can be ran inside a docker container in headless mode.
 
 1. Get the gettoken.json file.
 2. Run the docker image:
@@ -71,4 +71,4 @@ This bot can be runned inside a docker container in headless mode.
 docker run -v /path/to/gettoken.json:/app/gettoken.json meepen/salien-bot:latest
 ```
 
-You also can run an autoupdated stack with the [example/docker-compose-autoupdate/docker-compose.yml](https://github.com/meepen/salien-bot/blob/master/examples/docker-compose-autoupdate/docker-compose.yml) configuration file.
+You also can run an autoupdated stack with the [examples/docker-compose-autoupdate/docker-compose.yml](../blob/master/examples/docker-compose-autoupdate/docker-compose.yml) configuration file for [docker-compose](https://docs.docker.com/compose/).
