@@ -26,6 +26,8 @@ context.error = context.GameLoadError = function() {
 	window.location.reload();
 }
 
+document.getElementsByClassName('salien_section')[0].getElementsByClassName('title')[0].textContent = 'Saliens Bot Running...'
+
 // when the error is fixed we should remove the following
 CSalien.prototype.UpdateCustomizations = function()
 {
@@ -42,6 +44,7 @@ SERVER.ReportScore = function ReportScore(nScore, callback, error) {
     return this._ReportScore(nScore, function ReportScore_callback(results) {
         let response = results.response;
         console.log(`Server reported level ${response.new_level} (${response.new_score} / ${response.next_level_score})`)
+        document.getElementsByClassName('subtitle')[0].innerHTML += "</br>Server reported level "+response.new_level+" ("+response.new_score+" / "+response.next_level_score+")"
         return callback(results);
     }, function ReportScore_error() {
         console.log(arguments);
@@ -118,6 +121,7 @@ const TryContinue = function TryContinue() {
         let bestZoneIdx = GetBestZone();
         if(bestZoneIdx) {
             console.log("join to zone", bestZoneIdx);
+            document.getElementsByClassName('subtitle')[0].textContent = "Joining the zone number " + bestZoneIdx
             isJoining = true;
             GAME.m_State.m_Grid.click(bestZoneIdx % k_NumMapTilesW, (bestZoneIdx / k_NumMapTilesW) | 0);
             setTimeout(() => isJoining = false, 1000);
