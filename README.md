@@ -71,4 +71,4 @@ This bot can be ran inside a docker container in headless mode.
 docker run -v /path/to/gettoken.json:/app/gettoken.json meepen/salien-bot:latest
 ```
 
-You also can run an autoupdated stack with the [examples/docker-compose-autoupdate/docker-compose.yml](../blob/master/examples/docker-compose-autoupdate/docker-compose.yml) configuration file for [docker-compose](https://docs.docker.com/compose/).
+You also can run an autoupdated stack with the [examples/docker-compose-autoupdate/docker-compose.yml](../master/examples/docker-compose-autoupdate/docker-compose.yml) configuration file for [docker-compose](https://docs.docker.com/compose/).
