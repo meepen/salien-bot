@@ -3,20 +3,21 @@
 const args = process.argv.slice(2);
 const network = require("./headless/network.js");
 const fs = require("fs");
-
+console.log(args);
 const help_page = `
 Meeden's headless Salien bot
 https://github.com/meepen/salien-bot
 
 Usage: node headless.js [options]
 Options:
-  -h, --help            Display this information.
-  -l, --log             Writes log output to "log.txt"
-  --lang LANG           Enable changing the language of the steam API
-                        See https://partner.steamgames.com/doc/store/localization#supported_languages
-  --token TOKENFILE     Allow specifying a custom token file
-  -c, --care-for-planet Bot tries to stay on the same planet and does not change the
-                        planet even if difficulty would be better somewhere else.
+  -h, --help                    Display this information.
+  -l, --log                     Writes log output to "log.txt".
+  --lang LANG                   Enable changing the language of the steam API.
+                                See https://partner.steamgames.com/doc/store/localization#supported_languages.
+  --token TOKENFILE             Allow specifying a custom token file.
+  -tj, --token-json TOKEN_JSON  Allow inlining gettoken.json contents as base64 string.
+  -c, --care-for-planet         Bot tries to stay on the same planet and does not change the
+                                planet even if difficulty would be better somewhere else.
 `;
 
 
@@ -26,6 +27,7 @@ let DO_LOGS = false;
 const log_file = "./log.txt";
 
 let token_file = "./gettoken.json";
+let token_json_base64 = "";
 
 // clear log
 
@@ -51,6 +53,10 @@ for (let i = 0; i < args.length; i++) {
     else if (arg == "--token" || arg == "-t") {
         global.log(`token file: ${args[++i]}`);
         token_file = args[i];
+    }
+    else if (arg == "--token-json" || arg == "-tj") {
+        global.log(`Inline token json used.`);
+        token_json_base64 = args[++i];
     }
     else if (arg == "--care-for-planet" || arg == "-c") {
         CARE_ABOUT_PLANET = true;
@@ -84,7 +90,12 @@ const MaxScore = function MaxScore(difficulty) {
     return SCORE_TIME * 5 * difficulty_multipliers[difficulty];
 }
 
-const gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
+let gettoken;
+if (token_json_base64.length < 1) {
+    gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
+} else {
+  gettoken = JSON.parse(Buffer.from(token_json_base64, 'base64').toString('ascii'));
+}
 
 class Client {
     constructor(int) {
