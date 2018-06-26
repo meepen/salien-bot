@@ -14,7 +14,7 @@ Options:
   -l, --log                     Writes log output to "log.txt".
   --lang LANG                   Enable changing the language of the steam API.
                                 See https://partner.steamgames.com/doc/store/localization#supported_languages.
-  --token TOKENFILE             Allow specifying a custom token file.
+  -t, --token TOKENFILE         Allow specifying a custom token file.
   -tj, --token-json TOKEN_JSON  Allow inlining gettoken.json contents as base64 string.
   -c, --care-for-planet         Bot tries to stay on the same planet and does not change the
                                 planet even if difficulty would be better somewhere else.
