@@ -3,7 +3,7 @@
 const args = process.argv.slice(2);
 const network = require("./headless/network.js");
 const fs = require("fs");
-console.log(args);
+
 const help_page = `
 Meeden's headless Salien bot
 https://github.com/meepen/salien-bot
