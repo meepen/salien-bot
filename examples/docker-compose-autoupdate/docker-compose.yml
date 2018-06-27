@@ -1,0 +1,17 @@
+version: '2'
+# Autoupdated stack
+services:
+  bot:
+    image: meepen/salien-bot:latest
+    restart: always
+    volumes:
+    # The gettoken.json file must be in the same dir as docker-compose.yml file
+     - ./gettoken.json:/app/gettoken.json
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+  updater:
+    image: v2tec/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 300 --label-enable
