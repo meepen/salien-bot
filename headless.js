@@ -155,18 +155,20 @@ class Client {
 
     GetPlayerInfo() {
         return new Promise(res => {
-            this.int.GetPlayerInfo(d => {
-                if (!d || !d.response) {
-                    this.Connect().then(res);
-                    return;
-                }
-                if (!this.gPlayerInfo)
-                    this.gPlayerInfoOriginal = d.response;
-                this.gPlayerInfo = d.response;
-                res(this.gPlayerInfo);
-            }, () => {
-                this.GetPlayerInfo().then(res);
-            });
+            setTimeout(() => {
+                this.int.GetPlayerInfo(d => {
+                    if (!d || !d.response) {
+                        this.GetPlayerInfo().then(res);
+                        return;
+                    }
+                    if (!this.gPlayerInfo)
+                        this.gPlayerInfoOriginal = d.response;
+                    this.gPlayerInfo = d.response;
+                    res(this.gPlayerInfo);
+                }, () => {
+                    this.GetPlayerInfo().then(res);
+                });
+            }, 100);
         });
     }
 
@@ -204,7 +206,7 @@ class Client {
     }
 
     JoinZone(id) {
-        return new Promise(res => {
+        return new Promise((res, rej) => {
             this.int.JoinZone(id, d => {
                 this.gPlayerInfo.active_zone_position = id;
                 res(d.response.zone_info);
@@ -214,7 +216,7 @@ class Client {
                         res();
                     }
                     else {
-                        this.JoinZone(id).then(res);
+                        rej();
                     }
                 });
             });
@@ -339,6 +341,8 @@ class Client {
                             setTimeout(() => {
                                 this.ReportScore(MaxScore(zone_info.difficulty)).then(res);
                             }, time_left);
+                        }).catch(() => {
+                            this.FinishGame().then(res);
                         });
                     }).catch(() => {
                         this.FinishGame().then(res);
