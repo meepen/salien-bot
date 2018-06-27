@@ -94,7 +94,7 @@ let gettoken;
 if (token_json_base64.length < 1) {
     gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
 } else {
-  gettoken = JSON.parse(Buffer.from(token_json_base64, 'base64').toString('ascii'));
+    gettoken = JSON.parse(Buffer.from(token_json_base64, 'base64').toString('ascii'));
 }
 
 class Client {
