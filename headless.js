@@ -178,14 +178,13 @@ class Client {
                 this.gPlayerInfo.active_planet = id;
                 res();
             }, () => {
-                this.GetPlanets().then(planets => {
-                    for (let i = 0; i < planets.length; i++) {
-                        if (planets[i].id == id) {
-                            this.JoinPlanet(id).then(res);
-                            return;
-                        }
+                this.GetPlanet(id).then(planet => {
+                    if (planet.active) {
+                        this.JoinPlanet(id).then(res).catch(rej);
                     }
-                    rej();
+                    else {
+                        rej();
+                    }
                 })
             });
         });
