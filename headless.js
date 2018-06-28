@@ -179,7 +179,7 @@ class Client {
                 res();
             }, () => {
                 this.GetPlanet(id).then(planet => {
-                    if (planet.active) {
+                    if (planet.state.active) {
                         this.JoinPlanet(id).then(res).catch(rej);
                     }
                     else {
