@@ -190,12 +190,14 @@ class Client {
                 res();
             }, () => {
                 this.GetPlanet(id).then(planet => {
-                    if (planet.state.active) {
-                        this.JoinPlanet(id).then(res).catch(rej);
-                    }
-                    else {
-                        rej();
-                    }
+                    this.GetPlayerInfo().then(() => {
+                        if (planet.state.active && !this.gPlayerInfo.active_planet) {
+                            this.JoinPlanet(id).then(res).catch(rej);
+                        }
+                        else {
+                            rej();
+                        }
+                    });
                 })
             });
         });
