@@ -2,7 +2,7 @@
 
 :: Made by Main Fighter [mainfighter.com]
 :: Simple start script for meepen's sailen-bot [https://github.com/meepen/salien-bot]
-:: v1.7.4 [24-06-2018]
+:: v1.7.5 [24-06-2018]
 
 ::===============================================================================================================::
 
@@ -174,6 +174,7 @@ if %enabled%==false ( echo %name% - Disabled & goto :eof )
 echo %name% - Setting up token
 
 :: Checks
+if defined base64token ( echo %name% - Using Base64 token & goto :eof )
 if not exist "tokens\%name%.json" if not defined gettoken ( echo %name% - Token file not found and token not set in instance config & goto :eof )
 
 :: Creates tokens directory if it doesn't exist
@@ -196,10 +197,11 @@ if %enabled%==false ( echo %name% - Disabled & goto :eof )
 echo %name% - Starting bot
 
 :: Checks
-if not exist "tokens\%name%.json" ( echo %name% - No token file bot not starting & pause & goto :eof )
+if not defined base64token if not exist "tokens\%name%.json" ( echo %name% - No token file bot not starting & pause & goto :eof )
 
 :: Opens CMD Window > Sets title and color of window > Changes to dir > starts bot
-set commandline="title Sailen Bot - %name% & color %color% & cd %botdirectory% & node headless --token ..\tokens\%name%.json %botargs% & if %debug%==true pause & exit"
+if defined base64token ( set botcommandline=--token-json %base64token% %botargs% ) else ( set botcommandline=--token ..\tokens\%name%.json %botargs% )
+set commandline="title Sailen Bot - %name% & color %color% & cd %botdirectory% & node headless %botcommandline% & if %debug%==true pause & exit"
 if %minimized%==true (start /min cmd /k  %commandline%) else (start cmd /k %commandline%)
 
 goto :eof
@@ -230,6 +232,7 @@ goto :eof
 
 :: Don't change these
 set enabled=false
+set base64token=
 set gettoken=
 set botargs=
 set minimized=false
