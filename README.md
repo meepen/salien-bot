@@ -50,6 +50,11 @@ notepad gettoken.json
 node headless
 ```
 
+- (optional) See detailed bot options
+```
+node headless --help
+```
+
 It should be running now!
 
 ### Tile Selection
@@ -59,3 +64,16 @@ This version, by default, will scour all available planets and get the highest E
 node headless --care-for-planet
 ```
 This will make the bot only use the last planet which you were on and allows you to select the planet for the bot to focus on by first logging onto the Steam website and selecting a planet.
+
+### Run the bot inside Docker
+
+This bot can be ran inside a docker container in headless mode.
+
+1. Get the gettoken.json file.
+2. Run the docker image:
+
+```
+docker run -v /path/to/gettoken.json:/app/gettoken.json meepen/salien-bot:latest
+```
+
+You also can run an autoupdated stack with the [examples/docker-compose-autoupdate/docker-compose.yml](../master/examples/docker-compose-autoupdate/docker-compose.yml) configuration file for [docker-compose](https://docs.docker.com/compose/).

@@ -4,12 +4,30 @@ const args = process.argv.slice(2);
 const network = require("./headless/network.js");
 const fs = require("fs");
 
+const help_page = `
+Meeden's headless Salien bot
+https://github.com/meepen/salien-bot
+
+Usage: node headless.js [options]
+Options:
+  -h, --help                    Display this information.
+  -l, --log                     Writes log output to "log.txt".
+  --lang LANG                   Enable changing the language of the steam API.
+                                See https://partner.steamgames.com/doc/store/localization#supported_languages.
+  -t, --token TOKENFILE         Allow specifying a custom token file.
+  -tj, --token-json TOKEN_JSON  Allow inlining gettoken.json contents as base64 string.
+  -c, --care-for-planet         Bot tries to stay on the same planet and does not change the
+                                planet even if difficulty would be better somewhere else.
+`;
+
+
 let CARE_ABOUT_PLANET = false;
 let DO_LOGS = false;
 
 const log_file = "./log.txt";
 
 let token_file = "./gettoken.json";
+let token_json_base64 = "";
 
 // clear log
 
@@ -36,9 +54,17 @@ for (let i = 0; i < args.length; i++) {
         global.log(`token file: ${args[++i]}`);
         token_file = args[i];
     }
+    else if (arg == "--token-json" || arg == "-tj") {
+        global.log(`Inline token json used.`);
+        token_json_base64 = args[++i];
+    }
     else if (arg == "--care-for-planet" || arg == "-c") {
         CARE_ABOUT_PLANET = true;
         global.log("Caring for previous planet.");
+    }
+    else if (arg == "--help" || arg == "-h") {
+        console.log(help_page);
+        process.exit();
     }
     else
         throw new Error(`invalid command line argument ${arg}`);
@@ -64,7 +90,12 @@ const MaxScore = function MaxScore(difficulty) {
     return SCORE_TIME * 5 * difficulty_multipliers[difficulty];
 }
 
-const gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
+let gettoken;
+if (token_json_base64.length < 1) {
+    gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
+} else {
+    gettoken = JSON.parse(Buffer.from(token_json_base64, 'base64').toString('ascii'));
+}
 
 class Client {
     constructor(int) {
@@ -135,18 +166,20 @@ class Client {
 
     GetPlayerInfo() {
         return new Promise(res => {
-            this.int.GetPlayerInfo(d => {
-                if (!d || !d.response) {
-                    this.Connect().then(res);
-                    return;
-                }
-                if (!this.gPlayerInfo)
-                    this.gPlayerInfoOriginal = d.response;
-                this.gPlayerInfo = d.response;
-                res(this.gPlayerInfo);
-            }, () => {
-                this.GetPlayerInfo().then(res);
-            });
+            setTimeout(() => {
+                this.int.GetPlayerInfo(d => {
+                    if (!d || !d.response) {
+                        this.GetPlayerInfo().then(res);
+                        return;
+                    }
+                    if (!this.gPlayerInfo)
+                        this.gPlayerInfoOriginal = d.response;
+                    this.gPlayerInfo = d.response;
+                    res(this.gPlayerInfo);
+                }, () => {
+                    this.GetPlayerInfo().then(res);
+                });
+            }, 100);
         });
     }
 
@@ -156,14 +189,15 @@ class Client {
                 this.gPlayerInfo.active_planet = id;
                 res();
             }, () => {
-                this.GetPlanets().then(planets => {
-                    for (let i = 0; i < planets.length; i++) {
-                        if (planets[i].id == id) {
-                            this.JoinPlanet(id).then(res);
-                            return;
+                this.GetPlanet(id).then(planet => {
+                    this.GetPlayerInfo().then(() => {
+                        if (planet.state.active && !this.gPlayerInfo.active_planet) {
+                            this.JoinPlanet(id).then(res).catch(rej);
                         }
-                    }
-                    rej();
+                        else {
+                            rej();
+                        }
+                    });
                 })
             });
         });
@@ -184,7 +218,7 @@ class Client {
     }
 
     JoinZone(id) {
-        return new Promise(res => {
+        return new Promise((res, rej) => {
             this.int.JoinZone(id, d => {
                 this.gPlayerInfo.active_zone_position = id;
                 res(d.response.zone_info);
@@ -194,7 +228,7 @@ class Client {
                         res();
                     }
                     else {
-                        this.JoinZone(id).then(res);
+                        rej();
                     }
                 });
             });
@@ -319,6 +353,8 @@ class Client {
                             setTimeout(() => {
                                 this.ReportScore(MaxScore(zone_info.difficulty)).then(res);
                             }, time_left);
+                        }).catch(() => {
+                            this.FinishGame().then(res);
                         });
                     }).catch(() => {
                         this.FinishGame().then(res);
