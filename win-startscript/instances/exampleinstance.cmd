@@ -17,7 +17,7 @@
 :: set color=0A
 
 :: Bot Instance Example
-set enabled=false :: change to true
+set enabled=false
 set gettoken={"webapi_host":"https:\/\/community.steam-api.com\/","webapi_host_secure":"https:\/\/community.steam-api.com\/","token":"473jsha28s8f78391029sh27s","steamid":"76561198230883500","persona_name":"Main Fighter","success":1}
 set botargs=--log
 set minimized=false

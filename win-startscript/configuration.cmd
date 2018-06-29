@@ -1,5 +1,13 @@
 :: Global Configuration
-:: set killrunning=true not functional
+
+:: Kill running bots
+set killrunning=false
+
+:: Directory the bot files are stored in
+set botdirectory=botfiles
+
+:: Directory the bot tokens are stored in
+:: set tokendirectory=tokens | doesn't work currently
 
 :: Automatically downloads bot files using git
 :: You need git for this to work https://git-scm.com/downloads
@@ -9,10 +17,14 @@ set autodownloadbot=true
 :: You need git for this to work https://git-scm.com/downloads
 set autoupdatebot=true
 
-:: Runs NPM Install everytime bot starts
+:: Run npm install everytime the script is run
 set npminstall=true
 
-:: Debug/Test
-:: You won't need to use it
+:: Script Customization
+set cmdcolor=0A
+
+:: Debug/Test - You probably won't need to use it
+:: Turns echo on or off
 set echo=off
+:: Turns on any debug options, currently just adds pauses on most of the steps
 set debug=false

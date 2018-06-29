@@ -2,70 +2,121 @@
 
 :: Made by Main Fighter [mainfighter.com]
 :: Simple start script for meepen's sailen-bot [https://github.com/meepen/salien-bot]
-:: v1.7.1 [24-06-2018]
+:: v1.7.4 [24-06-2018]
 
 ::===============================================================================================================::
 
 :Greeting
 
-:: Calls configuration stuff
-call configuration.cmd
+call configuration.cmd 
 @echo %echo%
 
-title "Start script for meepen's sailent-bot"
-color 0A
+title Start script for meepen's sailens-bot
+color %cmdcolor%
 
 :: Checks
 :: NodeJS
 node.exe --version >nul 2>nul 
-if %errorlevel%==9009 (color 40 & echo [NEEDED] Node is needed for bot & start "" https://nodejs.org/en/ & pause & exit)
+if %errorlevel%==9009 ( set error=NodeJS not found & set fatal=true & start "" https://nodejs.org/en/ & call :ErrorScreen )
 :: Git
 git.exe --version >nul 2>nul 
-if %autodownloadbot%==true if %autoupdatebot%==true if %errorlevel%==9009 (color 40 & echo [OPTIONAL] Git is required for Auto Download and Update functions & set autodownloadbot=false & set autoupdatebot=false & start "" https://git-scm.com/ & pause)
+if %autodownloadbot%==true if %autoupdatebot%==true if %errorlevel%==9009 ( set error=Git not found & set autodownloadbot=false & set autoupdatebot=false & start "" https://git-scm.com/ & call :ErrorScreen )
 
 ::===============================================================================================================::
 
 :: Sets rootdir var to the currently directory of script
 set rootdir=%~dp0
 
+:: Kill running bots
+if %killrunning%==true (
+    color %cmdcolor%
+    title Start Script for meepen's sailens-bot - Kill Running Bots
+    echo.
+    echo Killing running bots
+    echo.
+    cd "%rootdir%"
+    call :KillRunning
+    if %debug%==true pause
+    cls 
+)
+
 :: Clone botfiles
 if %autodownloadbot%==true (
-    cd %rootdir%
+    color %cmdcolor%
+    title Start Script for meepen's sailens-bot - Download Files
+    echo.
+    echo Downloading bot files
+    echo.
+    cd "%rootdir%"
     call :DownloadBotFiles
     if %debug%==true pause
+    cls
+)
+
+:: Checks if bot files exist, if they don't the script will throw fatal error
+if not exist "%botdirectory%" ( 
+    set error=%botdirectory% not found 
+    set fatal=true
+    
+    if not exist "%botdirectory%\headless.js" ( 
+        set error2=%botdirectory%\headless.js not found 
+        set fatal=true 
+    )
+    
+    call :ErrorScreen
+    if %debug%==true pause
+    cls
 )
 
 :: Update botfiles
 if %autoupdatebot%==true (
-    cd %rootdir%
+    color %cmdcolor%
+    title Start Script for meepen's sailens-bot - Update Files
+    echo.
+    echo Updating bot files
+    echo.
+    cd "%rootdir%"
     call :UpdateBotFiles
     if %debug%==true pause
+    cls
 )
 
 :: npm install
 if %npminstall%==true (
-    cd %rootdir%
+    color %cmdcolor%
+    title Start Script for meepen's sailens-bot - NPM Install
+    echo.
+    echo Running npm install
+    echo.
+    cd "%rootdir%"
     call :npmInstall
     if %debug%==true pause
+    cls
 )
 
 :: Sets up token for all bots
-cls
-title Bot Token Setup
+color %cmdcolor%
+title Start Script for meepen's sailens-bot - Token Setup
 echo.
 echo Setting up bot tokens
-cd %rootdir%
-for %%a in ("instances\*.cmd") do call :SetDefaults & cd %rootdir% & call "%%a" & call :SetupToken
+cd "%rootdir%"
+for %%a in ("instances\*.cmd") do call :SetDefaults & cd "%rootdir%" & call "%%a" & call :SetupToken
+echo.
+echo All bot tokens setup
 if %debug%==true pause
+cls
 
 :: Start all bots in config
-cls
-title Bot Start
+color %cmdcolor%
+title Start Script for meepen's sailens-bot - Start Bots
 echo.
 echo Starting bots
-cd %rootdir%
-for %%a in ("instances\*.cmd") do call :SetDefaults & cd %rootdir% & call "%%a" & call :StartScript
+cd "%rootdir%"
+for %%a in ("instances\*.cmd") do call :SetDefaults & cd "%rootdir%" & call "%%a" & call :StartScript
+echo.
+echo All bots started
 if %debug%==true pause
+cls
 
 ::===============================================================================================================::
 
@@ -75,16 +126,20 @@ exit
 
 ::===============================================================================================================::
 
+:KillRunning
+
+:: Should only kill Sailen Bot instances
+:: Might improve later, only really adding it for myself
+taskkill /f /im cmd.exe /fi "WINDOWTITLE eq Sailen Bot*" & taskkill /f /im node.exe /fi "WINDOWTITLE eq Sailen Bot*" & echo Bots killed
+
+goto :eof
+
+::===============================================================================================================::
+
 :DownloadBotFiles
 
-title Bot File Download
-cls
-echo.
-echo Downloading bot files
-echo.
-
 :: Checks to make sure botfiles doesn't already exist > if it doesn't it clones the bot files to the botfiles directory
-if not exist botfiles ( git clone --quiet https://github.com/meepen/salien-bot.git botfiles ) else ( echo Bot files already exist )
+if not exist "%botdirectory%" ( git clone --quiet https://github.com/meepen/salien-bot.git "%botdirectory%" & echo Bot files downloaded ) else ( echo Bot files already exist )
 
 goto :eof
 
@@ -92,14 +147,8 @@ goto :eof
 
 :UpdateBotFiles
 
-title Update Bot Files
-cls
-echo.
-echo Updating bot files
-echo.
-
-:: Checks if botfiles exists > if it does then update botfiles using git and run npm install
-if exist botfiles ( cd botfiles & git pull --quiet ) else ( echo Bot files don't exist )
+:: Checks if botfiles exists > if it does then update botfiles using git
+if exist "%botdirectory%" ( cd "%botdirectory%" & git pull --quiet & echo Bot files updated ) else ( echo Bot files don't exist )
 
 goto :eof
 
@@ -107,14 +156,8 @@ goto :eof
 
 :npmInstall
 
-title Run npm install
-cls
-echo.
-echo Running npm install
-echo.
-
 :: Checks if botfiles exists > if exists change to directory and run npm install
-if exist botfiles ( cd botfiles & call npm install ) else ( echo Bot files don't exist )
+if exist "%botdirectory%" ( cd "%botdirectory%" & call npm install & @echo %echo% & echo NPM install finished ) else ( echo Bot files don't exist )
 
 goto :eof
 
@@ -122,17 +165,21 @@ goto :eof
 
 :SetupToken
 
-:: Probably not the best way to do it but it works
-if %enabled%==false goto :eof
-
 echo.
+
+:: Probably not the best way to do it but it works
+if %name%==untitled ( goto :eof )
+if %enabled%==false ( echo %name% - Disabled & goto :eof )
+
 echo %name% - Setting up token
 
 :: Checks
-if not exist "botfiles\%name%.json" if not defined gettoken echo %name% Token not in instance config & goto :eof
+if not exist "tokens\%name%.json" if not defined gettoken ( echo %name% - Token file not found and token not set in instance config & goto :eof )
 
-:: Checks if gettoken.json exists > if it doesn't write the token from the instance config file
-if not exist "botfiles\%name%.json" ( echo %gettoken% >> botfiles\%name%.json & echo %name% - Token setup ) else ( echo %name% - Token already setup )
+:: Creates tokens directory if it doesn't exist
+if not exist "tokens" ( mkdir "tokens" )
+:: Checks if gettoken.json exists for instance > if it doesn't write the token from the instance config file
+if not exist "tokens\%name%.json" ( echo %gettoken% >> "tokens\%name%.json" & echo %name% - Token setup ) else ( echo %name% - Token already setup )
 
 goto :eof
 
@@ -140,18 +187,40 @@ goto :eof
 
 :StartScript
 
-:: Probably not the best way to do it but it works
-if %enabled%==false goto :eof
-
 echo.
+
+:: Probably not the best way to do it but it works
+if %name%==untitled ( goto :eof )
+if %enabled%==false ( echo %name% - Disabled & goto :eof )
+
 echo %name% - Starting bot
 
 :: Checks
-if not exist "botfiles\%name%.json" ( echo %name% - Token is missing bot not starting & pause & goto :eof )
+if not exist "tokens\%name%.json" ( echo %name% - No token file bot not starting & pause & goto :eof )
 
 :: Opens CMD Window > Sets title and color of window > Changes to dir > starts bot
-set commandline="title Sailen Bot - %name% & color %color% & cd botfiles & node headless --token %name%.json %botargs% & if %debug%==true pause & exit"
+set commandline="title Sailen Bot - %name% & color %color% & cd %botdirectory% & node headless --token ..\tokens\%name%.json %botargs% & if %debug%==true pause & exit"
 if %minimized%==true (start /min cmd /k  %commandline%) else (start cmd /k %commandline%)
+
+goto :eof
+
+::===============================================================================================================::
+
+:ErrorScreen
+
+cls
+color 47
+if %fatal%==true ( title %name% - ERROR ) else ( title %name% - FATAL ERROR )
+echo.
+if %fatal%==true ( echo FATAL ERROR & echo %error% & if defined error2 echo %error2% ) else ( echo ERROR & echo %error% & if defined error2 echo %error2% )
+echo.
+
+pause
+if %fatal%==true exit
+
+set error=unknown
+set error2=
+set fatal=false
 
 goto :eof
 
