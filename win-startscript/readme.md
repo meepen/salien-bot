@@ -1,15 +1,13 @@
 # Start script for meepen's sailen-bot
 
-###### Make sure you delete botfiles directory if you are updating to 1.7.0. Uses one set of bot files with --token arg now.
-
 ## How to use
 
-- Download and install https://nodejs.org/ - Need for bot
-- Download and install https://git-scm.com/ - Needed for auto download/update
-- Download https://github.com/MainFighter/salien-bot/archive/winstartscript.zip and extract somewhere
-- Create a config in instances folder, everything is explained in exampleinstance.cmd
+- Required: Download and install https://nodejs.org/ - Needed for the actual bot
+- Optional: Download and install https://git-scm.com/ - Use for auto download and update
+- Download https://github.com/meepen/salien-bot/archive/winstartscript.zip and extract the win-startscript folder somewhere (you don't need the rest of the files for this)
+- Create a bot config in instances folder, everything is explained in exampleinstance.cmd
 - Run start.cmd
-The bot/s should be running now!
+The bots should be running now!
 
 How to get your token:
 - Log into Steam
