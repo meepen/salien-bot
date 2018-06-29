@@ -2,7 +2,7 @@
 
 :: Made by Main Fighter [mainfighter.com]
 :: Simple start script for meepen's sailen-bot [https://github.com/meepen/salien-bot]
-:: v1.7.5 [24-06-2018]
+:: v1.7.6 [24-06-2018]
 
 ::===============================================================================================================::
 
@@ -128,6 +128,7 @@ exit
 
 :KillRunning
 
+:: Actual script stuff
 :: Should only kill Sailen Bot instances
 :: Might improve later, only really adding it for myself
 taskkill /f /im cmd.exe /fi "WINDOWTITLE eq Sailen Bot*" & taskkill /f /im node.exe /fi "WINDOWTITLE eq Sailen Bot*" & echo Bots killed
@@ -138,6 +139,7 @@ goto :eof
 
 :DownloadBotFiles
 
+:: Actual script stuff
 :: Checks to make sure botfiles doesn't already exist > if it doesn't it clones the bot files to the botfiles directory
 if not exist "%botdirectory%" ( git clone --quiet https://github.com/meepen/salien-bot.git "%botdirectory%" & echo Bot files downloaded ) else ( echo Bot files already exist )
 
@@ -147,6 +149,7 @@ goto :eof
 
 :UpdateBotFiles
 
+:: Actual script stuff
 :: Checks if botfiles exists > if it does then update botfiles using git
 if exist "%botdirectory%" ( cd "%botdirectory%" & git pull --quiet & echo Bot files updated ) else ( echo Bot files don't exist )
 
@@ -156,6 +159,7 @@ goto :eof
 
 :npmInstall
 
+:: Actual script stuff
 :: Checks if botfiles exists > if exists change to directory and run npm install
 if exist "%botdirectory%" ( cd "%botdirectory%" & call npm install & @echo %echo% & echo NPM install finished ) else ( echo Bot files don't exist )
 
@@ -174,13 +178,15 @@ if %enabled%==false ( echo %name% - Disabled & goto :eof )
 echo %name% - Setting up token
 
 :: Checks
+:: If base64token is defined it will skip setting up the token
 if defined base64token ( echo %name% - Using Base64 token & goto :eof )
-if not exist "tokens\%name%.json" if not defined gettoken ( echo %name% - Token file not found and token not set in instance config & goto :eof )
+if not exist "%tokendirectory%\%name%.json" if not defined gettoken ( echo %name% - Token not configured & goto :eof )
 
+:: Actual script stuff
 :: Creates tokens directory if it doesn't exist
-if not exist "tokens" ( mkdir "tokens" )
+if not exist "%tokendirectory%" ( mkdir "%tokendirectory%" )
 :: Checks if gettoken.json exists for instance > if it doesn't write the token from the instance config file
-if not exist "tokens\%name%.json" ( echo %gettoken% >> "tokens\%name%.json" & echo %name% - Token setup ) else ( echo %name% - Token already setup )
+if not exist "%tokendirectory%\%name%.json" ( echo %gettoken% >> "%tokendirectory%\%name%.json" & echo %name% - Token setup ) else ( echo %name% - Token already setup )
 
 goto :eof
 
@@ -197,10 +203,12 @@ if %enabled%==false ( echo %name% - Disabled & goto :eof )
 echo %name% - Starting bot
 
 :: Checks
-if not defined base64token if not exist "tokens\%name%.json" ( echo %name% - No token file bot not starting & pause & goto :eof )
+:: Skips starting bot if base64token or no token file configured
+if not defined base64token if not exist "%tokendirectory%\%name%.json" ( echo %name% - Token not configured & pause & goto :eof )
 
+:: Actual script stuff
 :: Opens CMD Window > Sets title and color of window > Changes to dir > starts bot
-if defined base64token ( set botcommandline=--token-json %base64token% %botargs% ) else ( set botcommandline=--token ..\tokens\%name%.json %botargs% )
+if defined base64token ( set botcommandline=--token-json %base64token% %botargs% ) else ( set botcommandline=--token ..\%tokendirectory%\%name%.json %botargs% )
 set commandline="title Sailen Bot - %name% & color %color% & cd %botdirectory% & node headless %botcommandline% & if %debug%==true pause & exit"
 if %minimized%==true (start /min cmd /k  %commandline%) else (start cmd /k %commandline%)
 

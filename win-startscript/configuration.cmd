@@ -7,7 +7,7 @@ set killrunning=false
 set botdirectory=botfiles
 
 :: Directory the bot tokens are stored in
-:: set tokendirectory=tokens | doesn't work currently
+set tokendirectory=tokens
 
 :: Automatically downloads bot files using git
 :: You need git for this to work https://git-scm.com/downloads

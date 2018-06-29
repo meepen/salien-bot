@@ -6,6 +6,7 @@
 :: Bot Configuration Options
 :: You can leave any of them out and they will just use default settings
 :: enabled; whether the instance is enabled or not
+:: base64token; uses --token-json base64 token, leave this blank if you don't know what it is
 :: gettoken; paste your token here
 :: botargs; put any arguments you want to use for the bot [eg: --care-for-planet, --log]
 :: minimized; whether the cmd window starts minimized or not
@@ -14,6 +15,7 @@
 
 :: Bot Instance Example
 set enabled=false
+set base64token=
 set gettoken={"webapi_host":"https:\/\/community.steam-api.com\/","webapi_host_secure":"https:\/\/community.steam-api.com\/","token":"not_a_real_token","steamid":"not_a_real_steamid","persona_name":"example","success":1}
 set botargs=
 set minimized=false
