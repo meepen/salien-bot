@@ -438,6 +438,7 @@ const PrintInfo = function PrintInfo() {
     let info_lines = [];
     if (cl.gPlayerInfo) {
         let info = cl.gPlayerInfo;
+        info_lines.push(["Playing as", gettoken.persona_name]);
         info_lines.push(["Running for", FormatTimer(((Date.now() / 1000) | 0) - start_time)]);
         info_lines.push(["Current level", `${info.level} (${info.score} / ${info.next_level_score})`]);
         info_lines.push(["Exp since start", info.score - cl.gPlayerInfoOriginal.score]);
