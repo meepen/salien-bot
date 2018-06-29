@@ -1,4 +1,4 @@
-# Start script for meepen's sailen-bot
+# Windows Start script for meepen's sailen-bot
 
 ## How to use
 
