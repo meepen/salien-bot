@@ -1,4 +1,5 @@
 @echo off
+cd "%~dp0"
 
 :: Made by Main Fighter [mainfighter.com]
 :: Simple start script for meepen's sailen-bot [https://github.com/meepen/salien-bot]
