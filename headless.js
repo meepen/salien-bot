@@ -145,7 +145,11 @@ class Client {
                     next_heal -= per_tick;
                 }
                 this.ReportBossDamage(waiting ? 0 : 1, healed).then(data => {
-                    if (!data || data.game_over) {
+                    if (!data) {
+                        global.log("FAILED");
+                        return; // failed
+                    }
+                    if (data.game_over) {
                         global.log("BOSS OVER");
                         clearInterval(this.m_BossInterval);
                         res();
@@ -536,12 +540,17 @@ const PrintInfo = function PrintInfo() {
 
                         info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) ${zone.boss_active ? "BOSS " : ""}${difficulty_color_codes[zone.difficulty]}${difficulty_names[zone.difficulty]}${reset_code} [${(zone.capture_progress * 100).toFixed(3)}%] (id: ${zoneIdx})`]);
 
-                        let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
-                        info_lines.push(["Round time left", FormatTimer(time_left)]);
+                        if (!zone.boss_active) {
+                            let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
+                            info_lines.push(["Round time left", FormatTimer(time_left)]);
 
-                        let date = new Date(cl.endGameTime);
-                        date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - max_score) / exp_per_hour * 60 * 60);
-                        info_lines.push(["Next level up", date.toLocaleString()]);
+                            let date = new Date(cl.endGameTime);
+                            date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - max_score) / exp_per_hour * 60 * 60);
+                            info_lines.push(["Next level up", date.toLocaleString()]);
+                        }
+                        else if (cl.bossStatus) {
+                            info_lines.push(["Boss HP", `${cl.bossStatus.boss_hp} / ${cl.bossStatus.boss_max_hp} [${(cl.bossStatus.boss_hp / cl.bossStatus.boss_max_hp).toFixed(2)}%]`]);
+                        }
                     }
                 }
             }
