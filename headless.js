@@ -562,7 +562,7 @@ const PrintInfo = function PrintInfo() {
     console.log("\x1b[2J\x1b[0;0H" + info_lines.join("\n"));
 }
 
-//setInterval(PrintInfo, 1000);
+setInterval(PrintInfo, 1000);
 
 cl.Connect().then(() => {
     Finish();
