@@ -292,6 +292,7 @@ class Client {
 
     JoinZone(zone) {
         return new Promise((res, rej) => {
+            global.log(`joining zone ${zone.zone_position} with ${zone.difficulty} difficulty and ${zone.progress} progress`);
             if (zone.boss_active) {
                 this.int.JoinBossZone(zone.zone_position, results => {
                     this.gPlayerInfo.active_zone_position = zone.zone_position;
@@ -347,7 +348,7 @@ class Client {
             if (CARE_ABOUT_PLANET && this.gPlayerInfo.active_planet) {
                 this.GetPlanet(this.gPlayerInfo.active_planet).then(planet => {
                     if (!planet.state.active)
-                        this.LeavePlanet(() => this.GetBestPlanet().then(res));
+                        this.LeavePlanet.then(() => this.GetBestPlanet().then(res));
                     else
                         res(this.gPlanets[this.gPlayerInfo.active_planet]);
                 });
