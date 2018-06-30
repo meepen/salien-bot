@@ -28,6 +28,7 @@ const log_file = "./log.txt";
 
 let token_file = "./gettoken.json";
 let token_json_base64 = "";
+let EXPERIMENTAL = false;
 
 // clear log
 
@@ -40,7 +41,11 @@ global.log = function log(data) {
 
 for (let i = 0; i < args.length; i++) {
     let arg = args[i];
-    if (arg == "--log" || arg == "-l") {
+    if (arg == "--experimental" || arg == "-e") {
+        EXPERIMENTAL = true;
+        global.log("EXPERIMENTAL MODE ACTIVATED");
+    }
+    else if (arg == "--log" || arg == "-l") {
         DO_LOGS = true;
         fs.writeFileSync(log_file, "");
         global.log("Logging activated.");
@@ -122,31 +127,81 @@ class Client {
         this.endGameTime = Date.now() + offset;
     }
 
+    FinishBossGame() {
+        return new Promise(res => {
+            global.log("boss active");
+            let per_tick = 5000;
+            let per_heal = 120000;
+            let next_heal = per_heal;
+            let waiting = true;
+            this.m_BossDamage = 0;
+            this.m_BossInterval = setInterval(() => {
+                let healed = false;
+                if (!waiting && next_heal <= 0) {
+                    next_heal = per_heal;
+                    healed = true;
+                }
+                else {
+                    next_heal -= per_tick;
+                }
+                this.ReportBossDamage(waiting ? 0 : 100, healed).then(data => {
+                    if (!data || data.game_over) {
+                        global.log("BOSS OVER");
+                        clearInterval(this.m_BossInterval);
+                        res();
+                        return;
+                    }
+                    waiting = data.waiting_for_players;
+                    if (waiting) {
+                        global.log("still waiting for players");
+                    }
+                    this.bossStatus = data.boss_status;
+                }).catch(() => {
+                    clearInterval(this.m_BossInterval);
+                    res();
+                });
+            }, per_tick);
+        });
+    }
+
     LeaveGame() {
         return new Promise(res => {
-            if (this.gPlayerInfo.time_in_zone <= WAIT_TIME) {
-                // we can probably just finish our thing i guess
-                this.GetPlanet(this.gPlayerInfo.active_planet).then(() => {
-                    let time_left = 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone)
-                    this.GameInfo(time_left);
+            if (this.gPlayerInfo.active_zone_game) {
+                if (this.gPlayerInfo.time_in_zone <= WAIT_TIME) {
+                    // we can probably just finish our thing i guess
+                    this.GetPlanet(this.gPlayerInfo.active_planet).then(() => {
+                        let time_left = 1000 * (WAIT_TIME - this.gPlayerInfo.time_in_zone)
+                        this.GameInfo(time_left);
+                        setTimeout(() => {
+                            let planet = this.gPlanets[this.gPlayerInfo.active_planet];
+                            let zone = planet.zones[this.gPlayerInfo.active_zone_position];
+                            cl.ReportScore(MaxScore(zone.difficulty)).then(res);
+                        }, time_left);
+                    });
+                }
+                else {
+                    this.int.LeaveGameInstance(this.gPlayerInfo.active_zone_game, res, () => {
+                        this.GetPlayerInfo().then(() => {
+                            if (this.gPlayerInfo.active_zone_game) {
+                                this.LeaveGame().then(res);
+                            }
+                            else {
+                                res();
+                            }
+                        })
+                    })
+                }
+            }
+            else if (this.gPlayerInfo.active_boss_game) {
+                this.FinishBossGame().then(res);
+               /* this.int.LeaveGameInstance(this.gPlayerInfo.active_boss_game, res, () => {
                     setTimeout(() => {
-                        let planet = this.gPlanets[this.gPlayerInfo.active_planet];
-                        let zone = planet.zones[this.gPlayerInfo.active_zone_position];
-                        cl.ReportScore(MaxScore(zone.difficulty)).then(res);
-                    }, time_left);
-                });
+                        this.LeaveGame().then(res);
+                    }, 1000);
+                });*/
             }
             else {
-                this.int.LeaveGameInstance(this.gPlayerInfo.active_zone_game, res, () => {
-                    this.GetPlayerInfo().then(() => {
-                        if (this.gPlayerInfo.active_zone_game) {
-                            this.LeaveGame().then(res);
-                        }
-                        else {
-                            res();
-                        }
-                    })
-                })
+                res();
             }
         });
     }
@@ -217,22 +272,21 @@ class Client {
         });
     }
 
-    JoinZone(id) {
+    JoinZone(zone) {
         return new Promise((res, rej) => {
-            this.int.JoinZone(id, d => {
-                this.gPlayerInfo.active_zone_position = id;
-                res(d.response.zone_info);
-            }, () => {
-                this.GetPlayerInfo().then(() => {
-                    if (this.gPlayerInfo.active_zone_game) {
-                        res();
-                    }
-                    else {
-                        rej();
-                    }
-                });
-            });
-        })
+            if (zone.boss_active) {
+                this.int.JoinBossZone(zone.zone_position, results => {
+                    this.gPlayerInfo.active_zone_position = zone.zone_position;
+                    res(results.response);
+                }, rej);
+            }
+            else {
+                this.int.JoinZone(zone.zone_position, d => {
+                    this.gPlayerInfo.active_zone_position = zone.zone_position;
+                    res(d.response.zone_info);
+                }, rej);
+            }
+        });
     }
 
     ReportScore(score) {
@@ -293,6 +347,9 @@ class Client {
                         let planet = this.gPlanets[p.id];
                         let best_zone = GetBestZone(planet);
 
+                        if (best_zone && best_zone.boss_active)
+                            return res(planet, 3); // boss is always the best
+
                         if (best_zone && best_zone.difficulty > best_difficulty)
                             best_planet = planet, best_difficulty = best_zone.difficulty;
                     }
@@ -327,6 +384,23 @@ class Client {
         })
     }
 
+    ReportBossDamage(damage, healed) {
+        return new Promise((res, rej) => {
+            this.m_nConsecutiveFailures = 0;
+            // can we get away with 0 damage taken and no healing?
+            this.int.ReportBossDamage(damage, 0, healed ? 1 : 0, results => {
+                res(results.response);
+            }, (_, eresult) => {
+                if (eresult == 11) {
+                    res();
+                }
+                else if (++this.m_nConsecutiveFailures > 5) {
+                    rej();
+                }
+            });
+        });
+    }
+
     FinishGame() {
         return new Promise(res => {
             this.GetPlayerInfo().then(() => {
@@ -341,18 +415,23 @@ class Client {
                             });
                             return;
                         }
-                        this.JoinZone(zone.zone_position).then(zone_info => {
-                            if (!zone_info) {
-                                this.Connect().then(() => {
-                                    this.FinishGame().then(res);
-                                });
-                                return;
+                        this.JoinZone(zone).then(zone_info => {
+                            if (zone.boss_active) {
+                                this.FinishBossGame().then(res);
                             }
-                            let time_left = 1000 * WAIT_TIME;
-                            this.GameInfo(time_left);
-                            setTimeout(() => {
-                                this.ReportScore(MaxScore(zone_info.difficulty)).then(res);
-                            }, time_left);
+                            else {
+                                if (!zone_info) {
+                                    this.Connect().then(() => {
+                                        this.FinishGame().then(res);
+                                    });
+                                    return;
+                                }
+                                let time_left = 1000 * WAIT_TIME;
+                                this.GameInfo(time_left);
+                                setTimeout(() => {
+                                    this.ReportScore(MaxScore(zone_info.difficulty)).then(res);
+                                }, time_left);
+                            }
                         }).catch(() => {
                             this.FinishGame().then(res);
                         });
@@ -377,7 +456,7 @@ const GetBestZone = function GetBestZone(planet) {
         let zone = planet.zones[idx];
 
         if (!zone.captured) {
-            if (zone.type == 4) // boss
+            if (zone.boss_active && EXPERIMENTAL) // boss
                 return zone;
 
             if (zone.difficulty > highestDifficulty) {
@@ -459,7 +538,7 @@ const PrintInfo = function PrintInfo() {
                         // keep in old position
                         info_lines.splice(info_lines.length - 1, 0, ["Estimated exp/hr", exp_per_hour | 0]);
 
-                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) ${zone.type == 4 ? "BOSS " : ""}${difficulty_color_codes[zone.difficulty]}${difficulty_names[zone.difficulty]}${reset_code} [${(zone.capture_progress * 100).toFixed(3)}%] (id: ${zoneIdx})`]);
+                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) ${zone.boss_active == 4 ? "BOSS " : ""}${difficulty_color_codes[zone.difficulty]}${difficulty_names[zone.difficulty]}${reset_code} [${(zone.capture_progress * 100).toFixed(3)}%] (id: ${zoneIdx})`]);
 
                         let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
                         info_lines.push(["Round time left", FormatTimer(time_left)]);
@@ -487,7 +566,7 @@ const PrintInfo = function PrintInfo() {
     console.log("\x1b[2J\x1b[0;0H" + info_lines.join("\n"));
 }
 
-setInterval(PrintInfo, 1000);
+//setInterval(PrintInfo, 1000);
 
 cl.Connect().then(() => {
     Finish();
