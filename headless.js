@@ -3,6 +3,14 @@
 const args = process.argv.slice(2);
 const network = require("./headless/network.js");
 const fs = require("fs");
+let uint64;
+try {
+    uint64 = require("./uint64.js");
+}
+catch (e) {
+    console.log("Dependencies outdated - run `npm install` again");
+    process.exit();
+}
 
 const help_page = `
 Meeden's headless Salien bot
@@ -100,6 +108,16 @@ if (token_json_base64.length < 1) {
     gettoken = JSON.parse(fs.readFileSync(token_file, "utf8"));
 } else {
     gettoken = JSON.parse(Buffer.from(token_json_base64, 'base64').toString('ascii'));
+}
+
+const accountid = uint64(gettoken.steamid).toNumber();
+
+const GetSelf = function GetSelf(players) {
+    for (let i = 0; i < players.length; i++){
+        let ply = players[i];
+        if (ply.accountid == accountid)
+            return ply;
+    }
 }
 
 class Client {
@@ -550,6 +568,13 @@ const PrintInfo = function PrintInfo() {
                         }
                         else if (cl.bossStatus) {
                             info_lines.push(["Boss HP", `${cl.bossStatus.boss_hp} / ${cl.bossStatus.boss_max_hp} [${(cl.bossStatus.boss_hp / cl.bossStatus.boss_max_hp).toFixed(2)}%]`]);
+                            let self = GetSelf(cl.bossStatus.boss_players);
+                            if (self) {
+                                info_lines.push(["Boss EXP", self.xp_earned.toString()]);
+                            }
+                            else {
+                                info_lines.push(["No self", "error"]);
+                            }
                         }
                     }
                 }
