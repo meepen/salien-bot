@@ -129,7 +129,7 @@ class Client {
     Connect() {
         return new Promise(res => {
             this.GetPlayerInfo().then(() => {
-                if (this.gPlayerInfo.active_zone_game) {
+                if (this.gPlayerInfo.active_zone_game || this.gPlayerInfo.active_boss_game) {
                     this.LeaveGame().then(() => {
                         this.Connect().then(res);
                     })
@@ -422,6 +422,10 @@ class Client {
     FinishGame() {
         return new Promise(res => {
             this.GetPlayerInfo().then(() => {
+                if (this.gPlayerInfo.active_boss_game || this.gPlayerInfo.active_zone_game) {
+                    this.LeaveGame().then(res);
+                    return;
+                }
                 this.GetBestPlanet().then(planet => {
                     this.ForcePlanet(planet.id).then(() => {
                         let zone = GetBestZone(planet);
