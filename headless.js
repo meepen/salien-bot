@@ -144,7 +144,7 @@ class Client {
                 else {
                     next_heal -= per_tick;
                 }
-                this.ReportBossDamage(waiting ? 0 : 100, healed).then(data => {
+                this.ReportBossDamage(waiting ? 0 : 1, healed).then(data => {
                     if (!data || data.game_over) {
                         global.log("BOSS OVER");
                         clearInterval(this.m_BossInterval);
