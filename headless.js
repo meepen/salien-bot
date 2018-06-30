@@ -478,9 +478,6 @@ const GetBestZone = function GetBestZone(planet) {
         let zone = planet.zones[idx];
 
         if (!zone.captured) {
-            if (zone.capture_progress == 0 && zone.zone_position == 0)
-                continue;
-
             if (zone.boss_active) // boss
                 return zone;
 
