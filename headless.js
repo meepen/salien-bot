@@ -194,11 +194,7 @@ class Client {
             }
             else if (this.gPlayerInfo.active_boss_game) {
                 this.FinishBossGame().then(res);
-               /* this.int.LeaveGameInstance(this.gPlayerInfo.active_boss_game, res, () => {
-                    setTimeout(() => {
-                        this.LeaveGame().then(res);
-                    }, 1000);
-                });*/
+               /* */
             }
             else {
                 res();
@@ -456,7 +452,7 @@ const GetBestZone = function GetBestZone(planet) {
         let zone = planet.zones[idx];
 
         if (!zone.captured) {
-            if (zone.boss_active && EXPERIMENTAL) // boss
+            if (zone.boss_active) // boss
                 return zone;
 
             if (zone.difficulty > highestDifficulty) {
