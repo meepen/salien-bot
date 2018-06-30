@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      25
+// @version      26
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame
@@ -453,7 +453,7 @@ context.BOT_FUNCTION = function ticker(delta) {
 
     let state = EnemyManager();
 
-    let enemies = state.m_rgEnemies;
+    let enemies = state.m_mapEnemies;
 
     for (let attack of attacks)
         if (attack.shouldAttack(delta, enemies))
