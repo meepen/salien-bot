@@ -153,7 +153,8 @@ const GetBestZone = function GetBestZone() {
     let isLevelling = context.gPlayerInfo.level < MAX_LEVEL || Option("forceLevellingMode");
     let maxProgress = isLevelling ? 10000 : 0;
 
-    for (let idx = 0; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) {
+    // Index 0 is a valid index but isn't valid for clicking on so skip it
+    for (let idx = 1; idx < GAME.m_State.m_Grid.m_Tiles.length; idx++) {
         let zone = GAME.m_State.m_Grid.m_Tiles[idx].Info;
         if (!zone.captured) {
             if (zone.boss) {
