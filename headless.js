@@ -523,7 +523,7 @@ const PrintInfo = function PrintInfo() {
             if (current) {
                 info_lines.push(["Current planet", `${current.state.name} [${(current.state.capture_progress * 100).toFixed(3)}%] (id ${current.id})`]);
                 if (cl.gPlayerInfo.active_zone_position) {
-                    let zoneIdx = parseInt(cl.gPlayerInfo.active_zone_position);
+                    let zoneIdx = parseInt(cl.gPlayerInfo.active_zone_position) || parseInt(cl.gPlayerInfo.active_boss_position);
                     let zoneX = zoneIdx % k_NumMapTilesW, zoneY = (zoneIdx / k_NumMapTilesW) | 0;
                     let zone = current.zones[zoneIdx];
 
@@ -534,7 +534,7 @@ const PrintInfo = function PrintInfo() {
                         // keep in old position
                         info_lines.splice(info_lines.length - 1, 0, ["Estimated exp/hr", exp_per_hour | 0]);
 
-                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) ${zone.boss_active == 4 ? "BOSS " : ""}${difficulty_color_codes[zone.difficulty]}${difficulty_names[zone.difficulty]}${reset_code} [${(zone.capture_progress * 100).toFixed(3)}%] (id: ${zoneIdx})`]);
+                        info_lines.push(["Current zone", `(${zoneX}, ${zoneY}) ${zone.boss_active ? "BOSS " : ""}${difficulty_color_codes[zone.difficulty]}${difficulty_names[zone.difficulty]}${reset_code} [${(zone.capture_progress * 100).toFixed(3)}%] (id: ${zoneIdx})`]);
 
                         let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
                         info_lines.push(["Round time left", FormatTimer(time_left)]);
