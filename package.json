@@ -5,7 +5,7 @@
         "name": "Meepen",
         "url": "https://github.com/meepen/"
     },
-    "version": "2.1.1",
+    "version": "2.1.2",
     "dependencies": {
         "request": "2.87.0"
     },

@@ -348,7 +348,7 @@ class Client {
             if (CARE_ABOUT_PLANET && this.gPlayerInfo.active_planet) {
                 this.GetPlanet(this.gPlayerInfo.active_planet).then(planet => {
                     if (!planet.state.active)
-                        this.LeavePlanet.then(() => this.GetBestPlanet().then(res));
+                        this.LeavePlanet().then(() => this.GetBestPlanet().then(res));
                     else
                         res(this.gPlanets[this.gPlayerInfo.active_planet]);
                 });
