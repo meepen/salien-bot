@@ -216,7 +216,6 @@ class Client {
             }
             else if (this.gPlayerInfo.active_boss_game) {
                 this.FinishBossGame().then(res);
-               /* */
             }
             else {
                 res();
@@ -292,7 +291,7 @@ class Client {
 
     JoinZone(zone) {
         return new Promise((res, rej) => {
-            global.log(`joining zone ${zone.zone_position} with ${zone.difficulty} difficulty and ${zone.progress} progress`);
+            global.log(`joining zone ${zone.zone_position} with ${zone.difficulty} difficulty and ${zone.capture_progress} progress`);
             if (zone.boss_active) {
                 this.int.JoinBossZone(zone.zone_position, results => {
                     this.gPlayerInfo.active_zone_position = zone.zone_position;
