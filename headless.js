@@ -574,7 +574,7 @@ const PrintInfo = function PrintInfo() {
                             info_lines.push(["Next level up", date.toLocaleString()]);
                         }
                         else if (cl.bossStatus) {
-                            info_lines.push(["Boss HP", `${cl.bossStatus.boss_hp} / ${cl.bossStatus.boss_max_hp} [${(cl.bossStatus.boss_hp / cl.bossStatus.boss_max_hp).toFixed(2)}%]`]);
+                            info_lines.push(["Boss HP", `${cl.bossStatus.boss_hp} / ${cl.bossStatus.boss_max_hp} [${(cl.bossStatus.boss_hp / cl.bossStatus.boss_max_hp * 100).toFixed(2)}%]`]);
                             let self = GetSelf(cl.bossStatus.boss_players);
                             if (self) {
                                 info_lines.push(["Boss EXP", self.xp_earned.toString()]);
