@@ -148,6 +148,7 @@ class Client {
     FinishBossGame() {
         return new Promise(res => {
             global.log("boss active");
+            this.m_nConsecutiveFailures = 0;
             let per_tick = 5000;
             let per_heal = 120000;
             let next_heal = per_heal;
@@ -404,15 +405,11 @@ class Client {
 
     ReportBossDamage(damage, healed) {
         return new Promise((res, rej) => {
-            this.m_nConsecutiveFailures = 0;
             // can we get away with 0 damage taken and no healing?
             this.int.ReportBossDamage(damage, 0, healed ? 1 : 0, results => {
                 res(results.response);
             }, (_, eresult) => {
-                if (eresult == 11) {
-                    res();
-                }
-                else if (++this.m_nConsecutiveFailures > 5) {
+                if (++this.m_nConsecutiveFailures > 5) {
                     rej();
                 }
             });
