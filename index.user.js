@@ -70,20 +70,6 @@ const TryContinue = function TryContinue() {
     let continued = false;
     if (isJoining) 
         return continued;
-    if (GAME.m_State.m_IntroScreen) {
-        GAME.m_State.m_IntroScreen.children.forEach(function(child) {
-            if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
-                continued = true;
-                isJoining = true;
-                setTimeout(() => {
-                    isJoining = false
-                }, 6000);
-		setTimeout(() => {
-		    child.pointertap();
-                }, 5000);
-            }
-        })
-    }
     if (GAME.m_State.m_VictoryScreen) {
         GAME.m_State.m_VictoryScreen.children.forEach(function(child) {
             if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
@@ -144,6 +130,22 @@ const TryContinue = function TryContinue() {
         }
         console.log(bestZoneIdx);
         return;
+    }
+    if (GAME.m_State instanceof CBossState && GAME.m_State.m_IntroScreen.visible) {
+        isJoining = true;
+        continued = true;
+        setTimeout(() => {
+            GAME.m_State.m_IntroScreen.continueButton.pointertap();
+        }, 1000);
+        setTimeout(() => isJoining = false, 2000);
+    }
+    if (GAME.m_State instanceof CBossState && GAME.m_State.m_VictoryScreen.visible) {
+        isJoining = true;
+        continued = true;
+        setTimeout(() => {
+            GAME.m_State.m_VictoryScreen.children[1].pointertap();
+        }, 1000);
+        setTimeout(() => isJoining = false, 2000);
     }
     return continued;
 }
