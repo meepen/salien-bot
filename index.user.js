@@ -19,7 +19,7 @@ if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") 
 (function(context) {
 "use strict";
 
-const MAX_LEVEL = 13;
+const MAX_LEVEL = 16;
 
 // reload automatically instead of clicking ok
 context.error = context.GameLoadError = function() {
