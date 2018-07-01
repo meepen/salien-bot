@@ -43,7 +43,8 @@ let EXPERIMENTAL = false;
 global.log = function log(data) {
     if (!DO_LOGS)
         return;
-    fs.appendFileSync(log_file, (new Date()).toISOString() + ": " + data.toString());
+    let offset = new Date().getTimezoneOffset() / -60;
+    fs.appendFileSync(log_file, (new Date()).toLocaleString() + " GMT" + (offset >= 0 ? "+" + offset : offset) + " " + data.toString());
     fs.appendFileSync(log_file, "\n");
 }
 
@@ -563,12 +564,13 @@ const PrintInfo = function PrintInfo() {
                             let time_left = ((cl.endGameTime - Date.now()) / 1000) | 0;
                             info_lines.push(["Round time left", FormatTimer(time_left)]);
 
-                            let date = new Date(cl.endGameTime);
+                            let offset = (new Date().getTimezoneOffset() / 60) * -1;
+                            let date = new Date(cl.endGameTime + offset);
                             date.setSeconds(date.getSeconds() + (info.next_level_score - info.score - max_score) / exp_per_hour * 60 * 60);
                             info_lines.push(["Next level up", date.toLocaleString()]);
                         }
                         else if (cl.bossStatus) {
-                            info_lines.push(["Boss HP", `${cl.bossStatus.boss_hp} / ${cl.bossStatus.boss_max_hp} [${(cl.bossStatus.boss_hp / cl.bossStatus.boss_max_hp * 100).toFixed(2)}%]`]);
+                            info_lines.push(["Boss HP", `${cl.bossStatus.boss_hp} / ${cl.bossStatus.boss_max_hp} [${(cl.bossStatus.boss_hp / cl.bossStatus.boss_max_hp).toFixed(2)}%]`]);
                             let self = GetSelf(cl.bossStatus.boss_players);
                             if (self) {
                                 info_lines.push(["Boss EXP", self.xp_earned.toString()]);
