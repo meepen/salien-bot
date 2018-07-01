@@ -243,7 +243,7 @@ CServerInterface.prototype.ReportBossDamage = function( damagedone, damagetaken,
 		}
 		else
 		{
-			error();
+			error( null, request.getResponseHeader( 'x-eresult' ) );
 		}
 	}).fail( error );
 };
