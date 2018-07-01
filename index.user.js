@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      29.13
+// @version      29.14
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame
@@ -80,7 +80,10 @@ const TryContinue = function TryContinue() {
             isJoining = true;
             GAME.m_State.m_VictoryScreen.children[1].pointertap();
             setTimeout(() => {isJoining = false}, 6000);
-            setTimeout(() => {GAME.m_State.m_VictoryScreen.children[1].pointertap();}, 5000);
+            setTimeout(() => {
+                if (GAME.m_State.m_VictoryScreen.children[1])
+                    GAME.m_State.m_VictoryScreen.children[1].pointertap();
+	    }, 5000);
         }
     }
     if (GAME.m_State.m_LevelUpScreen) {
@@ -91,7 +94,10 @@ const TryContinue = function TryContinue() {
             isJoining = true;
             GAME.m_State.m_LevelUpScreen.children[1].pointertap();
             setTimeout(() => {isJoining = false}, 6000);
-            setTimeout(() => {GAME.m_State.m_LevelUpScreen.children[1].pointertap();}, 5000);
+            setTimeout(() => {
+                if (GAME.m_State.m_LevelUpScreen.children[1])
+                    GAME.m_State.m_LevelUpScreen.children[1].pointertap();
+	    }, 5000);
         }
     }
     if (GAME.m_State.m_IntroScreen) {
@@ -102,7 +108,10 @@ const TryContinue = function TryContinue() {
             isJoining = true;
             //GAME.m_State.m_IntroScreen.children[1].pointertap();
             setTimeout(() => {isJoining = false}, 6000);
-            setTimeout(() => {GAME.m_State.m_IntroScreen.children[1].pointertap();}, 5000);
+            setTimeout(() => {
+                if (GAME.m_State.m_IntroScreen.children[1])
+                    GAME.m_State.m_IntroScreen.children[1].pointertap();
+	    }, 5000);
         }
     }
     if (gServer.m_WebAPI && GAME.m_State instanceof CBootState) { // First screen
