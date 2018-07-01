@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      29
+// @version      29.15
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame
@@ -20,7 +20,8 @@ if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") 
 "use strict";
 
 const MAX_LEVEL = 13;
-
+const BOSS_CHECK = 5; //Number of battles to check planets for a boss.
+	
 // reload automatically instead of clicking ok
 context.error = context.GameLoadError = function() {
 	window.location.reload();
@@ -66,39 +67,52 @@ const AttackManager = function AttackManager() {
 }
 
 let isJoining = false;
+let battleCount = 0;
 const TryContinue = function TryContinue() {
     let continued = false;
     if (isJoining) 
         return continued;
     if (GAME.m_State.m_VictoryScreen) {
-        GAME.m_State.m_VictoryScreen.children.forEach(function(child) {
-            if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
-                continued = true;
-                isJoining = true;
-                setTimeout(() => {
-                    isJoining = false
-                }, 6000);
-		setTimeout(() => {
-		    child.pointertap();
-                }, 5000);
-            }
-        })
+        continued = false;
+        if (GAME.m_State.m_VictoryScreen.children[1] && GAME.m_State.m_VictoryScreen.children[1].visible) {
+        console.log(`VictoryScreen continue button pressed`);
+            continued = true;
+            isJoining = true;
+            GAME.m_State.m_VictoryScreen.children[1].pointertap();
+            setTimeout(() => {isJoining = false}, 6000);
+            setTimeout(() => {
+                if (GAME.m_State.m_VictoryScreen && GAME.m_State.m_VictoryScreen.children && GAME.m_State.m_VictoryScreen.children[1])
+                    GAME.m_State.m_VictoryScreen.children[1].pointertap();
+	    }, 5000);
+        }
     }
     if (GAME.m_State.m_LevelUpScreen) {
         continued = false;
-        GAME.m_State.m_LevelUpScreen.children.forEach(function(child) {
-            if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
-                continued = true;
-                isJoining = true;
-                child.pointertap();
-                setTimeout(() => {
-                    isJoining = false
-                }, 6000);
-		setTimeout(() => {
-		    child.pointertap();
-                }, 5000);
-            }
-        })
+        if (GAME.m_State.m_LevelUpScreen.children[1] && GAME.m_State.m_LevelUpScreen.children[1].visible) {
+            console.log(`LevelUpScreen continue button pressed`);
+            continued = true;
+            isJoining = true;
+            GAME.m_State.m_LevelUpScreen.children[1].pointertap();
+            setTimeout(() => {isJoining = false}, 6000);
+            setTimeout(() => {
+                if (GAME.m_State.m_LevelUpScreen && GAME.m_State.m_LevelUpScreen.children && GAME.m_State.m_LevelUpScreen.children[1])
+                    GAME.m_State.m_LevelUpScreen.children[1].pointertap();
+	    }, 5000);
+        }
+    }
+    if (GAME.m_State.m_IntroScreen) {
+        continued = false;
+        if (GAME.m_State.m_IntroScreen.children[1] && GAME.m_State.m_IntroScreen.children[1].visible) {
+            console.log(`IntroScreen continue button pressed`);
+            continued = true;
+            isJoining = true;
+            //GAME.m_State.m_IntroScreen.children[1].pointertap();
+            setTimeout(() => {isJoining = false}, 6000);
+            setTimeout(() => {
+                if (GAME.m_State.m_IntroScreen && GAME.m_State.m_IntroScreen.children && GAME.m_State.m_IntroScreen.children[1])
+                    GAME.m_State.m_IntroScreen.children[1].pointertap();
+	    }, 5000);
+        }
     }
     if (gServer.m_WebAPI && GAME.m_State instanceof CBootState) { // First screen
         isJoining = true;
@@ -106,19 +120,32 @@ const TryContinue = function TryContinue() {
         GAME.m_State.button.click();
     }
     if (GAME.m_State instanceof CPlanetSelectionState && !isJoining) { // Planet Selection
-        GAME.m_State.m_rgPlanetSprites[0].pointertap();
+        let bestPlanetIdx = GetBestPlanet();
+        if(typeof bestPlanetIdx == "number") {
+            GAME.m_State.m_rgPlanetSprites[bestPlanetIdx].pointertap();
+        }else{
+            GAME.m_State.m_rgPlanetSprites[0].pointertap();
+        }
         isJoining = true;
         setTimeout(() => isJoining = false, 1000);
         continued = true;
     }
     if (GAME.m_State instanceof CBattleSelectionState && !isJoining) {
         let bestZoneIdx = GetBestZone();
-        if(bestZoneIdx) {
-            console.log("join to zone", bestZoneIdx);
+        if(battleCount == BOSS_CHECK){
+            console.log("Battle Count met, leaving planet to check for bosses.");
+            document.getElementsByClassName('subtitle')[0].textContent = "Exiting to planet to check for bosses.";
+            GAME.m_State.m_LeaveButton.click();
+            battleCount = 0;
+            isJoining = true;
+            setTimeout(() => isJoining = false, 10000);
+        } else if(typeof bestZoneIdx == "number") {
+            console.log("join to zone", bestZoneIdx, "Battle #", battleCount);
             document.getElementsByClassName('subtitle')[0].textContent = "Joining the zone number " + bestZoneIdx
             isJoining = true;
             GAME.m_State.m_Grid.click(bestZoneIdx % k_NumMapTilesW, (bestZoneIdx / k_NumMapTilesW) | 0);
-            setTimeout(() => isJoining = false, 1000);
+            setTimeout(() => isJoining = false, 5000);
+            battleCount++;
         }
         else {
             isJoining = true;
@@ -141,6 +168,7 @@ const CanAttack = function CanAttack(attackname) {
     return canAttack;
 }
 const GetBestZone = function GetBestZone() {
+const GetBestZone = function GetBestZone() {
     let bestZoneIdx;
     let highestDifficulty = -1;
 
@@ -152,6 +180,7 @@ const GetBestZone = function GetBestZone() {
         if (!zone.captured) {
             if (zone.boss) {
                 console.log(`zone ${idx} (${bestZoneIdx % k_NumMapTilesW}, ${(bestZoneIdx / k_NumMapTilesW) | 0}) with boss`);
+
                 return idx;
             }
 
@@ -184,23 +213,28 @@ const GetBestZone = function GetBestZone() {
 }
 const GetBestPlanet = function GetBestPlanet() {
     let bestPlanet;
+    let bestPlanetIdx;
     let maxProgress = 0;
 
     if (!GAME.m_State.m_mapPlanets)
         return;
 
-    for (let planetKV of GAME.m_State.m_mapPlanets) {
-        let planet = planetKV[1];
+    for (let idx = 0; idx < GAME.m_State.m_rgPlanets.length; idx++) {
+        let planet = GAME.m_State.m_rgPlanets[idx];
+        if(planet.state.boss_zone_position !== undefined) { //Check to see if boss is active on a planet.
+            console.log(`selecting planet ${planet.state.name} with boss at (${planet.state.boss_zone_position.x},${planet.state.boss_zone_position.y}) progress: ${planet.state.capture_progress}`);
+            return idx;
+        }
         if(planet.state.active && !planet.state.captured && planet.state.capture_progress > maxProgress) {
             maxProgress = planet.state.capture_progress;
             bestPlanet = planet;
+            bestPlanetIdx = idx;
         }
-
     }
 
     if(bestPlanet) {
         console.log(`selecting planet ${bestPlanet.state.name} with progress: ${bestPlanet.state.capture_progress}`);
-        return bestPlanet.id;
+        return bestPlanetIdx;
     }
 }
 
@@ -396,14 +430,30 @@ class FreezeAttack extends Attack {
         AttackManager().m_mapKeyCodeToAttacks.get(this.getData().keycode)()
     }
 }
-
+	
+class HealingAttack extends Attack {
+    getCurrent() {
+        return "healing";
+    }
+    shouldAttack(delta, enemies) {
+        return GAME.m_State.m_AttackManager.m_bBossLevel;
+    }
+    getData() {
+        return AttackManager().m_AttackData[this.getCurrent()];
+    }
+    process() {
+        AttackManager().m_mapKeyCodeToAttacks.get(this.getData().keycode)()
+    }
+}
+	
 let attacks = [
     new ClickAttack(),
     new SpecialAttack(),
     new FreezeAttack(),
     new BombAttack(),
     new MeteorAttack(),
-    new BlackholeAttack()
+    new BlackholeAttack(),
+    new HealingAttack()
 ]
 
 if (context.BOT_FUNCTION) {
