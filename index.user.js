@@ -131,7 +131,7 @@ const TryContinue = function TryContinue() {
         console.log(bestZoneIdx);
         return;
     }
-    if (GAME.m_State instanceof CBossState && GAME.m_State.m_IntroScreen.visible) {
+    if (GAME.m_State instanceof CBossState && GAME.m_State.m_IntroScreen) {
         isJoining = true;
         continued = true;
         setTimeout(() => {
@@ -139,7 +139,7 @@ const TryContinue = function TryContinue() {
         }, 1000);
         setTimeout(() => isJoining = false, 2000);
     }
-    if (GAME.m_State instanceof CBossState && GAME.m_State.m_VictoryScreen.visible) {
+    if (GAME.m_State instanceof CBossState && GAME.m_State.m_VictoryScreen) {
         isJoining = true;
         continued = true;
         setTimeout(() => {
