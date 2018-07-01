@@ -131,6 +131,22 @@ const TryContinue = function TryContinue() {
         console.log(bestZoneIdx);
         return;
     }
+    if (GAME.m_State instanceof CBossState && GAME.m_State.m_IntroScreen) {
+        isJoining = true;
+        continued = true;
+        setTimeout(() => {
+            GAME.m_State.m_IntroScreen.continueButton.pointertap();
+        }, 1000);
+        setTimeout(() => isJoining = false, 2000);
+    }
+    if (GAME.m_State instanceof CBossState && GAME.m_State.m_VictoryScreen) {
+        isJoining = true;
+        continued = true;
+        setTimeout(() => {
+            GAME.m_State.m_VictoryScreen.children[1].pointertap();
+        }, 1000);
+        setTimeout(() => isJoining = false, 2000);
+    }
     return continued;
 }
 const CanAttack = function CanAttack(attackname) {
@@ -397,13 +413,29 @@ class FreezeAttack extends Attack {
     }
 }
 
+class HealingAttack extends Attack {
+    getCurrent() {
+        return "healing";
+    }
+    shouldAttack(delta, enemies) {
+        return GAME.m_State.m_AttackManager.m_bBossLevel;
+    }
+    getData() {
+        return AttackManager().m_AttackData[this.getCurrent()];
+    }
+    process() {
+        AttackManager().m_mapKeyCodeToAttacks.get(this.getData().keycode)()
+    }
+}
+
 let attacks = [
     new ClickAttack(),
     new SpecialAttack(),
     new FreezeAttack(),
     new BombAttack(),
     new MeteorAttack(),
-    new BlackholeAttack()
+    new BlackholeAttack(),
+    new HealingAttack()
 ]
 
 if (context.BOT_FUNCTION) {
