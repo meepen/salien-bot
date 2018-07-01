@@ -28,12 +28,6 @@ context.error = context.GameLoadError = function() {
 
 document.getElementsByClassName('salien_section')[0].getElementsByClassName('title')[0].textContent = 'Saliens Bot Running...'
 
-// when the error is fixed we should remove the following
-CSalien.prototype.UpdateCustomizations = function()
-{
-    this.SetBodyType(BODY_TYPES[gSalienData.body_type]);
-    this.LoadAttachments();
-}
 const APP = context.gApp;
 const GAME = context.gGame;
 const SERVER = context.gServer;
