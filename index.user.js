@@ -70,6 +70,20 @@ const TryContinue = function TryContinue() {
     let continued = false;
     if (isJoining) 
         return continued;
+    if (GAME.m_State.m_IntroScreen) {
+        GAME.m_State.m_IntroScreen.children.forEach(function(child) {
+            if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
+                continued = true;
+                isJoining = true;
+                setTimeout(() => {
+                    isJoining = false
+                }, 6000);
+		setTimeout(() => {
+		    child.pointertap();
+                }, 5000);
+            }
+        })
+    }
     if (GAME.m_State.m_VictoryScreen) {
         GAME.m_State.m_VictoryScreen.children.forEach(function(child) {
             if (child.visible && child.x == 155 && child.y == 300) {// TODO: not this
@@ -397,6 +411,25 @@ class FreezeAttack extends Attack {
     }
 }
 
+class HealAttack extends Attack {
+    getCurrent() {
+        return "healing";
+    }
+    shouldAttack(delta, enemies) {
+        let shouldAttack = false;
+        if (CanAttack(this.getCurrent())) {
+            shouldAttack = true;
+        }
+        return shouldAttack;
+    }
+    getData() {
+        return AttackManager().m_AttackData[this.getCurrent()];
+    }
+    process() {
+        AttackManager().m_mapKeyCodeToAttacks.get(this.getData().keycode)()
+    }
+}
+
 let attacks = [
     new ClickAttack(),
     new SpecialAttack(),
@@ -453,6 +486,11 @@ context.BOT_FUNCTION = function ticker(delta) {
         if (attack.shouldAttack(delta, enemies))
             attack.process(enemies);
 
+    if (context.gGame.m_State.m_AttackManager.m_bBossLevel) {
+	let attackheal = new HealAttack();
+        if (attackheal.shouldAttack(delta, enemies))
+            attackheal.process(enemies);
+    }
 }
 
 
