@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      29.14
+// @version      29.15
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame
@@ -81,7 +81,7 @@ const TryContinue = function TryContinue() {
             GAME.m_State.m_VictoryScreen.children[1].pointertap();
             setTimeout(() => {isJoining = false}, 6000);
             setTimeout(() => {
-                if (GAME.m_State.m_VictoryScreen.children[1])
+                if (GAME.m_State.m_VictoryScreen && GAME.m_State.m_VictoryScreen.children && GAME.m_State.m_VictoryScreen.children[1])
                     GAME.m_State.m_VictoryScreen.children[1].pointertap();
 	    }, 5000);
         }
@@ -95,7 +95,7 @@ const TryContinue = function TryContinue() {
             GAME.m_State.m_LevelUpScreen.children[1].pointertap();
             setTimeout(() => {isJoining = false}, 6000);
             setTimeout(() => {
-                if (GAME.m_State.m_LevelUpScreen.children[1])
+                if (GAME.m_State.m_LevelUpScreen && GAME.m_State.m_LevelUpScreen.children && GAME.m_State.m_LevelUpScreen.children[1])
                     GAME.m_State.m_LevelUpScreen.children[1].pointertap();
 	    }, 5000);
         }
@@ -109,7 +109,7 @@ const TryContinue = function TryContinue() {
             //GAME.m_State.m_IntroScreen.children[1].pointertap();
             setTimeout(() => {isJoining = false}, 6000);
             setTimeout(() => {
-                if (GAME.m_State.m_IntroScreen.children[1])
+                if (GAME.m_State.m_IntroScreen && GAME.m_State.m_IntroScreen.children && GAME.m_State.m_IntroScreen.children[1])
                     GAME.m_State.m_IntroScreen.children[1].pointertap();
 	    }, 5000);
         }
@@ -120,7 +120,12 @@ const TryContinue = function TryContinue() {
         GAME.m_State.button.click();
     }
     if (GAME.m_State instanceof CPlanetSelectionState && !isJoining) { // Planet Selection
-        GAME.m_State.m_rgPlanetSprites[0].pointertap();
+        let bestPlanetIdx = GetBestPlanet();
+        if(typeof bestPlanetIdx == "number") {
+            GAME.m_State.m_rgPlanetSprites[bestPlanetIdx].pointertap();
+        }else{
+            GAME.m_State.m_rgPlanetSprites[0].pointertap();
+        }
         isJoining = true;
         setTimeout(() => isJoining = false, 1000);
         continued = true;
