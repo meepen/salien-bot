@@ -413,16 +413,12 @@ class FreezeAttack extends Attack {
     }
 }
 
-class HealAttack extends Attack {
+class HealingAttack extends Attack {
     getCurrent() {
         return "healing";
     }
     shouldAttack(delta, enemies) {
-        let shouldAttack = false;
-        if (CanAttack(this.getCurrent())) {
-            shouldAttack = true;
-        }
-        return shouldAttack;
+        return GAME.m_State.m_AttackManager.m_bBossLevel;
     }
     getData() {
         return AttackManager().m_AttackData[this.getCurrent()];
@@ -438,7 +434,8 @@ let attacks = [
     new FreezeAttack(),
     new BombAttack(),
     new MeteorAttack(),
-    new BlackholeAttack()
+    new BlackholeAttack(),
+    new HealingAttack()
 ]
 
 if (context.BOT_FUNCTION) {
@@ -488,11 +485,6 @@ context.BOT_FUNCTION = function ticker(delta) {
         if (attack.shouldAttack(delta, enemies))
             attack.process(enemies);
 
-    if (context.gGame.m_State.m_AttackManager.m_bBossLevel) {
-	let attackheal = new HealAttack();
-        if (attackheal.shouldAttack(delta, enemies))
-            attackheal.process(enemies);
-    }
 }
 
 
