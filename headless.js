@@ -31,6 +31,7 @@ Options:
 
 let CARE_ABOUT_PLANET = false;
 let DO_LOGS = false;
+let LINE_ENDING = process.platform == "win32" ? "\r\n" : "\n";
 
 const log_file = "./log.txt";
 
@@ -45,7 +46,7 @@ global.log = function log(data) {
         return;
     let offset = new Date().getTimezoneOffset() / -60;
     fs.appendFileSync(log_file, (new Date()).toLocaleString() + " GMT" + (offset >= 0 ? "+" + offset : offset) + " " + data.toString());
-    fs.appendFileSync(log_file, "\n");
+    fs.appendFileSync(log_file, LINE_ENDING);
 }
 
 for (let i = 0; i < args.length; i++) {
