@@ -100,7 +100,7 @@ const TryContinue = function TryContinue() {
 	    }, 5000);
         }
     }
-    if (GAME.m_State.m_IntroScreen) {
+    if (GAME.m_State.m_IntroScreen && GAME.m_State.m_VictoryScreen == undefined) {
         continued = false;
         if (GAME.m_State.m_IntroScreen.children[1] && GAME.m_State.m_IntroScreen.children[1].visible) {
             console.log(`IntroScreen continue button pressed`);
