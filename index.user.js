@@ -21,7 +21,7 @@ if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") 
 
 const MAX_LEVEL = 13;
 const BOSS_CHECK = 5; //Number of battles to check planets for a boss.
-	
+
 // reload automatically instead of clicking ok
 context.error = context.GameLoadError = function() {
 	window.location.reload();
