@@ -19,7 +19,7 @@ if (typeof GM_info !== "undefined" && (GM_info.scriptHandler || "Greasemonkey") 
 (function(context) {
 "use strict";
 
-const MAX_LEVEL = 13;
+const MAX_LEVEL = 25;
 const BOSS_CHECK = 5; //Number of battles to check planets for a boss.
 
 // reload automatically instead of clicking ok
