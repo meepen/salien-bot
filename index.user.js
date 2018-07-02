@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Saliens bot
 // @namespace    http://tampermonkey.net/
-// @version      29.15
+// @version      30
 // @description  Beat all the saliens levels
 // @author       https://github.com/meepen/salien-bot
 // @match        https://steamcommunity.com/saliengame
@@ -167,7 +167,7 @@ const CanAttack = function CanAttack(attackname) {
     Manager.m_rtAttackLastUsed = lastUsed;
     return canAttack;
 }
-const GetBestZone = function GetBestZone() {
+
 const GetBestZone = function GetBestZone() {
     let bestZoneIdx;
     let highestDifficulty = -1;
