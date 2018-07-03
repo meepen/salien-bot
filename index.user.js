@@ -436,7 +436,7 @@ class HealingAttack extends Attack {
         return "healing";
     }
     shouldAttack(delta, enemies) {
-        return GAME.m_State.m_AttackManager.m_bBossLevel;
+        return GAME.m_State.m_AttackManager.m_bBossLevel && GAME.m_State.m_PlayerMaxHealth != GAME.m_State.m_PlayerHealth;
     }
     getData() {
         return AttackManager().m_AttackData[this.getCurrent()];
