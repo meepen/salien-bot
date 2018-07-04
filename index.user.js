@@ -438,14 +438,14 @@ class HealingAttack extends Attack {
     shouldAttack(delta, enemies) {
         if(GAME.m_State.m_AttackManager.m_bBossLevel){
             let needHeal = 0;
-            for (let salienAllay in m_mapAllySaliens) {
+            for (let salienAllay in GAME.m_State.m_mapAllySaliens) {
                 if(salienAllay.hp < salienAllay.max_hp)
                     needHeal++;
             }
-            if (needHeal > 5)
+            if (needHeal >= 5)
                 return true;
-            return false;
         }
+        return false;
     }
     getData() {
         return AttackManager().m_AttackData[this.getCurrent()];
