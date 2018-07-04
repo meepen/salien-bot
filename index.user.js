@@ -70,7 +70,7 @@ let isJoining = false;
 let battleCount = 0;
 const TryContinue = function TryContinue() {
     let continued = false;
-    if (isJoining) 
+    if (isJoining)
         return continued;
     if (GAME.m_State.m_VictoryScreen) {
         continued = false;
@@ -430,13 +430,22 @@ class FreezeAttack extends Attack {
         AttackManager().m_mapKeyCodeToAttacks.get(this.getData().keycode)()
     }
 }
-	
+
 class HealingAttack extends Attack {
     getCurrent() {
         return "healing";
     }
     shouldAttack(delta, enemies) {
-        return GAME.m_State.m_AttackManager.m_bBossLevel && GAME.m_State.m_PlayerMaxHealth != GAME.m_State.m_PlayerHealth;
+        if(GAME.m_State.m_AttackManager.m_bBossLevel){
+            let needHeal = 0;
+            for (let salienAllay in m_mapAllySaliens) {
+                if(salienAllay.hp < salienAllay.max_hp)
+                    needHeal++;
+            }
+            if (needHeal > 5)
+                return true;
+            return false;
+        }
     }
     getData() {
         return AttackManager().m_AttackData[this.getCurrent()];
@@ -445,7 +454,7 @@ class HealingAttack extends Attack {
         AttackManager().m_mapKeyCodeToAttacks.get(this.getData().keycode)()
     }
 }
-	
+
 let attacks = [
     new ClickAttack(),
     new SpecialAttack(),
