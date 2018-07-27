@@ -1,0 +1,1 @@
+:: Some reason it doesn't work if there is only one instance file, this is a bandaid fix. Will look into it later.
